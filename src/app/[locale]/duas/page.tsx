@@ -25,6 +25,20 @@ export default async function Page({
           description={c.placeholderBody}
         />
         <FixtureNotice locale={locale} />
+        <div className="general-dua-entry feature-surface">
+          <div>
+            <span className="general-dua-badge">General Dua</span>
+            <h2>{locale === "ar" ? "أدعية عامة" : "General Duas"}</h2>
+            <p className="muted">
+              {locale === "ar"
+                ? "أدعية إسلامية معاصرة يكتبها فريق الصمد، ومنفصلة بوضوح عن الأدعية الموثّقة."
+                : "Modern Islamic supplications written by the Alsamad team, clearly separated from authenticated duas."}
+            </p>
+          </div>
+          <a className="button button-primary" href={`/${locale}/duas/general`}>
+            {c.view}
+          </a>
+        </div>
         <div className="filter-bar">
           <label className="search-field">
             <span className="sr-only">{c.search}</span>
