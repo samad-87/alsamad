@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: alsamad_local
+      POSTGRES_USER: alsamad
+      POSTGRES_PASSWORD: alsamad_local_only
+      TZ: UTC
+      PGTZ: UTC
+    ports:
+      - "127.0.0.1:55432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U alsamad -d alsamad_local"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+    volumes:
+      - alsamad_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  alsamad_postgres_data:
