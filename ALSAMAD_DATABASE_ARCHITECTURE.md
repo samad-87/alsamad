@@ -223,18 +223,199 @@ The seed must use deterministic UUIDv7 identifiers, be idempotent, and leave eac
 
 ## 5.2 Content integrity — 8 tables
 
-| Table               | Purpose and exact journey                                                                                      | Essential constraints                                                                                                                                                 | Why it cannot wait                                                                                                                                                  |
-| ------------------- | -------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `works`             | Canonical identity for cited corpora and works (J2–J7, J11).                                                   | Unique canonical key; checked `work_type`; stable identifier.                                                                                                         | Citations and editions require a language-independent root that survives provider and text changes.                                                                 |
-| `editions`          | Licensed, versioned rendering of a work (J2, J3, J11).                                                         | FK to work and license; unique work/key/version; published editions immutable; bounded provenance metadata with checksum and import version.                          | Exact Quran/source identity, attribution, and reproducible imports depend on an edition boundary.                                                                   |
-| `passages`          | Stable addressable unit within a work (J2–J7).                                                                 | FK to work and optional parent; unique work/canonical locator; valid hierarchy/order.                                                                                 | Source references must remain stable when edition text changes.                                                                                                     |
-| `passage_texts`     | Edition-specific original text for a passage (J2–J7).                                                          | FKs to edition and passage; unique pair; checksum; immutable after publication.                                                                                       | Exact source text cannot live in flexible JSON or be duplicated per language.                                                                                       |
-| `licenses`          | Rights, attribution, and redistribution terms (J3, J11).                                                       | Unique provider/license/version; required attribution and effective terms; no secret contract payload.                                                                | The platform cannot safely publish licensed corpora without durable rights metadata.                                                                                |
-| `source_references` | Structured evidence attached directly to an immutable content revision or canonical passage (J3, J6, J7, J11). | Exactly one supported target context; FK to revision and/or cited work/edition/passage as constrained; role and locator checks; scoped deduplication.                 | Religious claims need readable, durable evidence. Direct attachment avoids a speculative generic evidence join while allowing multiple references as multiple rows. |
-| `content_items`     | Stable root for publishable non-Quran content (J4–J7, J11).                                                    | Unique canonical key; checked content type; no current-text payload; ownership module fixed.                                                                          | Duas, adhkar, collections, and editorial content need identities independent of revision and translation.                                                           |
-| `content_revisions` | Immutable version of a content item and publication candidate (J4–J7, J11).                                    | FK to item and predecessor; unique item/revision number; checksum; checked verification/publication states; optimistic-concurrency version; published rows immutable. | Review, translation binding, corrections, rollback, and withdrawal all require an immutable revision boundary.                                                      |
+| Table               | Purpose and exact journey                                                                                         | Essential constraints                                                                                                                                                 | Why it cannot wait                                                                                                                                             |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `works`             | Canonical identity for cited corpora and works (J2–J7, J11).                                                      | Unique canonical key; checked `work_type`; stable identifier.                                                                                                         | Citations and editions require a language-independent root that survives provider and text changes.                                                            |
+| `editions`          | Licensed, versioned rendering of a work (J2, J3, J11).                                                            | FK to work and license; unique work/key/version; published editions immutable; bounded provenance metadata with checksum and import version.                          | Exact Quran/source identity, attribution, and reproducible imports depend on an edition boundary.                                                              |
+| `passages`          | Stable addressable unit within a work (J2–J7).                                                                    | FK to work and optional parent; unique work/canonical locator; valid hierarchy/order.                                                                                 | Source references must remain stable when edition text changes.                                                                                                |
+| `passage_texts`     | Edition-specific original text for a passage (J2–J7).                                                             | FKs to edition and passage; unique pair; checksum; immutable after publication.                                                                                       | Exact source text cannot live in flexible JSON or be duplicated per language.                                                                                  |
+| `licenses`          | Rights, attribution, and redistribution terms (J3, J11).                                                          | Unique provider/license/version; required attribution and effective terms; no secret contract payload.                                                                | The platform cannot safely publish licensed corpora without durable rights metadata.                                                                           |
+| `source_references` | Structured evidence owned by an immutable content revision and citing a canonical work context (J3, J6, J7, J11). | Required revision and cited work; optional same-work edition/passage narrowing; role, locator, checksum, publication, and scoped-deduplication checks.                | Religious claims need readable, durable evidence. Revision ownership avoids a floating generic evidence join while multiple rows preserve multiple references. |
+| `content_items`     | Stable root for publishable non-Quran content (J4–J7, J11).                                                       | Unique canonical key; checked content type; no current-text payload; ownership module fixed.                                                                          | Duas, adhkar, collections, and editorial content need identities independent of revision and translation.                                                      |
+| `content_revisions` | Immutable version of a content item and publication candidate (J4–J7, J11).                                       | FK to item and predecessor; unique item/revision number; checksum; checked verification/publication states; optimistic-concurrency version; published rows immutable. | Review, translation binding, corrections, rollback, and withdrawal all require an immutable revision boundary.                                                 |
 
 Content classification, verification, publication, and review remain independent checked columns even though they do not each require lookup tables. Provenance that belongs to an imported edition or revision is stored as typed columns plus bounded provider metadata; a separate lineage-event table may be added only when a real multi-stage import requires it.
+
+### 5.2.1 Executable M4 boundary and dependency order
+
+M4 authorizes exactly the eight Content integrity tables already counted in the frozen Release 1 catalog. The migration order is:
+
+1. `licenses`;
+2. `works`;
+3. `editions`;
+4. `passages`;
+5. `passage_texts`;
+6. `content_items`;
+7. `content_revisions`; and
+8. `source_references`.
+
+The order is an implementation dependency order, not a permission to split or omit tables. After M4, exactly 10 of the 30 authorized Release 1 domain tables exist: the two M3 tables and these eight. M4 does not authorize Quran, devotional, translation, editorial, prayer, calendar, audit, publication-history, Prepared, Later, or Future tables. It authorizes no provider import and no selection of a Quran edition, translation, tafsir, dua, dhikr, or other external religious dataset.
+
+The relationship model is exact: a language-independent `work` owns stable `passages`; a licensed `edition` renders one work; `passage_texts` hold the exact edition-specific text for those passages. A `content_item` is the stable non-Quran publishable identity and owns an append-only chain of immutable `content_revisions`. A `source_reference` belongs to one content revision and cites a structured work context, optionally narrowed to an edition and passage. `licenses` authorize edition publication; they do not convey canonical identity. Provider identifiers remain aliases in bounded provenance columns and never replace ALSAMAD primary keys or canonical keys.
+
+### 5.2.2 `licenses`
+
+| Column                   | PostgreSQL type | Nullability and default               | Contract                                                                                  |
+| ------------------------ | --------------- | ------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `id`                     | `uuid`          | Required; no database default         | Application-generated UUIDv7 primary key; immutable.                                      |
+| `provider_code`          | `varchar(64)`   | Required                              | Lowercase provider/legal-source code; external namespace, not canonical content identity. |
+| `license_key`            | `varchar(128)`  | Required                              | Stable provider-scoped license identifier.                                                |
+| `version`                | `varchar(64)`   | Required                              | Exact terms/version identifier.                                                           |
+| `name`                   | `varchar(200)`  | Required                              | Human-readable license name.                                                              |
+| `rights_scope`           | `varchar(24)`   | Required                              | One of `public_domain`, `permission`, `open_license`, or `contract`.                      |
+| `attribution_text`       | `text`          | Required                              | Exact public attribution; nonblank.                                                       |
+| `terms_url`              | `text`          | Nullable                              | HTTPS public terms URL when available.                                                    |
+| `retention_policy`       | `varchar(24)`   | Required                              | One of `permanent`, `time_limited`, or `no_storage`.                                      |
+| `retention_days`         | `integer`       | Nullable                              | Required and positive only for `time_limited`; otherwise null.                            |
+| `redistribution_allowed` | `boolean`       | Required; default `false`             | Explicit redistribution permission.                                                       |
+| `derivatives_allowed`    | `boolean`       | Required; default `false`             | Explicit derivative-work permission.                                                      |
+| `effective_from`         | `timestamptz`   | Required                              | Rights begin instant in UTC.                                                              |
+| `effective_until`        | `timestamptz`   | Nullable                              | Exclusive rights expiry; later than `effective_from`.                                     |
+| `status`                 | `varchar(16)`   | Required; default `draft`             | One of `draft`, `active`, `expired`, `revoked`.                                           |
+| `created_at`             | `timestamptz`   | Required; default `current_timestamp` | UTC creation time.                                                                        |
+| `updated_at`             | `timestamptz`   | Required; default `current_timestamp` | UTC last administrative update.                                                           |
+
+Constraints are `UNIQUE (provider_code, license_key, version)`; lowercase provider code; nonblank key, version, name, and attribution; valid closed vocabularies; valid HTTPS URL when present; coherent retention fields; and ordered effective dates. Indexes are `(status, effective_from, effective_until)` and `(provider_code, license_key)`. `id`, `provider_code`, `license_key`, `version`, and `effective_from` are immutable after insert. Activation requires nonblank attribution and a currently effective window. Revocation or expiry prevents new publication but preserves historical rows. Deletion is restricted while referenced; licenses are retained for the life of every dependent edition and publication record. Contract documents, credentials, and secret terms are prohibited.
+
+### 5.2.3 `works`
+
+| Column                   | PostgreSQL type | Nullability and default               | Contract                                                                                        |
+| ------------------------ | --------------- | ------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `id`                     | `uuid`          | Required; no database default         | Application-generated UUIDv7 primary key; immutable.                                            |
+| `canonical_key`          | `varchar(160)`  | Required                              | Unique lowercase provider-independent identity; immutable.                                      |
+| `work_type`              | `varchar(24)`   | Required                              | One of `quran`, `hadith_collection`, `dua_collection`, `dhikr_collection`, or `reference_work`. |
+| `title`                  | `varchar(300)`  | Required                              | Neutral administrative title; not canonical source text.                                        |
+| `original_language_code` | `varchar(8)`    | Required                              | Lowercase language code; language metadata only, not a translated work clone.                   |
+| `authority_name`         | `varchar(300)`  | Nullable                              | Attributed compiler/author/authority where applicable.                                          |
+| `description`            | `text`          | Nullable                              | Non-canonical administrative description.                                                       |
+| `created_at`             | `timestamptz`   | Required; default `current_timestamp` | UTC creation time.                                                                              |
+| `updated_at`             | `timestamptz`   | Required; default `current_timestamp` | UTC last administrative update.                                                                 |
+
+Constraints are uniqueness of `canonical_key`; lowercase canonical key and language code; closed `work_type`; and nonblank required text. Indexes are `work_type` and `original_language_code`. `id`, `canonical_key`, and `work_type` are immutable after reference. A work is language-independent canonical identity: translations or scripts never create parallel canonical works merely because their display language differs. `ON DELETE RESTRICT` applies from every dependent edition, passage, and source reference; archival is operational and not represented by destructive deletion in M4.
+
+### 5.2.4 `editions`
+
+| Column                     | PostgreSQL type | Nullability and default               | Contract                                                                                   |
+| -------------------------- | --------------- | ------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `id`                       | `uuid`          | Required; no database default         | Application-generated UUIDv7 primary key; immutable.                                       |
+| `work_id`                  | `uuid`          | Required                              | FK to `works.id`; `ON UPDATE RESTRICT ON DELETE RESTRICT`; immutable.                      |
+| `license_id`               | `uuid`          | Required                              | FK to `licenses.id`; `ON UPDATE RESTRICT ON DELETE RESTRICT`; immutable after publication. |
+| `edition_key`              | `varchar(160)`  | Required                              | Provider-independent key within the work.                                                  |
+| `version`                  | `varchar(64)`   | Required                              | Exact edition or import version.                                                           |
+| `language_code`            | `varchar(8)`    | Required                              | Lowercase language code of exact source text.                                              |
+| `script_code`              | `varchar(4)`    | Nullable                              | Title-case ISO 15924-style script code.                                                    |
+| `display_name`             | `varchar(300)`  | Required                              | Administrative edition label.                                                              |
+| `provider_code`            | `varchar(64)`   | Required                              | Lowercase provenance namespace.                                                            |
+| `provider_edition_id`      | `varchar(256)`  | Required                              | Opaque external alias; never a primary or canonical key.                                   |
+| `import_version`           | `varchar(128)`  | Required                              | Reproducible provider snapshot/resource version.                                           |
+| `source_manifest_checksum` | `varchar(64)`   | Required                              | Lowercase SHA-256 hex of the approved source manifest.                                     |
+| `provider_metadata`        | `jsonb`         | Required; default `'{}'::jsonb`       | Bounded object of non-secret provenance aliases only.                                      |
+| `publication_state`        | `varchar(16)`   | Required; default `draft`             | One of `draft`, `validated`, `published`, `withdrawn`.                                     |
+| `published_at`             | `timestamptz`   | Nullable                              | Required exactly for `published` or `withdrawn`.                                           |
+| `created_at`               | `timestamptz`   | Required; default `current_timestamp` | UTC creation time.                                                                         |
+| `updated_at`               | `timestamptz`   | Required; default `current_timestamp` | UTC last pre-publication update.                                                           |
+
+Constraints are `UNIQUE (work_id, edition_key, version)`, `UNIQUE (provider_code, provider_edition_id, import_version)`, closed publication state, lowercase codes, script format, nonblank aliases, a 64-character lowercase SHA-256 checksum, JSON object size at most 16 KiB, and coherent `published_at`. Indexes are `work_id`, `license_id`, `(publication_state, work_id)`, and `(provider_code, provider_edition_id)`. Publication is permitted only through a trigger that confirms the referenced license is `active`, effective at `published_at`, permits storage, and has not expired or been revoked. Once an edition first enters `published`, every column except `publication_state`, `updated_at`, and a transition from `published` to `withdrawn` is immutable; withdrawal cannot return to publication. A correction creates a new edition version. Time-limited source data must be withdrawn and deleted according to its license unless separate durable rights exist; edition identity and required attribution evidence remain retained, while licensed payload removal is handled through restricted recovery procedures.
+
+### 5.2.5 `passages`
+
+| Column              | PostgreSQL type | Nullability and default               | Contract                                                                       |
+| ------------------- | --------------- | ------------------------------------- | ------------------------------------------------------------------------------ |
+| `id`                | `uuid`          | Required; no database default         | Application-generated UUIDv7 primary key; immutable.                           |
+| `work_id`           | `uuid`          | Required                              | FK to `works.id`; `ON UPDATE RESTRICT ON DELETE RESTRICT`; immutable.          |
+| `parent_passage_id` | `uuid`          | Nullable                              | Self-FK; `ON UPDATE RESTRICT ON DELETE RESTRICT`; same work; no cycle.         |
+| `canonical_locator` | `varchar(200)`  | Required                              | Stable provider-independent locator within the work; immutable.                |
+| `passage_type`      | `varchar(24)`   | Required                              | One of `work`, `book`, `chapter`, `section`, `verse`, `entry`, or `paragraph`. |
+| `sequence_number`   | `integer`       | Required                              | Positive deterministic sibling order.                                          |
+| `depth`             | `smallint`      | Required                              | Zero through 15; root is zero and child is parent depth plus one.              |
+| `created_at`        | `timestamptz`   | Required; default `current_timestamp` | UTC creation time.                                                             |
+| `updated_at`        | `timestamptz`   | Required; default `current_timestamp` | UTC last administrative update.                                                |
+
+Constraints are `UNIQUE (work_id, canonical_locator)`, `UNIQUE NULLS NOT DISTINCT (work_id, parent_passage_id, sequence_number)`, positive sequence, bounded depth, closed type, nonblank locator, and no self-parent. Indexes are `(work_id, parent_passage_id, sequence_number)` and `parent_passage_id`. A `DEFERRABLE INITIALLY IMMEDIATE` constraint trigger rejects cycles, cross-work parents, and invalid depth. `id`, `work_id`, and `canonical_locator` are immutable; passage identity survives every edition-text correction. Deletion is restricted while children, passage text, or source references exist.
+
+### 5.2.6 `passage_texts`
+
+| Column                | PostgreSQL type | Nullability and default               | Contract                                                                 |
+| --------------------- | --------------- | ------------------------------------- | ------------------------------------------------------------------------ |
+| `id`                  | `uuid`          | Required; no database default         | Application-generated UUIDv7 primary key; immutable.                     |
+| `edition_id`          | `uuid`          | Required                              | FK to `editions.id`; `ON UPDATE RESTRICT ON DELETE RESTRICT`; immutable. |
+| `passage_id`          | `uuid`          | Required                              | FK to `passages.id`; `ON UPDATE RESTRICT ON DELETE RESTRICT`; immutable. |
+| `text_content`        | `text`          | Required                              | Exact UTF-8 edition text; nonblank; never JSON.                          |
+| `normalized_checksum` | `varchar(64)`   | Required                              | Lowercase SHA-256 hex of contract-normalized text.                       |
+| `source_checksum`     | `varchar(64)`   | Required                              | Lowercase SHA-256 hex of exact imported UTF-8 bytes.                     |
+| `publication_state`   | `varchar(16)`   | Required; default `draft`             | One of `draft`, `validated`, `published`, `withdrawn`.                   |
+| `published_at`        | `timestamptz`   | Nullable                              | Required exactly for `published` or `withdrawn`.                         |
+| `created_at`          | `timestamptz`   | Required; default `current_timestamp` | UTC creation time.                                                       |
+| `updated_at`          | `timestamptz`   | Required; default `current_timestamp` | UTC last pre-publication update.                                         |
+
+Constraints are `UNIQUE (edition_id, passage_id)`, two valid SHA-256 values, nonblank text, closed publication state, and coherent `published_at`. Indexes are `passage_id` and `(edition_id, publication_state)`. A trigger rejects an edition/passage pair whose work IDs differ and forbids publication unless the edition is published under an enforceable license. Published rows are immutable except the one-way state transition to `withdrawn` and its timestamp; corrections require a new edition version and new passage-text row, never overwrite. Withdrawal preserves checksums and identity. Physical text retention follows the edition license, including Quran.Foundation's seven-day default unless written durable-storage permission or independent licensing is recorded.
+
+### 5.2.7 `content_items`
+
+| Column          | PostgreSQL type | Nullability and default               | Contract                                                                             |
+| --------------- | --------------- | ------------------------------------- | ------------------------------------------------------------------------------------ |
+| `id`            | `uuid`          | Required; no database default         | Application-generated UUIDv7 primary key; immutable.                                 |
+| `canonical_key` | `varchar(160)`  | Required                              | Unique lowercase provider-independent identity; immutable.                           |
+| `content_type`  | `varchar(32)`   | Required                              | One of `dua`, `dhikr`, `collection`, `article`, `guide`, or `editorial_general_dua`. |
+| `origin_kind`   | `varchar(16)`   | Required                              | One of `canonical_source`, `editorial`, or `imported`.                               |
+| `owning_module` | `varchar(32)`   | Required                              | One of `devotional`, `editorial`, or `knowledge`.                                    |
+| `is_sensitive`  | `boolean`       | Required; default `false`             | Data-handling flag; religious content itself is not user-sensitive data.             |
+| `created_at`    | `timestamptz`   | Required; default `current_timestamp` | UTC creation time.                                                                   |
+| `updated_at`    | `timestamptz`   | Required; default `current_timestamp` | UTC identity metadata update.                                                        |
+
+Constraints are uniqueness and lowercase form of `canonical_key`; closed vocabularies; and the structural rule that `editorial_general_dua` requires `origin_kind = 'editorial'` and `owning_module = 'editorial'`, while no other type may use that combination. Indexes are `(content_type, owning_module)` and `origin_kind`. `id`, `canonical_key`, `content_type`, `origin_kind`, and `owning_module` are immutable after the first revision. The table carries no current text, translation, publication state, AI payload, or provider primary identity. Deletion is restricted while revisions or downstream domain records exist.
+
+### 5.2.8 `content_revisions`
+
+| Column                     | PostgreSQL type | Nullability and default               | Contract                                                                            |
+| -------------------------- | --------------- | ------------------------------------- | ----------------------------------------------------------------------------------- |
+| `id`                       | `uuid`          | Required; no database default         | Application-generated UUIDv7 primary key; immutable.                                |
+| `content_item_id`          | `uuid`          | Required                              | FK to `content_items.id`; `ON UPDATE RESTRICT ON DELETE RESTRICT`; immutable.       |
+| `predecessor_revision_id`  | `uuid`          | Nullable                              | Self-FK; same item; must be prior revision; `ON DELETE RESTRICT`; immutable.        |
+| `revision_number`          | `integer`       | Required                              | Positive, gap-free, increasing per content item.                                    |
+| `source_text`              | `text`          | Required                              | Exact UTF-8 source-language revision text; nonblank.                                |
+| `source_language_code`     | `varchar(8)`    | Required                              | Lowercase language code; language metadata, not duplicated canonical identity.      |
+| `verification_state`       | `varchar(20)`   | Required; default `unverified`        | One of `unverified`, `source_verified`, `editorial_only`, or `rejected`.            |
+| `publication_state`        | `varchar(16)`   | Required; default `draft`             | One of `draft`, `in_review`, `approved`, `published`, `withdrawn`, or `superseded`. |
+| `provenance_kind`          | `varchar(16)`   | Required                              | One of `manual`, `provider`, or `editorial`.                                        |
+| `provider_code`            | `varchar(64)`   | Nullable                              | Required only for provider provenance; lowercase external namespace.                |
+| `provider_record_id`       | `varchar(256)`  | Nullable                              | Required only for provider provenance; opaque external alias.                       |
+| `source_manifest_checksum` | `varchar(64)`   | Nullable                              | Required for provider provenance; lowercase SHA-256 hex.                            |
+| `content_checksum`         | `varchar(64)`   | Required                              | Lowercase SHA-256 hex of contract-normalized revision payload.                      |
+| `schema_version`           | `integer`       | Required; default `1`                 | Positive payload/checksum contract version.                                         |
+| `lock_version`             | `integer`       | Required; default `1`                 | Positive optimistic-concurrency token before publication.                           |
+| `published_at`             | `timestamptz`   | Nullable                              | Required exactly after publication (`published`, `withdrawn`, `superseded`).        |
+| `created_at`               | `timestamptz`   | Required; default `current_timestamp` | UTC creation time.                                                                  |
+| `updated_at`               | `timestamptz`   | Required; default `current_timestamp` | UTC last mutable-state update.                                                      |
+
+Constraints are `UNIQUE (content_item_id, revision_number)`, `UNIQUE (content_item_id, content_checksum)`, coherent predecessor/null rules, positive versions, closed states, valid checksums, provider-field all-or-none rules, and coherent publication time. Indexes are `(content_item_id, publication_state, revision_number DESC)`, `predecessor_revision_id`, `(provider_code, provider_record_id) WHERE provider_code IS NOT NULL`, and `(publication_state, published_at)`. A `DEFERRABLE INITIALLY IMMEDIATE` constraint trigger enforces: revision 1 has no predecessor; every later revision points to revision number minus one for the same item; revision numbers are gap-free at transaction end; and no predecessor cycle exists. Publication requires an allowed verification state: `source_verified` for sourced religious content and `editorial_only` only for structurally identified Editorial General Dua or non-canonical editorial material. `unverified` and `rejected` revisions cannot publish.
+
+Published revision payloads and provenance are immutable. The only post-publication mutations are one-way `published` to `withdrawn` or `superseded`, plus `updated_at`; neither state may return to publication. Corrections insert the next revision with the published revision as predecessor, preserve the previous row, and publish only after its own verification and source references pass. Rollback means publishing a new revision whose payload intentionally restores earlier content; it never republishes or edits an old row. AI-generated or AI-transformed output may be stored only outside this canonical schema during research; no M4 column, provenance kind, state transition, or trigger permits AI output to become canonical or published content.
+
+### 5.2.9 `source_references`
+
+| Column                | PostgreSQL type | Nullability and default               | Contract                                                                          |
+| --------------------- | --------------- | ------------------------------------- | --------------------------------------------------------------------------------- |
+| `id`                  | `uuid`          | Required; no database default         | Application-generated UUIDv7 primary key; immutable.                              |
+| `content_revision_id` | `uuid`          | Required                              | FK to `content_revisions.id`; `ON UPDATE RESTRICT ON DELETE RESTRICT`; immutable. |
+| `cited_work_id`       | `uuid`          | Required                              | FK to `works.id`; `ON UPDATE RESTRICT ON DELETE RESTRICT`; immutable.             |
+| `cited_edition_id`    | `uuid`          | Nullable                              | FK to `editions.id`; must belong to cited work; restricted deletion.              |
+| `cited_passage_id`    | `uuid`          | Nullable                              | FK to `passages.id`; must belong to cited work; restricted deletion.              |
+| `reference_role`      | `varchar(20)`   | Required                              | One of `primary_source`, `supporting`, `attribution`, or `context`.               |
+| `locator_label`       | `varchar(300)`  | Required                              | Human-readable structured locator; nonblank.                                      |
+| `quotation`           | `text`          | Nullable                              | Optional exact excerpt, subject to license; never the canonical source payload.   |
+| `quotation_checksum`  | `varchar(64)`   | Nullable                              | Required exactly when quotation exists; SHA-256 of normalized quotation.          |
+| `source_url`          | `text`          | Nullable                              | HTTPS evidence URL when applicable.                                               |
+| `sort_order`          | `integer`       | Required; default `0`                 | Non-negative deterministic order within a revision.                               |
+| `created_at`          | `timestamptz`   | Required; default `current_timestamp` | UTC creation time; row is immutable.                                              |
+
+Constraints enforce closed role, nonblank locator, non-negative order, valid HTTPS URL, quotation/checksum pairing, valid SHA-256, and `UNIQUE (content_revision_id, cited_work_id, cited_edition_id, cited_passage_id, reference_role, locator_label) NULLS NOT DISTINCT`. Indexes are `(content_revision_id, sort_order)`, `cited_work_id`, `cited_edition_id`, and `cited_passage_id`. A trigger enforces that cited edition and passage, when present, belong to the cited work; when both are present their edition/work context agrees. Every published sourced religious revision requires at least one `primary_source` reference, enforced by a deferred publication-integrity constraint trigger. Editorial General Dua revisions require no claim of canonical provenance but must use `editorial_only`; if a source is supplied it remains a normal structured reference and does not change the editorial classification. Rows attached to a published revision are immutable and deletion-restricted; corrections create references for the new revision.
+
+### 5.2.10 Checksums, publication, retention, and sensitivity
+
+All M4 checksum columns contain lowercase 64-character hexadecimal SHA-256. The application computes checksums from UTF-8 bytes using a versioned normalization contract: source checksums use exact bytes; normalized text checksums use Unicode NFC, LF line endings, and no other whitespace, punctuation, tashkeel, or character folding. PostgreSQL recomputes and validates normalized text and revision checksums through `pgcrypto` trigger functions before insert/update; the migration may enable the `pgcrypto` extension but may create no bookkeeping table. Manifest checksums validate format in PostgreSQL and are reconciled against the external manifest by verification code. Any mismatch aborts the transaction.
+
+Publication is a database-enforced boundary. Draft and validation data may be corrected before first publication. The first transition to published freezes identity, exact text, checksum, provenance, source, license, and publication timestamp. Withdrawal preserves historical integrity while preventing public serving. No hard delete is permitted for published identity or provenance. Licensed text may require payload erasure after expiry; the recovery procedure must first withdraw it, preserve the minimum lawful checksum/attribution evidence, and execute a separately reviewed forward corrective migration consistent with the recorded license. M4 stores public religious/editorial material and operational rights metadata, not personal data; it must contain no user profiles, worship behavior, credentials, secret contracts, or precise user location.
 
 ## 5.3 Quran — 6 tables
 

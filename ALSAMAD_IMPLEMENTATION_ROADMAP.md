@@ -471,22 +471,165 @@ Contract complete; implementation not started by this documentation task.
 
 ## Phase 4: Content Integrity foundation
 
-- Objective
-- Included scope
-- Explicitly excluded scope
-- Dependencies
-- Artifacts
-- Database changes allowed
-- Application capabilities
-- Admin capabilities
-- Security requirements
-- QA requirements
-- Observability requirements
-- Analytics requirements
-- Acceptance criteria
-- Completion evidence
-- Rollback/recovery
-- Release status
+### Objective
+
+Implement the provider-independent Content Integrity foundation by activating exactly the eight Release 1 tables in `ALSAMAD_DATABASE_ARCHITECTURE.md` section 5.2. Establish durable work, edition, passage, exact-text, license, structured-source, content-identity, and immutable-revision boundaries before Quran or devotional content is implemented.
+
+### Included scope
+
+- Drizzle mappings and one reviewed forward-only migration for exactly `licenses`, `works`, `editions`, `passages`, `passage_texts`, `content_items`, `content_revisions`, and `source_references`.
+- Every approved PostgreSQL constraint, FK, index, trigger function, constraint trigger, checksum, immutability, publication, provenance, license, revision-order, retention, and deletion rule in database architecture sections 5.2.1–5.2.10.
+- `pgcrypto` only as a PostgreSQL extension required to recompute SHA-256; it creates no ALSAMAD domain or bookkeeping table.
+- Real PostgreSQL verification, including UTF-8 Arabic text round-trip and all M2/M3 regression checks.
+
+### Explicitly excluded scope
+
+- All six Quran tables, all four devotional/translation tables, all editorial, prayer/calendar, audit/publication-history, Prepared, Later, and Future tables.
+- Quran.Foundation integration, provider-specific schema coupling, content imports, dataset selection, and production content activation.
+- Selection or seed of Quran editions, translations, tafsir, duas, adhkar, source corpora, religious passages, licenses, works, editions, or publishable content.
+- UI, public APIs, authentication, staff workflow, review assignment, analytics, AI generation, and runtime religious answers.
+- Any generic provenance-event, provider-alias, current-revision pointer, soft-delete, or search table.
+
+### Dependencies
+
+- M1 exact 30-table Release 1 scope: PASS.
+- M2 Database Foundation: PASS.
+- M3 Global Locales and Regional Configuration, including real PostgreSQL verification: PASS.
+- Database architecture sections 5.2.1–5.2.10 are authoritative.
+
+### Exact implementation sequence
+
+1. enable `pgcrypto` and create `licenses`;
+2. create `works`;
+3. create `editions`;
+4. create `passages`;
+5. create `passage_texts`;
+6. create `content_items`;
+7. create `content_revisions`;
+8. create `source_references`;
+9. create cross-table validation, checksum, immutability, hierarchy, revision-order, license, and publication-integrity triggers only after all referenced tables exist.
+
+### Artifacts and allowed files
+
+Implementation may modify only:
+
+- `src/db/schema.ts`;
+- `drizzle/0002_content_integrity_foundation.sql`;
+- `drizzle/meta/_journal.json`;
+- `scripts/db-verify.mjs`;
+- `tests/database-foundation.test.mjs`, only for static contract coverage; and
+- one new focused `tests/content-integrity-database.test.mjs`, only if required.
+
+`src/db/ids.ts` may change only if a proven defect prevents existing UUIDv7 semantics. `package.json` and `package-lock.json` may change only if `pgcrypto` verification cannot use existing tooling, and such necessity must be proven before editing. No seed file change is authorized because M4 authorizes no rows. No other file may change without a separately approved contract amendment.
+
+### Database changes allowed
+
+M4 authorizes exactly eight new physical Release 1 domain tables. Together with M3, the cumulative count becomes exactly 10 of 30. Migration filename is exactly `drizzle/0002_content_integrity_foundation.sql`. Migration bookkeeping does not count as a domain table, and the migration must not create any unauthorized infrastructure table.
+
+All primary keys are application-generated UUIDv7 with no database default. FKs use `ON UPDATE RESTRICT ON DELETE RESTRICT`. The exact columns, PostgreSQL types, nullability, defaults, uniqueness, checks, indexes, immutable fields, and trigger requirements are fixed by database architecture section 5.2. Migration reruns must be safe and must neither weaken nor silently skip a mismatched existing object.
+
+### Seed authorization and no-seed boundary
+
+M4 authorizes **zero seed rows** and no modification to `scripts/db-seed.mjs`. Existing M3 `ar` and `en` seeds must remain exactly once; geographic rows remain zero. Synthetic records may exist only inside rolled-back verification transactions. No external religious dataset, license assertion, work, edition, passage, text, content item, revision, source reference, provider ID, or publication state may be seeded or imported.
+
+### Application and admin capabilities
+
+Typed database mapping and verification only. No UI, route, public API, provider adapter, import job, administration, editorial workflow, content-serving path, or public publication is authorized.
+
+### Security, integrity, and retention requirements
+
+- PostgreSQL, not application code, enforces checksums, license effectiveness, provenance completeness, publication eligibility, immutable publication, revision order, passage hierarchy, cross-work relationships, and restrictive deletion.
+- Provider metadata is bounded, non-secret, and alias-only. Provider IDs never become canonical primary keys.
+- Published corrections create a new edition version or content revision; old published records are never overwritten or republished.
+- AI output has no canonical provenance path and cannot become published canonical content.
+- Quran.Foundation storage remains subject to the seven-day default unless written durable-storage permission or independent licensing is recorded; M4 does not import its content.
+- No personal data, user location, worship behavior, credentials, or secret contract payload is stored. Published integrity evidence is retained; license-driven payload removal follows the reviewed withdrawal/recovery procedure.
+
+### Trigger requirements
+
+The migration must provide named PostgreSQL functions/triggers for:
+
+- immutable UUID and canonical identity fields;
+- active/effective license enforcement at edition publication;
+- one-way published-edition and published-passage-text immutability/withdrawal;
+- passage same-work hierarchy, depth, and cycle rejection using a `DEFERRABLE INITIALLY IMMEDIATE` constraint trigger;
+- edition/passage same-work validation for passage text;
+- SHA-256 recomputation and rejection for normalized text and revision payloads;
+- content-item identity immutability after first revision;
+- revision predecessor, same-item, gap-free ordering, and cycle rejection using a `DEFERRABLE INITIALLY IMMEDIATE` constraint trigger;
+- published revision immutability and one-way withdrawal/supersession;
+- source-reference cited-work consistency; and
+- deferred publication integrity requiring eligible verification, mandatory provenance, and at least one primary source for sourced religious content.
+
+Triggers must be idempotently created, fail closed, use deterministic error messages suitable for tests, and never silently repair invalid religious content.
+
+### Checksum and correction policy
+
+Checksums use lowercase SHA-256 hex. Exact imported bytes use `source_checksum`; Unicode NFC plus LF-only line endings, without whitespace, punctuation, tashkeel, or character folding, produces normalized text/revision checksums. The checksum schema version is persisted for content revisions. PostgreSQL recomputes normalized checksums with `pgcrypto`; manifest checksum values are format-validated in PostgreSQL and externally reconciled by the verifier.
+
+A published correction is always additive: create a new edition version or the next gap-free content revision, revalidate provenance/license/source evidence, then publish it. Withdrawal and supersession never mutate historical payloads. Recovery of earlier wording creates another revision; it does not edit or reactivate the old row.
+
+### QA requirements
+
+Run:
+
+- `npm run format:check`;
+- `npm run lint`;
+- `npm run typecheck`;
+- `npm run build`;
+- `npm run db:up`;
+- `npm run db:safety`;
+- `npm run db:migrate`;
+- `npm run db:seed` twice;
+- `npm run test:db`;
+- `npm run db:check`;
+- direct real-PostgreSQL schema, constraint, trigger, index, extension, and table-count inspection;
+- a second `npm run db:migrate`;
+- `git diff --check`; and
+- `npm run db:down` while preserving the named volume.
+
+All M2 and M3 checks must remain green. Verification data must run in transactions and roll back without leaving content rows.
+
+### Observability and analytics requirements
+
+Verification output must show table counts, constraints, triggers, indexes, checksum mismatches, license/provenance/publication rejection, revision ordering, deletion restriction, migration rerun, existing seed idempotency, UTF-8/Arabic round-trip, and shutdown without exposing content payloads or secrets. M4 adds no product analytics, user telemetry, or worship measurement.
+
+### Acceptance criteria
+
+M4 passes only when real PostgreSQL proves:
+
+- exactly eight new M4 domain tables exist, the cumulative Release 1 domain count is exactly 10, and no unauthorized table exists;
+- every exact column, type, nullability, default, FK, update/delete action, unique/check constraint, index, and required trigger matches section 5.2;
+- application-generated IDs persist as UUIDv7 and timestamps behave in UTC;
+- duplicate canonical keys, edition identities, passage locators/text pairs, revision numbers/checksums, provider aliases, and source references are rejected;
+- invalid closed states, hierarchy, cross-work links, retention windows, license windows, provenance combinations, checksum formats/values, publication timestamps, and Editorial General Dua classification are rejected;
+- publication under an inactive, expired, revoked, `no_storage`, or not-yet-effective license is rejected;
+- published editions, passage texts, revisions, provenance, checksums, and attached references are immutable, while only approved one-way withdrawal/supersession transitions succeed;
+- sourced religious revisions cannot publish without mandatory provider/manual provenance as applicable and at least one structured `primary_source` reference;
+- unverified, rejected, AI-originated, or structurally misclassified editorial content cannot publish as canonical content;
+- revision 1 has no predecessor, later revisions use the immediate same-item predecessor, numbering is gap-free, ordering/cycles are enforced at transaction end, and corrections create new revisions;
+- parent, referenced license/work/edition/passage/item/revision, published evidence, and historical rows cannot be deleted in violation of restrictions;
+- checksum recomputation accepts exact expected values and rejects a one-byte, Unicode-normalization, or Arabic-diacritic mismatch according to the declared policy;
+- migration rerun succeeds without schema drift;
+- the existing `ar` and `en` seeds remain exactly once after two seed runs, no geographic or M4 row is seeded, and seed idempotency passes;
+- UTF-8 English and Arabic text, including tashkeel, round-trips exactly inside rolled-back verification transactions; and
+- all M2, M3, repository, format, lint, strict TypeScript, build, safety, and database checks remain green.
+
+### Completion evidence
+
+Return the exact changed-file list and migration; schema, FK, constraint, trigger, index, extension, checksum, and seed inventories; SQL table-count query/results showing 8 M4 and 10 cumulative domain tables; representative accepted/rejected PostgreSQL transactions for every acceptance family; migration-rerun and seed-idempotency output; exact UTF-8/Arabic round-trip evidence; M2/M3 regression results; repository checks; preserved-volume shutdown evidence; proven defects fixed; and remaining blockers.
+
+### Rollback/recovery
+
+Production migrations are forward-only. Before release, recreate a disposable database or restore the preserved named volume from a known-good backup. After release, repair defects only through a reviewed forward migration that preserves UUIDs, canonical keys, checksums, published history, attribution, and license evidence. Never drop or rewrite published integrity rows as rollback. Failed imports/publications are atomic and leave no partial graph. License expiry or withdrawal first disables serving and publication; payload removal, when legally required, uses a separately reviewed recovery migration and retains only lawful minimum integrity evidence.
+
+### First M5 handoff
+
+After every M4 acceptance criterion passes, hand the stable `works`, `editions`, `passages`, `licenses`, and immutable publication primitives to **M5 — Quran data model and verified import**. M5 begins with provider-independent Quran structural tables and a content-activation gate; it must not import, select, or activate any Quran.Foundation resource until exact edition, rights, attribution, quota, checksum/manifest, retention, fallback, and deletion/exit approval exists. This M4 contract does not authorize M5 implementation.
+
+### Release status
+
+Contract complete; implementation not started by this documentation task.
 
 ## Phase 5: Quran data model and verified import
 
@@ -828,14 +971,14 @@ Quran.Foundation is the approved primary Quran provider through `QuranContentPro
 - M2 Database Foundation Verified
 - M3 Global Locales and Regional Configuration Verified
 - M4 Content Integrity Foundation Operational
-- M5 Devotional Content Operational
-- M6 Editorial Operations Ready
-- M7 Deterministic Search Ready
-- M8 Prayer and Hijri Ready
-- M9 Public Experience Complete
-- M10 Release 1 Verified
-- M11 Production Launch
-- M12 Stabilization Complete
+- M5 Quran Data Model and Verified Import Operational
+- M6 Devotional Content and Editorial General Dua Operational
+- M7 Editorial Operations Ready
+- M8 Deterministic Search Ready
+- M9 Prayer and Hijri Ready
+- M10 Public Release 1 Experience Complete
+- M11 Release 1 Verified
+- M12 Production Launch and Stabilization Complete
 
 ## Dependency Map
 
