@@ -3,9 +3,11 @@
 Provider-independent long-term observability architecture aligned with the Product, Database, Admin, AI, API, Security, Sakinah Design System, and Infrastructure architectures.
 
 ## Mission
+
 Define monitoring, telemetry, diagnostics, alerting, operational insight, and health architecture.
 
 ## Constitutional Principles
+
 - Observability by Default Principle
 - Evidence Before Assumption Principle
 - Minimal Sensitive Data Principle
@@ -18,6 +20,7 @@ Define monitoring, telemetry, diagnostics, alerting, operational insight, and he
 - Provider Independence Principle
 
 ## 1. Observability Philosophy
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined accountable operational role.
 - Trust boundaries documented.
@@ -27,6 +30,7 @@ Define monitoring, telemetry, diagnostics, alerting, operational insight, and he
 - Release status identified.
 
 ## 2. Signals
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined accountable operational role.
 - Trust boundaries documented.
@@ -36,6 +40,7 @@ Define monitoring, telemetry, diagnostics, alerting, operational insight, and he
 - Release status identified.
 
 ## 3. Health Architecture
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined accountable operational role.
 - Trust boundaries documented.
@@ -45,6 +50,7 @@ Define monitoring, telemetry, diagnostics, alerting, operational insight, and he
 - Release status identified.
 
 ## 4. Readiness & Liveness
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined accountable operational role.
 - Trust boundaries documented.
@@ -54,6 +60,7 @@ Define monitoring, telemetry, diagnostics, alerting, operational insight, and he
 - Release status identified.
 
 ## 5. Public Status Model
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined accountable operational role.
 - Trust boundaries documented.
@@ -63,6 +70,7 @@ Define monitoring, telemetry, diagnostics, alerting, operational insight, and he
 - Release status identified.
 
 ## 6. Request Correlation IDs
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined accountable operational role.
 - Trust boundaries documented.
@@ -72,6 +80,7 @@ Define monitoring, telemetry, diagnostics, alerting, operational insight, and he
 - Release status identified.
 
 ## 7. Distributed Tracing
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined accountable operational role.
 - Trust boundaries documented.
@@ -81,6 +90,7 @@ Define monitoring, telemetry, diagnostics, alerting, operational insight, and he
 - Release status identified.
 
 ## 8. Structured Logging
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined accountable operational role.
 - Trust boundaries documented.
@@ -90,6 +100,7 @@ Define monitoring, telemetry, diagnostics, alerting, operational insight, and he
 - Release status identified.
 
 ## 9. Metrics Architecture
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined accountable operational role.
 - Trust boundaries documented.
@@ -99,6 +110,7 @@ Define monitoring, telemetry, diagnostics, alerting, operational insight, and he
 - Release status identified.
 
 ## 10. Business Metrics
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined accountable operational role.
 - Trust boundaries documented.
@@ -108,6 +120,7 @@ Define monitoring, telemetry, diagnostics, alerting, operational insight, and he
 - Release status identified.
 
 ## 11. Editorial Metrics
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined accountable operational role.
 - Trust boundaries documented.
@@ -117,6 +130,7 @@ Define monitoring, telemetry, diagnostics, alerting, operational insight, and he
 - Release status identified.
 
 ## 12. Quran Integrity Monitoring
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined accountable operational role.
 - Trust boundaries documented.
@@ -126,6 +140,7 @@ Define monitoring, telemetry, diagnostics, alerting, operational insight, and he
 - Release status identified.
 
 ## 13. AI Monitoring
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined accountable operational role.
 - Trust boundaries documented.
@@ -135,6 +150,7 @@ Define monitoring, telemetry, diagnostics, alerting, operational insight, and he
 - Release status identified.
 
 ## 14. AI Cost Monitoring
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined accountable operational role.
 - Trust boundaries documented.
@@ -144,6 +160,7 @@ Define monitoring, telemetry, diagnostics, alerting, operational insight, and he
 - Release status identified.
 
 ## 15. AI Safety Monitoring
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined accountable operational role.
 - Trust boundaries documented.
@@ -153,6 +170,7 @@ Define monitoring, telemetry, diagnostics, alerting, operational insight, and he
 - Release status identified.
 
 ## 16. API Monitoring
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined accountable operational role.
 - Trust boundaries documented.
@@ -162,6 +180,7 @@ Define monitoring, telemetry, diagnostics, alerting, operational insight, and he
 - Release status identified.
 
 ## 17. Database Monitoring
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined accountable operational role.
 - Trust boundaries documented.
@@ -171,6 +190,7 @@ Define monitoring, telemetry, diagnostics, alerting, operational insight, and he
 - Release status identified.
 
 ## 18. Cache Monitoring
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined accountable operational role.
 - Trust boundaries documented.
@@ -180,6 +200,7 @@ Define monitoring, telemetry, diagnostics, alerting, operational insight, and he
 - Release status identified.
 
 ## 19. Search Monitoring
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined accountable operational role.
 - Trust boundaries documented.
@@ -189,6 +210,7 @@ Define monitoring, telemetry, diagnostics, alerting, operational insight, and he
 - Release status identified.
 
 ## 20. Background Job Monitoring
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined accountable operational role.
 - Trust boundaries documented.
@@ -198,6 +220,7 @@ Define monitoring, telemetry, diagnostics, alerting, operational insight, and he
 - Release status identified.
 
 ## 21. Queue Monitoring
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined accountable operational role.
 - Trust boundaries documented.
@@ -207,6 +230,7 @@ Define monitoring, telemetry, diagnostics, alerting, operational insight, and he
 - Release status identified.
 
 ## 22. Backup Monitoring
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined accountable operational role.
 - Trust boundaries documented.
@@ -216,6 +240,7 @@ Define monitoring, telemetry, diagnostics, alerting, operational insight, and he
 - Release status identified.
 
 ## 23. Restore Verification
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined accountable operational role.
 - Trust boundaries documented.
@@ -225,6 +250,7 @@ Define monitoring, telemetry, diagnostics, alerting, operational insight, and he
 - Release status identified.
 
 ## 24. Infrastructure Monitoring
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined accountable operational role.
 - Trust boundaries documented.
@@ -234,6 +260,7 @@ Define monitoring, telemetry, diagnostics, alerting, operational insight, and he
 - Release status identified.
 
 ## 25. CDN Monitoring
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined accountable operational role.
 - Trust boundaries documented.
@@ -243,6 +270,7 @@ Define monitoring, telemetry, diagnostics, alerting, operational insight, and he
 - Release status identified.
 
 ## 26. Security Monitoring
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined accountable operational role.
 - Trust boundaries documented.
@@ -252,6 +280,7 @@ Define monitoring, telemetry, diagnostics, alerting, operational insight, and he
 - Release status identified.
 
 ## 27. Authentication Monitoring
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined accountable operational role.
 - Trust boundaries documented.
@@ -261,6 +290,7 @@ Define monitoring, telemetry, diagnostics, alerting, operational insight, and he
 - Release status identified.
 
 ## 28. Authorization Monitoring
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined accountable operational role.
 - Trust boundaries documented.
@@ -270,6 +300,7 @@ Define monitoring, telemetry, diagnostics, alerting, operational insight, and he
 - Release status identified.
 
 ## 29. Audit Monitoring
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined accountable operational role.
 - Trust boundaries documented.
@@ -279,6 +310,7 @@ Define monitoring, telemetry, diagnostics, alerting, operational insight, and he
 - Release status identified.
 
 ## 30. Privacy-safe Analytics
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined accountable operational role.
 - Trust boundaries documented.
@@ -288,6 +320,7 @@ Define monitoring, telemetry, diagnostics, alerting, operational insight, and he
 - Release status identified.
 
 ## 31. Alert Architecture
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined accountable operational role.
 - Trust boundaries documented.
@@ -297,6 +330,7 @@ Define monitoring, telemetry, diagnostics, alerting, operational insight, and he
 - Release status identified.
 
 ## 32. Alert Routing
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined accountable operational role.
 - Trust boundaries documented.
@@ -306,6 +340,7 @@ Define monitoring, telemetry, diagnostics, alerting, operational insight, and he
 - Release status identified.
 
 ## 33. Incident Timeline
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined accountable operational role.
 - Trust boundaries documented.
@@ -315,6 +350,7 @@ Define monitoring, telemetry, diagnostics, alerting, operational insight, and he
 - Release status identified.
 
 ## 34. Operational Dashboards
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined accountable operational role.
 - Trust boundaries documented.
@@ -324,6 +360,7 @@ Define monitoring, telemetry, diagnostics, alerting, operational insight, and he
 - Release status identified.
 
 ## 35. SLO / SLA / Error Budget Philosophy
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined accountable operational role.
 - Trust boundaries documented.
@@ -333,6 +370,7 @@ Define monitoring, telemetry, diagnostics, alerting, operational insight, and he
 - Release status identified.
 
 ## 36. Capacity Monitoring
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined accountable operational role.
 - Trust boundaries documented.
@@ -342,6 +380,7 @@ Define monitoring, telemetry, diagnostics, alerting, operational insight, and he
 - Release status identified.
 
 ## 37. Cost Monitoring
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined accountable operational role.
 - Trust boundaries documented.
@@ -351,6 +390,7 @@ Define monitoring, telemetry, diagnostics, alerting, operational insight, and he
 - Release status identified.
 
 ## 38. Regional Monitoring
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined accountable operational role.
 - Trust boundaries documented.
@@ -360,6 +400,7 @@ Define monitoring, telemetry, diagnostics, alerting, operational insight, and he
 - Release status identified.
 
 ## 39. Future Multi-region Monitoring
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined accountable operational role.
 - Trust boundaries documented.
@@ -369,6 +410,7 @@ Define monitoring, telemetry, diagnostics, alerting, operational insight, and he
 - Release status identified.
 
 ## 40. Open Decisions
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined accountable operational role.
 - Trust boundaries documented.
@@ -378,6 +420,7 @@ Define monitoring, telemetry, diagnostics, alerting, operational insight, and he
 - Release status identified.
 
 ## 41. Final Validation
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined accountable operational role.
 - Trust boundaries documented.
@@ -387,35 +430,44 @@ Define monitoring, telemetry, diagnostics, alerting, operational insight, and he
 - Release status identified.
 
 ## Mermaid Diagrams
+
 ```mermaid
 flowchart LR
 App-->Telemetry-->Storage-->Dashboards
 ```
+
 ```mermaid
 flowchart LR
 Request-->Trace-->Database
 ```
+
 ```mermaid
 flowchart LR
 Alert-->Routing-->Responder
 ```
+
 ```mermaid
 flowchart LR
 Incident-->Diagnosis-->Recovery
 ```
+
 ```mermaid
 flowchart TD
 Executive-->Operational-->Service
 ```
+
 ```mermaid
 flowchart LR
 App-->AIAdapter-->Provider
 ```
+
 ```mermaid
 flowchart LR
 Infra-->Metrics-->Alerts
 ```
+
 ## Matrices
+
 - Metrics ownership
 - Dashboard ownership
 - Alert severity
@@ -425,16 +477,27 @@ Infra-->Metrics-->Alerts
 - Operational KPIs
 - Business KPIs
 - Release status
+
 ## Release Classification
+
 ### Release 1
+
 Core health, telemetry, alerts, dashboards, PostgreSQL, AI safety visibility.
+
 ### Prepared
+
 Advanced tracing, synthetic monitoring, queue visibility.
+
 ### Approved Later Module
+
 Regional monitoring, Talibeen monitoring, subscription monitoring.
+
 ### Future / Research
+
 Multi-region analytics, predictive diagnostics.
+
 ## Open Decisions
+
 - Telemetry provider
 - Tracing backend
 - Metrics backend
@@ -442,7 +505,9 @@ Multi-region analytics, predictive diagnostics.
 - Alerting provider
 - Incident tooling
 - Retention periods
+
 ## Validation
+
 - Aligned with all referenced architectures.
 - Quran publication integrity monitored.
 - Religious review, correction and withdrawal workflows observable.
@@ -655,3 +720,9 @@ Multi-region analytics, predictive diagnostics.
 - Observability architecture guidance 647.
 - Observability architecture guidance 648.
 - Observability architecture guidance 649.
+
+## M0.5 — Quran.Foundation monitoring
+
+Release 1 monitors bounded-cardinality Quran.Foundation latency, availability, quota consumption, `429`/`Retry-After`, authentication failures, token refresh, schema drift, checksum mismatch, deletion/withdrawal signals, cache legal age, catalog freshness, circuit state, audio resolution/playback failure, and any Prepared OAuth health check. Alerts identify the affected capability and edition without logging tokens, private notes, full user payloads, unnecessary Quran bodies, or raw search queries.
+
+The readiness gate proves that QF failure preserves legally valid Quran navigation and text, Search falls back locally, audio fails text-first, and the provider can be disabled without changing public contracts.

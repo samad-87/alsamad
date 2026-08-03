@@ -1,9 +1,11 @@
 # ALSAMAD Infrastructure & Deployment Architecture
 
 ## Mission
+
 Provider-independent long-term infrastructure architecture for Alsamad.
 
 ## Constitutional Principles
+
 - Infrastructure Minimalism Principle
 - Provider Independence Principle
 - Environment Isolation Principle
@@ -18,7 +20,9 @@ Provider-independent long-term infrastructure architecture for Alsamad.
 - Disaster Recovery Principle
 
 ## Expanded Architecture
+
 ### 1. Infrastructure constitutional principles
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined operational owner.
 - Trust boundaries: Explicit isolation between infrastructure domains.
@@ -30,6 +34,7 @@ Provider-independent long-term infrastructure architecture for Alsamad.
 - Release status: Release 1 / Prepared / Later / Future.
 
 ### 2. Environment topology
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined operational owner.
 - Trust boundaries: Explicit isolation between infrastructure domains.
@@ -41,6 +46,7 @@ Provider-independent long-term infrastructure architecture for Alsamad.
 - Release status: Release 1 / Prepared / Later / Future.
 
 ### 3. Environment isolation
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined operational owner.
 - Trust boundaries: Explicit isolation between infrastructure domains.
@@ -52,6 +58,7 @@ Provider-independent long-term infrastructure architecture for Alsamad.
 - Release status: Release 1 / Prepared / Later / Future.
 
 ### 4. DNS and domain architecture
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined operational owner.
 - Trust boundaries: Explicit isolation between infrastructure domains.
@@ -63,6 +70,7 @@ Provider-independent long-term infrastructure architecture for Alsamad.
 - Release status: Release 1 / Prepared / Later / Future.
 
 ### 5. CDN, WAF and edge delivery
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined operational owner.
 - Trust boundaries: Explicit isolation between infrastructure domains.
@@ -74,6 +82,7 @@ Provider-independent long-term infrastructure architecture for Alsamad.
 - Release status: Release 1 / Prepared / Later / Future.
 
 ### 6. Application hosting
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined operational owner.
 - Trust boundaries: Explicit isolation between infrastructure domains.
@@ -85,6 +94,7 @@ Provider-independent long-term infrastructure architecture for Alsamad.
 - Release status: Release 1 / Prepared / Later / Future.
 
 ### 7. PostgreSQL hosting
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined operational owner.
 - Trust boundaries: Explicit isolation between infrastructure domains.
@@ -96,6 +106,7 @@ Provider-independent long-term infrastructure architecture for Alsamad.
 - Release status: Release 1 / Prepared / Later / Future.
 
 ### 8. Connection management and pooling
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined operational owner.
 - Trust boundaries: Explicit isolation between infrastructure domains.
@@ -107,6 +118,7 @@ Provider-independent long-term infrastructure architecture for Alsamad.
 - Release status: Release 1 / Prepared / Later / Future.
 
 ### 9. Migration execution boundaries
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined operational owner.
 - Trust boundaries: Explicit isolation between infrastructure domains.
@@ -118,6 +130,7 @@ Provider-independent long-term infrastructure architecture for Alsamad.
 - Release status: Release 1 / Prepared / Later / Future.
 
 ### 10. Object storage and media delivery
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined operational owner.
 - Trust boundaries: Explicit isolation between infrastructure domains.
@@ -129,6 +142,7 @@ Provider-independent long-term infrastructure architecture for Alsamad.
 - Release status: Release 1 / Prepared / Later / Future.
 
 ### 11. Cache architecture
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined operational owner.
 - Trust boundaries: Explicit isolation between infrastructure domains.
@@ -140,6 +154,7 @@ Provider-independent long-term infrastructure architecture for Alsamad.
 - Release status: Release 1 / Prepared / Later / Future.
 
 ### 12. Deterministic search infrastructure
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined operational owner.
 - Trust boundaries: Explicit isolation between infrastructure domains.
@@ -151,6 +166,7 @@ Provider-independent long-term infrastructure architecture for Alsamad.
 - Release status: Release 1 / Prepared / Later / Future.
 
 ### 13. Background jobs and queues
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined operational owner.
 - Trust boundaries: Explicit isolation between infrastructure domains.
@@ -162,6 +178,7 @@ Provider-independent long-term infrastructure architecture for Alsamad.
 - Release status: Release 1 / Prepared / Later / Future.
 
 ### 14. Scheduled jobs
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined operational owner.
 - Trust boundaries: Explicit isolation between infrastructure domains.
@@ -173,6 +190,7 @@ Provider-independent long-term infrastructure architecture for Alsamad.
 - Release status: Release 1 / Prepared / Later / Future.
 
 ### 15. Email and notifications
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined operational owner.
 - Trust boundaries: Explicit isolation between infrastructure domains.
@@ -184,6 +202,7 @@ Provider-independent long-term infrastructure architecture for Alsamad.
 - Release status: Release 1 / Prepared / Later / Future.
 
 ### 16. Feature flags and runtime configuration
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined operational owner.
 - Trust boundaries: Explicit isolation between infrastructure domains.
@@ -195,6 +214,7 @@ Provider-independent long-term infrastructure architecture for Alsamad.
 - Release status: Release 1 / Prepared / Later / Future.
 
 ### 17. AI provider connectivity
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined operational owner.
 - Trust boundaries: Explicit isolation between infrastructure domains.
@@ -206,6 +226,7 @@ Provider-independent long-term infrastructure architecture for Alsamad.
 - Release status: Release 1 / Prepared / Later / Future.
 
 ### 18. Future self-hosted GPU inference
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined operational owner.
 - Trust boundaries: Explicit isolation between infrastructure domains.
@@ -217,6 +238,7 @@ Provider-independent long-term infrastructure architecture for Alsamad.
 - Release status: Release 1 / Prepared / Later / Future.
 
 ### 19. CI/CD boundaries
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined operational owner.
 - Trust boundaries: Explicit isolation between infrastructure domains.
@@ -228,6 +250,7 @@ Provider-independent long-term infrastructure architecture for Alsamad.
 - Release status: Release 1 / Prepared / Later / Future.
 
 ### 20. Build reproducibility
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined operational owner.
 - Trust boundaries: Explicit isolation between infrastructure domains.
@@ -239,6 +262,7 @@ Provider-independent long-term infrastructure architecture for Alsamad.
 - Release status: Release 1 / Prepared / Later / Future.
 
 ### 21. Artifact promotion
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined operational owner.
 - Trust boundaries: Explicit isolation between infrastructure domains.
@@ -250,6 +274,7 @@ Provider-independent long-term infrastructure architecture for Alsamad.
 - Release status: Release 1 / Prepared / Later / Future.
 
 ### 22. Deployment approvals
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined operational owner.
 - Trust boundaries: Explicit isolation between infrastructure domains.
@@ -261,6 +286,7 @@ Provider-independent long-term infrastructure architecture for Alsamad.
 - Release status: Release 1 / Prepared / Later / Future.
 
 ### 23. Rollback architecture
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined operational owner.
 - Trust boundaries: Explicit isolation between infrastructure domains.
@@ -272,6 +298,7 @@ Provider-independent long-term infrastructure architecture for Alsamad.
 - Release status: Release 1 / Prepared / Later / Future.
 
 ### 24. Blue/green and canary strategy
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined operational owner.
 - Trust boundaries: Explicit isolation between infrastructure domains.
@@ -283,6 +310,7 @@ Provider-independent long-term infrastructure architecture for Alsamad.
 - Release status: Release 1 / Prepared / Later / Future.
 
 ### 25. Database backup and PITR
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined operational owner.
 - Trust boundaries: Explicit isolation between infrastructure domains.
@@ -294,6 +322,7 @@ Provider-independent long-term infrastructure architecture for Alsamad.
 - Release status: Release 1 / Prepared / Later / Future.
 
 ### 26. Object-storage backup
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined operational owner.
 - Trust boundaries: Explicit isolation between infrastructure domains.
@@ -305,6 +334,7 @@ Provider-independent long-term infrastructure architecture for Alsamad.
 - Release status: Release 1 / Prepared / Later / Future.
 
 ### 27. Restore testing
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined operational owner.
 - Trust boundaries: Explicit isolation between infrastructure domains.
@@ -316,6 +346,7 @@ Provider-independent long-term infrastructure architecture for Alsamad.
 - Release status: Release 1 / Prepared / Later / Future.
 
 ### 28. Disaster recovery
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined operational owner.
 - Trust boundaries: Explicit isolation between infrastructure domains.
@@ -327,6 +358,7 @@ Provider-independent long-term infrastructure architecture for Alsamad.
 - Release status: Release 1 / Prepared / Later / Future.
 
 ### 29. RPO/RTO framework
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined operational owner.
 - Trust boundaries: Explicit isolation between infrastructure domains.
@@ -338,6 +370,7 @@ Provider-independent long-term infrastructure architecture for Alsamad.
 - Release status: Release 1 / Prepared / Later / Future.
 
 ### 30. Regional expansion
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined operational owner.
 - Trust boundaries: Explicit isolation between infrastructure domains.
@@ -349,6 +382,7 @@ Provider-independent long-term infrastructure architecture for Alsamad.
 - Release status: Release 1 / Prepared / Later / Future.
 
 ### 31. Data residency
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined operational owner.
 - Trust boundaries: Explicit isolation between infrastructure domains.
@@ -360,6 +394,7 @@ Provider-independent long-term infrastructure architecture for Alsamad.
 - Release status: Release 1 / Prepared / Later / Future.
 
 ### 32. Infrastructure observability
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined operational owner.
 - Trust boundaries: Explicit isolation between infrastructure domains.
@@ -371,6 +406,7 @@ Provider-independent long-term infrastructure architecture for Alsamad.
 - Release status: Release 1 / Prepared / Later / Future.
 
 ### 33. Health/readiness checks
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined operational owner.
 - Trust boundaries: Explicit isolation between infrastructure domains.
@@ -382,6 +418,7 @@ Provider-independent long-term infrastructure architecture for Alsamad.
 - Release status: Release 1 / Prepared / Later / Future.
 
 ### 34. Capacity planning
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined operational owner.
 - Trust boundaries: Explicit isolation between infrastructure domains.
@@ -393,6 +430,7 @@ Provider-independent long-term infrastructure architecture for Alsamad.
 - Release status: Release 1 / Prepared / Later / Future.
 
 ### 35. Cost governance
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined operational owner.
 - Trust boundaries: Explicit isolation between infrastructure domains.
@@ -404,6 +442,7 @@ Provider-independent long-term infrastructure architecture for Alsamad.
 - Release status: Release 1 / Prepared / Later / Future.
 
 ### 36. Vendor exit strategy
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined operational owner.
 - Trust boundaries: Explicit isolation between infrastructure domains.
@@ -415,6 +454,7 @@ Provider-independent long-term infrastructure architecture for Alsamad.
 - Release status: Release 1 / Prepared / Later / Future.
 
 ### 37. Release classification
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined operational owner.
 - Trust boundaries: Explicit isolation between infrastructure domains.
@@ -426,6 +466,7 @@ Provider-independent long-term infrastructure architecture for Alsamad.
 - Release status: Release 1 / Prepared / Later / Future.
 
 ### 38. Open decisions
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined operational owner.
 - Trust boundaries: Explicit isolation between infrastructure domains.
@@ -437,6 +478,7 @@ Provider-independent long-term infrastructure architecture for Alsamad.
 - Release status: Release 1 / Prepared / Later / Future.
 
 ### 39. Final validation matrix
+
 - Responsibilities: Alsamad-specific operational ownership.
 - Ownership: Defined operational owner.
 - Trust boundaries: Explicit isolation between infrastructure domains.
@@ -448,20 +490,25 @@ Provider-independent long-term infrastructure architecture for Alsamad.
 - Release status: Release 1 / Prepared / Later / Future.
 
 ## Mermaid Diagrams
+
 ```mermaid
 flowchart LR
 User-->DNS-->CDN-->App-->API-->PostgreSQL
 ```
+
 ```mermaid
 flowchart LR
 Commit-->Build-->Artifact-->Staging-->Approval-->Production-->Rollback
 ```
+
 ```mermaid
 flowchart LR
 App-->Adapter-->CloudAI
 Adapter-->LocalGPU
 ```
+
 ## Matrices
+
 - Environment responsibilities
 - Infrastructure ownership
 - Provider dependency classification
@@ -476,6 +523,7 @@ Adapter-->LocalGPU
 - Release-status capabilities
 
 ## Validation
+
 - PostgreSQL remains source of truth.
 - Canonical religious content remains protected.
 - AI outages do not disable core functionality.
@@ -708,3 +756,9 @@ Adapter-->LocalGPU
 - Infrastructure guidance line 697.
 - Infrastructure guidance line 698.
 - Infrastructure guidance line 699.
+
+## M0.5 — Quran.Foundation dependency
+
+Quran.Foundation is accessed only through server-side provider adapters with environment-separated secrets, controlled egress, bounded retries, request coalescing, quota handling, circuit breaking, and an emergency disable switch. Cache keys include provider, environment, API version, resource, edition, and locale; cache enforcement must never exceed the default seven-day legal limit without documented rights.
+
+Release 1 requires a legally valid fallback source or written durable-storage permission before canonical activation. Provider outages disable refresh, QF Search, and new audio resolution before disrupting verified reading. Audio hosts, proxying, caching, Range behavior, and downloads remain disabled unless explicitly approved. Provider exit removes QF content as required while preserving only permitted governance evidence and independently licensed content.

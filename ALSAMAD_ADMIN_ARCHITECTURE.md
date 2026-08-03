@@ -126,12 +126,12 @@ Operational decisions must not be hidden in source code, ad hoc spreadsheets, di
 
 All capabilities use one of four statuses.
 
-| Status | Administrative meaning |
-| --- | --- |
-| **Release 1** | Required to operate the trustworthy daily foundation and its verified content. |
-| **Prepared** | Architecture and controlled foundations may be prepared, but public exposure or account dependence is optional. |
+| Status                    | Administrative meaning                                                                                                             |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| **Release 1**             | Required to operate the trustworthy daily foundation and its verified content.                                                     |
+| **Prepared**              | Architecture and controlled foundations may be prepared, but public exposure or account dependence is optional.                    |
 | **Approved Later Module** | Product capability is approved in principle but requires its own implementation, privacy, security, and operational authorization. |
-| **Future / Research** | Requires evidence, safety evaluation, licensing, experimentation, or a later product decision. |
+| **Future / Research**     | Requires evidence, safety evaluation, licensing, experimentation, or a later product decision.                                     |
 
 A capability’s presence in this document does not authorize implementation.
 
@@ -1100,28 +1100,28 @@ The architecture avoids one shared unrestricted administrator role. Operational 
 
 ### 30.1 Core operational roles
 
-| Role | Primary responsibility | Explicit exclusions |
-| --- | --- | --- |
-| **Editorial Author** | Draft and revise assigned editorial content | Cannot approve religious review or publish own work |
-| **Arabic Language Editor** | Arabic language, terminology, typography, and script review | Cannot assert source authenticity without religious/source capability |
-| **Language Reviewer** | Review translations/localized editorial content for assigned locales | Cannot publish or change canonical source text |
-| **Source & Licensing Steward** | Verify provider, edition, source, license, checksum, and redistribution rights | Cannot independently publish religious content |
-| **Religious Reviewer** | Review source claims, classification, authenticity handling, and religious appropriateness | Cannot silently edit content or publish unless separately granted publisher capability |
-| **Editorial Coordinator** | Assign work, manage queues, resolve operational blockers | Assignment does not grant approval authority |
-| **Publisher** | Execute guarded publication after all required approvals | Cannot waive missing religious/source reviews |
-| **Correction Steward** | Triage corrections, coordinate revisions and public disclosures | Cannot rewrite canonical history |
-| **Prayer Configuration Steward** | Maintain prayer method and regional defaults | Cannot activate without required configuration approval |
-| **Calendar Configuration Steward** | Maintain Hijri methods, adjustments, and events | Cannot claim universal certainty for regional observations |
-| **SEO Steward** | Manage canonical, sitemap, redirect, and reviewed metadata decisions | Cannot alter canonical religious truth or rank by payment |
-| **Media Steward** | Manage licensed assets, variants, accessibility text, and lifecycle | Cannot approve religious claims contained in media |
-| **Search Steward** | Manage deterministic search projections and benchmarks | Cannot mutate canonical content through search tooling |
-| **Moderation Reviewer** | Review reports and cases in approved later workflows | Cannot alter religious content outside correction workflow |
-| **Appeals Reviewer** | Independently review moderation appeals | Cannot erase original decisions |
-| **Security & Privacy Administrator** | Access control, incident response, privacy/deletion operations | Cannot publish religious content |
-| **Platform Operator** | Deployments, jobs, backups, monitoring, operational health | Cannot directly modify editorial truth |
-| **Role Administrator** | Manage scoped grants under dual control | Cannot grant oneself unrestricted authority |
-| **Emergency Commander** | Coordinate declared incidents and break-glass actions | Temporary, audited, and cannot bypass content replacement reviews |
-| **Auditor** | Read-only inspection of audit, workflow, and control evidence | No mutation authority |
+| Role                                 | Primary responsibility                                                                     | Explicit exclusions                                                                    |
+| ------------------------------------ | ------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------- |
+| **Editorial Author**                 | Draft and revise assigned editorial content                                                | Cannot approve religious review or publish own work                                    |
+| **Arabic Language Editor**           | Arabic language, terminology, typography, and script review                                | Cannot assert source authenticity without religious/source capability                  |
+| **Language Reviewer**                | Review translations/localized editorial content for assigned locales                       | Cannot publish or change canonical source text                                         |
+| **Source & Licensing Steward**       | Verify provider, edition, source, license, checksum, and redistribution rights             | Cannot independently publish religious content                                         |
+| **Religious Reviewer**               | Review source claims, classification, authenticity handling, and religious appropriateness | Cannot silently edit content or publish unless separately granted publisher capability |
+| **Editorial Coordinator**            | Assign work, manage queues, resolve operational blockers                                   | Assignment does not grant approval authority                                           |
+| **Publisher**                        | Execute guarded publication after all required approvals                                   | Cannot waive missing religious/source reviews                                          |
+| **Correction Steward**               | Triage corrections, coordinate revisions and public disclosures                            | Cannot rewrite canonical history                                                       |
+| **Prayer Configuration Steward**     | Maintain prayer method and regional defaults                                               | Cannot activate without required configuration approval                                |
+| **Calendar Configuration Steward**   | Maintain Hijri methods, adjustments, and events                                            | Cannot claim universal certainty for regional observations                             |
+| **SEO Steward**                      | Manage canonical, sitemap, redirect, and reviewed metadata decisions                       | Cannot alter canonical religious truth or rank by payment                              |
+| **Media Steward**                    | Manage licensed assets, variants, accessibility text, and lifecycle                        | Cannot approve religious claims contained in media                                     |
+| **Search Steward**                   | Manage deterministic search projections and benchmarks                                     | Cannot mutate canonical content through search tooling                                 |
+| **Moderation Reviewer**              | Review reports and cases in approved later workflows                                       | Cannot alter religious content outside correction workflow                             |
+| **Appeals Reviewer**                 | Independently review moderation appeals                                                    | Cannot erase original decisions                                                        |
+| **Security & Privacy Administrator** | Access control, incident response, privacy/deletion operations                             | Cannot publish religious content                                                       |
+| **Platform Operator**                | Deployments, jobs, backups, monitoring, operational health                                 | Cannot directly modify editorial truth                                                 |
+| **Role Administrator**               | Manage scoped grants under dual control                                                    | Cannot grant oneself unrestricted authority                                            |
+| **Emergency Commander**              | Coordinate declared incidents and break-glass actions                                      | Temporary, audited, and cannot bypass content replacement reviews                      |
+| **Auditor**                          | Read-only inspection of audit, workflow, and control evidence                              | No mutation authority                                                                  |
 
 ### 30.2 Religious advisory group
 
@@ -1202,14 +1202,14 @@ Every grant may be scoped by:
 
 Every important administrative action must define the following.
 
-| Dimension | Required definition |
-| --- | --- |
-| **Who may perform it** | Capability, role, content/locale/region scope, assignment, and separation-of-duty conditions. |
-| **Required reviews** | Source, license, language, religious, editorial, security, privacy, or configuration review as applicable. |
-| **Approval path** | Exact transitions, approvers, quorum or dual-control rule, and blocked conditions. |
-| **Audit trail** | Actor, capability, purpose, target revision/configuration, decision, evidence references, and correlation ID. |
-| **Rollback** | Supersession, correction, withdrawal, prior version restoration, feature disablement, or compensating action. |
-| **Visibility** | Internal, reviewer-only, preview, scheduled, public, withdrawn, archived, restricted, or sensitive. |
+| Dimension              | Required definition                                                                                           |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------- |
+| **Who may perform it** | Capability, role, content/locale/region scope, assignment, and separation-of-duty conditions.                 |
+| **Required reviews**   | Source, license, language, religious, editorial, security, privacy, or configuration review as applicable.    |
+| **Approval path**      | Exact transitions, approvers, quorum or dual-control rule, and blocked conditions.                            |
+| **Audit trail**        | Actor, capability, purpose, target revision/configuration, decision, evidence references, and correlation ID. |
+| **Rollback**           | Supersession, correction, withdrawal, prior version restoration, feature disablement, or compensating action. |
+| **Visibility**         | Internal, reviewer-only, preview, scheduled, public, withdrawn, archived, restricted, or sensitive.           |
 
 No important action is complete if one of these dimensions is undefined.
 
@@ -1506,15 +1506,15 @@ Before Release 1 administration is accepted:
 
 ## 43. Open Decisions
 
-This architecture intentionally leaves unresolved decisions unresolved.
+This architecture retains only operational choices that remain unresolved; M0.5 closes the Quran-provider architecture decisions.
 
 - exact staff authentication provider;
 - exact scholarly/advisory review structure and quorum policy;
-- Quran edition/provider and redistribution license;
-- initial English translation edition(s) and license;
-- whether content evidence requires the optional 31st Release 1 table or can be represented through existing source references;
+- exact approved Quran text edition and documented redistribution/storage rights; Quran.Foundation is the primary provider;
+- exact approved English translation edition(s), attribution, footnote treatment, and license;
+- content evidence uses the existing source, edition, license, and bounded provider-metadata structures; the 30-table boundary remains;
 - exact durable redirect/SEO persistence timing;
-- whether licensed audio is included in Release 1;
+- exact licensed Release 1 reciters and production audio approvals; audio is conditionally included and otherwise disabled;
 - exact retention periods;
 - PostgreSQL RLS use for sensitive later modules;
 - production hosting and recovery objectives;
@@ -1598,3 +1598,9 @@ Any implementation phase must separately identify:
 - privacy and retention impact;
 - operational owner;
 - explicit exclusions.
+
+## M0.5 — Quran.Foundation operational ownership
+
+Quran.Foundation is the primary Quran provider, but ALSAMAD administration owns resource approval, exact edition selection, license evidence, attribution, checksums, import manifests, publication, correction, withdrawal, and provider exit. Release 1 operations must expose governed catalog review, provider health, quota/429 state, cache legal age, schema/checksum failures, deletion signals, and an emergency provider-disable control through existing administrative capabilities.
+
+Audio is conditionally in Release 1 only after the written audio approval gate passes; otherwise its controls remain disabled. Quran.Foundation Search remains evaluation-only until its production gate passes. Public OAuth/User API operations remain Prepared, and streak/social/community operations are prohibited.

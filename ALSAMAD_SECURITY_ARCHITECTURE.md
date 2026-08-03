@@ -64,30 +64,30 @@ Controls require tests, configuration evidence, logs, alerts, access reviews, re
 
 Material exceptions require owner, reason, compensating controls, expiry, and review. Religious integrity decisions include qualified content authority. Talibeen activation requires Security, Privacy, Safety, Legal, and module approval. Runtime AI requires AI, Content Integrity, Security, Privacy, and qualified reviewers.
 
-| Class | Examples | Handling |
-| --- | --- | --- |
-| Public | Published Quran, translation, duas, methods | Integrity protected; policy-cacheable |
-| Internal | Non-sensitive operations | Authenticated, least privilege |
-| Confidential | Drafts, reviews, staff/provider details | Encrypted, scoped |
-| Restricted | Sessions, credentials, security evidence, precise preferences | Narrow access; prohibited from ordinary logs |
-| Highly Restricted | Future Talibeen/safety/conversations, sensitive AI traces | Isolated, purpose-bound, heightened audit/retention |
+| Class             | Examples                                                      | Handling                                            |
+| ----------------- | ------------------------------------------------------------- | --------------------------------------------------- |
+| Public            | Published Quran, translation, duas, methods                   | Integrity protected; policy-cacheable               |
+| Internal          | Non-sensitive operations                                      | Authenticated, least privilege                      |
+| Confidential      | Drafts, reviews, staff/provider details                       | Encrypted, scoped                                   |
+| Restricted        | Sessions, credentials, security evidence, precise preferences | Narrow access; prohibited from ordinary logs        |
+| Highly Restricted | Future Talibeen/safety/conversations, sensitive AI traces     | Isolated, purpose-bound, heightened audit/retention |
 
 # 4. Threat Model
 
 Threat actors include bots, credential attackers, abusive scrapers, malicious/compromised staff, compromised dependencies/CI/providers/workstations, hostile imports, religious-text tampering, future prompt/corpus injection, future Talibeen stalkers/scammers/extortionists/enumerators, and accidental operator/configuration failure.
 
-| Threat | Target | Principal controls |
-| --- | --- | --- |
-| Quran/Sunnah tampering | Canonical text/evidence | Quarantine, checksums, reviews, immutable versions, monitoring, restore |
-| Privilege escalation | Admin/editorial | MFA, capabilities, separation, audit, recertification |
-| Account takeover | Staff/future users | Passkeys/MFA, secure recovery, sessions, anomaly detection |
-| Injection/SSRF/XSS | App/API | Validation, parameterization, encoding, CSP, egress controls |
-| Exfiltration | Restricted data | Minimization, isolation, encryption, access detection |
-| Supply-chain compromise | Build/deploy | Pinning, provenance, scans, signed artifacts, protected CI |
-| AI injection/poisoning | Future AI | Trusted corpus, retrieval isolation, policy/citation validation |
-| Enumeration/stalking | Future Talibeen | Opaque IDs, anti-enumeration, privacy discovery, blocks |
-| Destructive admin/ransomware | Production/backups | Segmentation, immutable backups, dual control, restore drills |
-| Availability abuse | Public service | CDN/WAF, limits, graceful degradation, capacity alerts |
+| Threat                       | Target                  | Principal controls                                                      |
+| ---------------------------- | ----------------------- | ----------------------------------------------------------------------- |
+| Quran/Sunnah tampering       | Canonical text/evidence | Quarantine, checksums, reviews, immutable versions, monitoring, restore |
+| Privilege escalation         | Admin/editorial         | MFA, capabilities, separation, audit, recertification                   |
+| Account takeover             | Staff/future users      | Passkeys/MFA, secure recovery, sessions, anomaly detection              |
+| Injection/SSRF/XSS           | App/API                 | Validation, parameterization, encoding, CSP, egress controls            |
+| Exfiltration                 | Restricted data         | Minimization, isolation, encryption, access detection                   |
+| Supply-chain compromise      | Build/deploy            | Pinning, provenance, scans, signed artifacts, protected CI              |
+| AI injection/poisoning       | Future AI               | Trusted corpus, retrieval isolation, policy/citation validation         |
+| Enumeration/stalking         | Future Talibeen         | Opaque IDs, anti-enumeration, privacy discovery, blocks                 |
+| Destructive admin/ransomware | Production/backups      | Segmentation, immutable backups, dual control, restore drills           |
+| Availability abuse           | Public service          | CDN/WAF, limits, graceful degradation, capacity alerts                  |
 
 ```mermaid
 flowchart TB
@@ -129,14 +129,14 @@ Mandatory controls:
 
 Editorial General Dua retains structural classification, language review, religious-appropriateness review, mandatory label, and prohibited authenticated badges. Citation for inspiration does not transform editorial wording into Quran/Sunnah. AI text remains a draft.
 
-| Action | Author | Source reviewer | Language reviewer | Religious reviewer | Publisher |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| Draft | Allow | Read | Read | Read | Read |
-| Evidence verification | Submit | Allow | Read | Read | Read |
-| Language approval | No self-approval | Read | Allow scoped | Read | Read |
-| Religious approval | No | Read | Read | Allow scoped | Read |
-| Publish | No | No | No | No | After all gates |
-| Emergency withdrawal | No | No | No | Recommend | Explicit capability/reason |
+| Action                |           Author | Source reviewer | Language reviewer | Religious reviewer |                  Publisher |
+| --------------------- | ---------------: | --------------: | ----------------: | -----------------: | -------------------------: |
+| Draft                 |            Allow |            Read |              Read |               Read |                       Read |
+| Evidence verification |           Submit |           Allow |              Read |               Read |                       Read |
+| Language approval     | No self-approval |            Read |      Allow scoped |               Read |                       Read |
+| Religious approval    |               No |            Read |              Read |       Allow scoped |                       Read |
+| Publish               |               No |              No |                No |                 No |            After all gates |
+| Emergency withdrawal  |               No |              No |                No |          Recommend | Explicit capability/reason |
 
 # 6. Identity, MFA, Passkeys, Recovery, Sessions
 
@@ -158,15 +158,15 @@ Sessions use high-entropy opaque tokens, stored hashed when server-managed; Secu
 
 Authorization evaluates subject, capability, owner, resource, content class, locale, region, environment, assurance, time, and constraints. Roles are grant templates, not decisions. UI hiding is not enforcement. Database privileges add defense but do not replace application checks.
 
-| Class | Examples | Extra control |
-| --- | --- | --- |
-| Public read | Published Quran/duas/methods | Published-state filter |
-| Editorial write | Revision/translation | Module and locale scope |
-| Religious review | Authenticated content | Qualification and separation |
-| Publication | Publish/correct/withdraw | Strong auth and completed gates |
-| Security admin | Grants/sessions/incidents | Strong auth and strict audit |
-| Infrastructure | Deploy/secrets/database | Workload/user identity and environment scope |
-| Talibeen later | Safety/support/moderation | Purpose, case, heightened audit |
+| Class            | Examples                     | Extra control                                |
+| ---------------- | ---------------------------- | -------------------------------------------- |
+| Public read      | Published Quran/duas/methods | Published-state filter                       |
+| Editorial write  | Revision/translation         | Module and locale scope                      |
+| Religious review | Authenticated content        | Qualification and separation                 |
+| Publication      | Publish/correct/withdraw     | Strong auth and completed gates              |
+| Security admin   | Grants/sessions/incidents    | Strong auth and strict audit                 |
+| Infrastructure   | Deploy/secrets/database      | Workload/user identity and environment scope |
+| Talibeen later   | Safety/support/moderation    | Purpose, case, heightened audit              |
 
 Direct cross-module table writes are denied. Row-level security may reinforce private modules but never replaces ownership/use-case testing.
 
@@ -245,13 +245,13 @@ Talibeen is an Approved Later Module with zero Release 1 tables and needs separa
 - Rapid removal from discovery and documented erasure/anonymization timeline.
 - Minors excluded unless independently approved legal/safety architecture says otherwise.
 
-| Actor | Own profile | Discovery projection | Other private profile | Safety evidence |
-| --- | ---: | ---: | ---: | ---: |
-| User | Scoped read/write | Approved candidates | Deny | Own reports only |
-| Ordinary support | Case-minimal | Deny | Deny | Deny |
-| Safety specialist | Case-required | Case-required | Purpose-bound | Scoped/audited |
-| Engineer | Synthetic only | Synthetic only | Deny | Deny |
-| Analyst | Aggregated/de-identified | Aggregated | Deny | Deny |
+| Actor             |              Own profile | Discovery projection | Other private profile |  Safety evidence |
+| ----------------- | -----------------------: | -------------------: | --------------------: | ---------------: |
+| User              |        Scoped read/write |  Approved candidates |                  Deny | Own reports only |
+| Ordinary support  |             Case-minimal |                 Deny |                  Deny |             Deny |
+| Safety specialist |            Case-required |        Case-required |         Purpose-bound |   Scoped/audited |
+| Engineer          |           Synthetic only |       Synthetic only |                  Deny |             Deny |
+| Analyst           | Aggregated/de-identified |           Aggregated |                  Deny |             Deny |
 
 # 13. Secrets and Encryption
 
@@ -360,19 +360,19 @@ Each finding has owner, deadline, fix/mitigation, verification, and exception ex
 
 # 23. Security Testing
 
-| Area | Evidence |
-| --- | --- |
-| Authentication | Passkey/MFA/session/recovery normal and abuse cases |
-| Authorization | Capability matrix, cross-scope denial, self-approval denial |
-| API | Injection, SSRF, CSRF, CORS, XSS, mass assignment, limits, redaction |
-| Database | Real PostgreSQL constraints, roles, append-only, migration safety |
+| Area              | Evidence                                                             |
+| ----------------- | -------------------------------------------------------------------- |
+| Authentication    | Passkey/MFA/session/recovery normal and abuse cases                  |
+| Authorization     | Capability matrix, cross-scope denial, self-approval denial          |
+| API               | Injection, SSRF, CSRF, CORS, XSS, mass assignment, limits, redaction |
+| Database          | Real PostgreSQL constraints, roles, append-only, migration safety    |
 | Content Integrity | Quarantine, checksums, edition/source/reviews, correction/withdrawal |
-| Supply chain | Dependency/container scans, SBOM, provenance, artifact verification |
-| Infrastructure | IaC scan, exposure, egress, identity, secret policy |
-| Recovery | Encrypted restore and canonical checksum verification |
-| Privacy | Inventory, minimization, export/deletion, log inspection |
-| AI later | Injection, poisoning, citations, refusal, leakage, tool abuse, drift |
-| Talibeen later | Enumeration, scraping, visibility, block, deletion, safety access |
+| Supply chain      | Dependency/container scans, SBOM, provenance, artifact verification  |
+| Infrastructure    | IaC scan, exposure, egress, identity, secret policy                  |
+| Recovery          | Encrypted restore and canonical checksum verification                |
+| Privacy           | Inventory, minimization, export/deletion, log inspection             |
+| AI later          | Injection, poisoning, citations, refusal, leakage, tool abuse, drift |
+| Talibeen later    | Enumeration, scraping, visibility, block, deletion, safety access    |
 
 Tests run in CI where appropriate, pre-production, after material change, and periodically. High-risk modules require independent penetration testing. Scan completion is not acceptance; findings must be verified closed.
 
@@ -384,17 +384,17 @@ Exports exclude internal security signals and others' data. Deletion distinguish
 
 # 25. Security Matrix
 
-| Domain | Prevent | Detect | Respond/Recover |
-| --- | --- | --- | --- |
-| Content Integrity | Quarantine, checksum, review, immutable publish | Scheduled checks/publication alerts | Withdraw, purge, restore, correct |
-| Identity | Passkeys/MFA, limits, secure recovery | Login/recovery anomalies | Revoke/reset/investigate |
-| Authorization | Capabilities, scope, separation | Denials/grant anomalies | Revoke/contain/audit |
-| API | Validation, CSRF/CSP/SSRF controls | WAF/app anomalies | Block/patch/rotate/deploy |
-| Data | Minimize, encrypt, isolate | Access/export anomalies | Contain/notify/restore/delete |
-| Supply chain | Pin, review, signed artifact | Scan/provenance mismatch | Stop/rebuild trusted chain |
-| Availability | CDN, limits, capacity | SLO/attack alerts | Degrade/fail over/restore |
-| AI later | Trusted corpus/tools/validator | Citation/policy regression | Kill switch/model-corpus rollback |
-| Talibeen later | Isolation/privacy discovery/blocks | Scraping/safety signals | Freeze/protect/preserve scoped evidence |
+| Domain            | Prevent                                         | Detect                              | Respond/Recover                         |
+| ----------------- | ----------------------------------------------- | ----------------------------------- | --------------------------------------- |
+| Content Integrity | Quarantine, checksum, review, immutable publish | Scheduled checks/publication alerts | Withdraw, purge, restore, correct       |
+| Identity          | Passkeys/MFA, limits, secure recovery           | Login/recovery anomalies            | Revoke/reset/investigate                |
+| Authorization     | Capabilities, scope, separation                 | Denials/grant anomalies             | Revoke/contain/audit                    |
+| API               | Validation, CSRF/CSP/SSRF controls              | WAF/app anomalies                   | Block/patch/rotate/deploy               |
+| Data              | Minimize, encrypt, isolate                      | Access/export anomalies             | Contain/notify/restore/delete           |
+| Supply chain      | Pin, review, signed artifact                    | Scan/provenance mismatch            | Stop/rebuild trusted chain              |
+| Availability      | CDN, limits, capacity                           | SLO/attack alerts                   | Degrade/fail over/restore               |
+| AI later          | Trusted corpus/tools/validator                  | Citation/policy regression          | Kill switch/model-corpus rollback       |
+| Talibeen later    | Isolation/privacy discovery/blocks              | Scraping/safety signals             | Freeze/protect/preserve scoped evidence |
 
 # 26. Release Classification
 
@@ -426,16 +426,21 @@ Production requires current threat/data-flow model; no unresolved blocking findi
 - Staff identity provider, passkey/MFA timeline, production access/device posture.
 - RPO/RTO, backup/audit/log/security-evidence retention and restore cadence.
 - Vulnerability SLAs, penetration-test provider, disclosure channel, incident contacts.
-- Quran/translation/devotional providers and artifact-signing approach.
-- Public authentication activation.
+- Exact Quran/translation editions, durable-storage rights, attribution, quotas, and artifact-signing approach; Quran.Foundation is the approved primary Quran provider.
+- Later public-authentication activation requirements; public authentication remains Prepared in Release 1.
 - Key hierarchy, rotation, emergency recovery custody.
 - Talibeen jurisdiction, age policy, safety operation, and isolation before approval.
 - AI provider terms, data handling, evaluation thresholds, and red-team governance before approval.
 
 # 29. Final Validation
 
+## 28.1 M0.5 Quran.Foundation controls
+
+Quran.Foundation app secrets, access tokens, refresh tokens, and confidential credentials remain server-side, environment-separated, least-privileged, rotated, and absent from browser bundles, Git, logs, and public errors. Content credentials and optional user OAuth credentials are isolated. Authorization Code + PKCE/OIDC account linking is Prepared only; QF `sub` is an external alias and never canonical ALSAMAD identity.
+
+Provider payloads are untrusted structured input: validate schema and checksums, sanitize translation/tafsir markup, allowlist media/snapshot hosts and schemes, and translate provider errors. Enforce the default seven-day legal retention ceiling, private `no-store` User API responses, deletion/withdrawal events, revocation, incident notification, and provider termination. Expired QF content cannot be served merely because the provider is unavailable.
+
 - Security by Design, Privacy by Design, Least Privilege, Defense in Depth, Default Deny, and Content Integrity Protection are first-class.
 - Threat model covers external, insider, provider/build, content, future AI, and future Talibeen risks.
 - Quran/Sunnah integrity, identity/MFA/passkeys/recovery/sessions, capability authorization, admin/API/app security, AI/RAG, Talibeen isolation, secrets/encryption, supply chain/CI/CD, logging/audit/detection/response, backup/recovery, vulnerabilities, testing, release classification, open decisions, Mermaid diagrams, and matrices are complete.
 - Release 1 remains minimal and future evolution additive.
-

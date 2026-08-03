@@ -3,9 +3,11 @@
 This document defines the long-term quality assurance, verification, testing, release confidence, and defect prevention architecture for Alsamad.
 
 ## Mission
+
 Quality is designed into every layer of the platform.
 
 ## Constitutional Principles
+
 - Quality by Design Principle
 - Evidence Before Release Principle
 - Religious Accuracy Supremacy Principle
@@ -24,218 +26,256 @@ Quality is designed into every layer of the platform.
 - Release Confidence Principle
 
 ## 1. Quality Operating Model
+
 - Alsamad-specific assets, ownership, risks, controls, audit expectations, release classification, and validation criteria are defined.
 - Religious accuracy has highest priority where applicable.
 - Real PostgreSQL verification is required whenever PostgreSQL behavior is under test.
 - Human review remains authoritative for religious publication.
 
 ## 2. Test Pyramid and Portfolio
+
 - Alsamad-specific assets, ownership, risks, controls, audit expectations, release classification, and validation criteria are defined.
 - Religious accuracy has highest priority where applicable.
 - Real PostgreSQL verification is required whenever PostgreSQL behavior is under test.
 - Human review remains authoritative for religious publication.
 
 ## 3. Release Risk Classification
+
 - Alsamad-specific assets, ownership, risks, controls, audit expectations, release classification, and validation criteria are defined.
 - Religious accuracy has highest priority where applicable.
 - Real PostgreSQL verification is required whenever PostgreSQL behavior is under test.
 - Human review remains authoritative for religious publication.
 
 ## 4. Static Quality Gates
+
 - Alsamad-specific assets, ownership, risks, controls, audit expectations, release classification, and validation criteria are defined.
 - Religious accuracy has highest priority where applicable.
 - Real PostgreSQL verification is required whenever PostgreSQL behavior is under test.
 - Human review remains authoritative for religious publication.
 
 ## 5. Database Testing Architecture
+
 - Alsamad-specific assets, ownership, risks, controls, audit expectations, release classification, and validation criteria are defined.
 - Religious accuracy has highest priority where applicable.
 - Real PostgreSQL verification is required whenever PostgreSQL behavior is under test.
 - Human review remains authoritative for religious publication.
 
 ## 6. Religious Content Verification
+
 - Alsamad-specific assets, ownership, risks, controls, audit expectations, release classification, and validation criteria are defined.
 - Religious accuracy has highest priority where applicable.
 - Real PostgreSQL verification is required whenever PostgreSQL behavior is under test.
 - Human review remains authoritative for religious publication.
 
 ## 7. Editorial Workflow Testing
+
 - Alsamad-specific assets, ownership, risks, controls, audit expectations, release classification, and validation criteria are defined.
 - Religious accuracy has highest priority where applicable.
 - Real PostgreSQL verification is required whenever PostgreSQL behavior is under test.
 - Human review remains authoritative for religious publication.
 
 ## 8. API Testing Architecture
+
 - Alsamad-specific assets, ownership, risks, controls, audit expectations, release classification, and validation criteria are defined.
 - Religious accuracy has highest priority where applicable.
 - Real PostgreSQL verification is required whenever PostgreSQL behavior is under test.
 - Human review remains authoritative for religious publication.
 
 ## 9. Security Testing
+
 - Alsamad-specific assets, ownership, risks, controls, audit expectations, release classification, and validation criteria are defined.
 - Religious accuracy has highest priority where applicable.
 - Real PostgreSQL verification is required whenever PostgreSQL behavior is under test.
 - Human review remains authoritative for religious publication.
 
 ## 10. Accessibility Testing
+
 - Alsamad-specific assets, ownership, risks, controls, audit expectations, release classification, and validation criteria are defined.
 - Religious accuracy has highest priority where applicable.
 - Real PostgreSQL verification is required whenever PostgreSQL behavior is under test.
 - Human review remains authoritative for religious publication.
 
 ## 11. RTL/LTR and Localization Testing
+
 - Alsamad-specific assets, ownership, risks, controls, audit expectations, release classification, and validation criteria are defined.
 - Religious accuracy has highest priority where applicable.
 - Real PostgreSQL verification is required whenever PostgreSQL behavior is under test.
 - Human review remains authoritative for religious publication.
 
 ## 12. Quran Experience Testing
+
 - Alsamad-specific assets, ownership, risks, controls, audit expectations, release classification, and validation criteria are defined.
 - Religious accuracy has highest priority where applicable.
 - Real PostgreSQL verification is required whenever PostgreSQL behavior is under test.
 - Human review remains authoritative for religious publication.
 
 ## 13. Duas and Adhkar Testing
+
 - Alsamad-specific assets, ownership, risks, controls, audit expectations, release classification, and validation criteria are defined.
 - Religious accuracy has highest priority where applicable.
 - Real PostgreSQL verification is required whenever PostgreSQL behavior is under test.
 - Human review remains authoritative for religious publication.
 
 ## 14. Prayer and Hijri Testing
+
 - Alsamad-specific assets, ownership, risks, controls, audit expectations, release classification, and validation criteria are defined.
 - Religious accuracy has highest priority where applicable.
 - Real PostgreSQL verification is required whenever PostgreSQL behavior is under test.
 - Human review remains authoritative for religious publication.
 
 ## 15. Search Testing
+
 - Alsamad-specific assets, ownership, risks, controls, audit expectations, release classification, and validation criteria are defined.
 - Religious accuracy has highest priority where applicable.
 - Real PostgreSQL verification is required whenever PostgreSQL behavior is under test.
 - Human review remains authoritative for religious publication.
 
 ## 16. AI Evaluation and Testing
+
 - Alsamad-specific assets, ownership, risks, controls, audit expectations, release classification, and validation criteria are defined.
 - Religious accuracy has highest priority where applicable.
 - Real PostgreSQL verification is required whenever PostgreSQL behavior is under test.
 - Human review remains authoritative for religious publication.
 
 ## 17. Admin Testing
+
 - Alsamad-specific assets, ownership, risks, controls, audit expectations, release classification, and validation criteria are defined.
 - Religious accuracy has highest priority where applicable.
 - Real PostgreSQL verification is required whenever PostgreSQL behavior is under test.
 - Human review remains authoritative for religious publication.
 
 ## 18. Talibeen Testing
+
 - Alsamad-specific assets, ownership, risks, controls, audit expectations, release classification, and validation criteria are defined.
 - Religious accuracy has highest priority where applicable.
 - Real PostgreSQL verification is required whenever PostgreSQL behavior is under test.
 - Human review remains authoritative for religious publication.
 
 ## 19. Performance Testing
+
 - Alsamad-specific assets, ownership, risks, controls, audit expectations, release classification, and validation criteria are defined.
 - Religious accuracy has highest priority where applicable.
 - Real PostgreSQL verification is required whenever PostgreSQL behavior is under test.
 - Human review remains authoritative for religious publication.
 
 ## 20. Resilience and Failure Testing
+
 - Alsamad-specific assets, ownership, risks, controls, audit expectations, release classification, and validation criteria are defined.
 - Religious accuracy has highest priority where applicable.
 - Real PostgreSQL verification is required whenever PostgreSQL behavior is under test.
 - Human review remains authoritative for religious publication.
 
 ## 21. Backup, Restore and DR Testing
+
 - Alsamad-specific assets, ownership, risks, controls, audit expectations, release classification, and validation criteria are defined.
 - Religious accuracy has highest priority where applicable.
 - Real PostgreSQL verification is required whenever PostgreSQL behavior is under test.
 - Human review remains authoritative for religious publication.
 
 ## 22. Observability Verification
+
 - Alsamad-specific assets, ownership, risks, controls, audit expectations, release classification, and validation criteria are defined.
 - Religious accuracy has highest priority where applicable.
 - Real PostgreSQL verification is required whenever PostgreSQL behavior is under test.
 - Human review remains authoritative for religious publication.
 
 ## 23. Test Data Architecture
+
 - Alsamad-specific assets, ownership, risks, controls, audit expectations, release classification, and validation criteria are defined.
 - Religious accuracy has highest priority where applicable.
 - Real PostgreSQL verification is required whenever PostgreSQL behavior is under test.
 - Human review remains authoritative for religious publication.
 
 ## 24. Test Environments
+
 - Alsamad-specific assets, ownership, risks, controls, audit expectations, release classification, and validation criteria are defined.
 - Religious accuracy has highest priority where applicable.
 - Real PostgreSQL verification is required whenever PostgreSQL behavior is under test.
 - Human review remains authoritative for religious publication.
 
 ## 25. CI Quality Gates
+
 - Alsamad-specific assets, ownership, risks, controls, audit expectations, release classification, and validation criteria are defined.
 - Religious accuracy has highest priority where applicable.
 - Real PostgreSQL verification is required whenever PostgreSQL behavior is under test.
 - Human review remains authoritative for religious publication.
 
 ## 26. Flaky Test Management
+
 - Alsamad-specific assets, ownership, risks, controls, audit expectations, release classification, and validation criteria are defined.
 - Religious accuracy has highest priority where applicable.
 - Real PostgreSQL verification is required whenever PostgreSQL behavior is under test.
 - Human review remains authoritative for religious publication.
 
 ## 27. Defect Management
+
 - Alsamad-specific assets, ownership, risks, controls, audit expectations, release classification, and validation criteria are defined.
 - Religious accuracy has highest priority where applicable.
 - Real PostgreSQL verification is required whenever PostgreSQL behavior is under test.
 - Human review remains authoritative for religious publication.
 
 ## 28. Release Acceptance
+
 - Alsamad-specific assets, ownership, risks, controls, audit expectations, release classification, and validation criteria are defined.
 - Religious accuracy has highest priority where applicable.
 - Real PostgreSQL verification is required whenever PostgreSQL behavior is under test.
 - Human review remains authoritative for religious publication.
 
 ## 29. Quality Metrics
+
 - Alsamad-specific assets, ownership, risks, controls, audit expectations, release classification, and validation criteria are defined.
 - Religious accuracy has highest priority where applicable.
 - Real PostgreSQL verification is required whenever PostgreSQL behavior is under test.
 - Human review remains authoritative for religious publication.
 
 ## 30. Open Decisions
+
 - Alsamad-specific assets, ownership, risks, controls, audit expectations, release classification, and validation criteria are defined.
 - Religious accuracy has highest priority where applicable.
 - Real PostgreSQL verification is required whenever PostgreSQL behavior is under test.
 - Human review remains authoritative for religious publication.
 
 ## 31. Final Validation
+
 - Alsamad-specific assets, ownership, risks, controls, audit expectations, release classification, and validation criteria are defined.
 - Religious accuracy has highest priority where applicable.
 - Real PostgreSQL verification is required whenever PostgreSQL behavior is under test.
 - Human review remains authoritative for religious publication.
 
 ## Mermaid Diagrams
+
 ```mermaid
 flowchart LR
 Dev-->CI-->QA-->Release
 ```
+
 ```mermaid
 flowchart LR
 Content-->Review-->ReligiousReview-->Publish
 ```
+
 ```mermaid
 flowchart LR
 Migration-->PostgreSQL-->Verification
 ```
+
 ```mermaid
 flowchart LR
 Prompt-->Evaluation-->Approval
 ```
+
 ```mermaid
 flowchart LR
 Defect-->Fix-->RegressionTest-->Close
 ```
+
 ```mermaid
 flowchart LR
 Backup-->Restore-->Verification
 ```
 
 ## Matrices
+
 - Risk classification
 - Test ownership
 - Test layers
@@ -250,16 +290,25 @@ Backup-->Restore-->Verification
 - Release-status capabilities
 
 ## Release Classification
+
 ### Release 1
+
 Core QA gates, real PostgreSQL verification, accessibility and security release gates.
+
 ### Prepared
+
 Expanded AI evaluation and resilience validation.
+
 ### Approved Later Module
+
 Talibeen and subscription quality architecture.
+
 ### Future / Research
+
 Advanced semantic search, mutation testing, predictive quality analytics.
 
 ## Open Decisions
+
 - Unit-test framework
 - Browser-test framework
 - Accessibility tooling
@@ -272,6 +321,7 @@ Advanced semantic search, mutation testing, predictive quality analytics.
 - Staging topology
 
 ## Validation
+
 - Aligned with all referenced architectures.
 - Religious accuracy is the highest quality priority.
 - AI is evaluated but never treated as canonical truth.
@@ -904,3 +954,9 @@ Advanced semantic search, mutation testing, predictive quality analytics.
 - Quality architecture guidance 897.
 - Quality architecture guidance 898.
 - Quality architecture guidance 899.
+
+## M0.5 — Quran.Foundation verification
+
+The Quran provider suite covers adapter contracts without exposing raw payloads; ALSAMAD/QF ID mapping; approved edition and checksum integrity; chapters, ayah ranges, pages, juz, hizb, rub, ruku and manzil; translations and footnotes; tafsir attribution; pagination/error normalization; schema drift; deletion events; seven-day retention enforcement; quota/timeout/circuit behavior; independently licensed fallback; and provider replacement.
+
+Conditional audio tests cover approved reciters, URL allowlists, timing capability detection, text-only fallback, withdrawal, and disabled state when approvals are absent. QF Search remains internal until production, privacy, relevance, Arabic normalization, mapping, and fallback tests pass. Prepared OAuth/User tests prove credential separation, `no-store`, consent, revocation/export/deletion, Mushaf mapping, and that streak/social scopes are neither requested nor exposed.

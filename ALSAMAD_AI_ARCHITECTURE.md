@@ -144,6 +144,8 @@ Evaluation regressions can block deployment, reduce routing eligibility, or disa
 
 No AI provider may own Alsamad’s canonical prompts, task taxonomy, retrieval corpus, evaluation datasets, conversation history, embeddings strategy, routing policy, or product state.
 
+Quran.Foundation Content and Quran.Foundation User API data must not be used for training, fine-tuning, embeddings, RAG corpora, or evaluation datasets without explicit written permission covering that exact use. Private User API data is excluded from AI corpora regardless of technical availability. This restriction does not expand Release 1 AI scope.
+
 Provider replacement must remain operationally and contractually possible.
 
 ### 2.12 AI Evolution Principle
@@ -327,20 +329,20 @@ The AI architecture is a modular capability layer composed of stable internal do
 
 Each durable AI concept must have one owner:
 
-| Concept | Owning domain |
-| --- | --- |
-| Task definition | AI Task Contracts |
-| Provider configuration metadata | Provider and Model Registry |
-| Vendor-specific request/response mapping | Provider Adapter |
-| Model selection policy | Model Routing |
-| Approved corpus eligibility | Corpus Governance |
-| Retrieval execution | Retrieval Orchestration |
-| Prompt template and versions | Prompt Library |
-| Safety policy | Runtime Safety |
-| Evaluation dataset and run | Evaluation |
-| Runtime traces and metrics | Observability |
-| Incident record | AI Incident Management |
-| Canonical religious or editorial data | Relevant non-AI content module |
+| Concept                                  | Owning domain                  |
+| ---------------------------------------- | ------------------------------ |
+| Task definition                          | AI Task Contracts              |
+| Provider configuration metadata          | Provider and Model Registry    |
+| Vendor-specific request/response mapping | Provider Adapter               |
+| Model selection policy                   | Model Routing                  |
+| Approved corpus eligibility              | Corpus Governance              |
+| Retrieval execution                      | Retrieval Orchestration        |
+| Prompt template and versions             | Prompt Library                 |
+| Safety policy                            | Runtime Safety                 |
+| Evaluation dataset and run               | Evaluation                     |
+| Runtime traces and metrics               | Observability                  |
+| Incident record                          | AI Incident Management         |
+| Canonical religious or editorial data    | Relevant non-AI content module |
 
 ### 4.3 Stable internal contracts
 
@@ -1010,14 +1012,14 @@ AI may never:
 
 Religious tasks are classified by risk and permitted behavior:
 
-| Class | Example | Required behavior |
-| --- | --- | --- |
-| Canonical retrieval | Show a verse or approved dhikr | Deterministic source retrieval; no generative alteration |
-| Grounded explanation | Explain approved content | Retrieval, citations, visible editorial/AI distinction |
-| Comparative explanation | Summarize approved viewpoints | Preserve attribution, disagreement, and scope |
-| Personal guidance | Apply approved general guidance | Evidence, uncertainty, non-fatwa boundary, escalation where needed |
+| Class                            | Example                            | Required behavior                                                           |
+| -------------------------------- | ---------------------------------- | --------------------------------------------------------------------------- |
+| Canonical retrieval              | Show a verse or approved dhikr     | Deterministic source retrieval; no generative alteration                    |
+| Grounded explanation             | Explain approved content           | Retrieval, citations, visible editorial/AI distinction                      |
+| Comparative explanation          | Summarize approved viewpoints      | Preserve attribution, disagreement, and scope                               |
+| Personal guidance                | Apply approved general guidance    | Evidence, uncertainty, non-fatwa boundary, escalation where needed          |
 | Fatwa or scholar-specific ruling | User requests authoritative ruling | Do not issue independently; refer to qualified authority or approved source |
-| Unsupported or ambiguous claim | No approved evidence | State unknown or refuse to speculate |
+| Unsupported or ambiguous claim   | No approved evidence               | State unknown or refuse to speculate                                        |
 
 ### 10.3 Evidence explanation
 
@@ -1904,14 +1906,14 @@ Permissions group around workflows, not pages. Examples:
 
 Every important action defines:
 
-| Property | Requirement |
-| --- | --- |
-| Who may perform it | Named capability and scope |
-| Required reviews | Task-, religious-, language-, privacy-, or safety-specific |
-| Approval path | Explicit state transition and accountable owner |
-| Audit trail | Actor, action, target, reason, version, timestamp |
-| Rollback | Prior version, route fallback, disablement, or compensating action |
-| Visibility | Public, staff, restricted, or incident-only |
+| Property           | Requirement                                                        |
+| ------------------ | ------------------------------------------------------------------ |
+| Who may perform it | Named capability and scope                                         |
+| Required reviews   | Task-, religious-, language-, privacy-, or safety-specific         |
+| Approval path      | Explicit state transition and accountable owner                    |
+| Audit trail        | Actor, action, target, reason, version, timestamp                  |
+| Rollback           | Prior version, route fallback, disablement, or compensating action |
+| Visibility         | Public, staff, restricted, or incident-only                        |
 
 ---
 
@@ -2029,13 +2031,13 @@ The following operate independently from AI:
 
 ### 20.2 Degradation levels
 
-| Level | Condition | Behavior |
-| --- | --- | --- |
-| Normal | Preferred AI routes healthy | Full approved AI capability |
-| Reduced | One provider/model unavailable | Approved fallback route |
-| Limited | Generation unavailable, retrieval healthy | Deterministic search and source results |
-| Non-AI | AI layer unavailable | Core platform only; clear temporary notice where relevant |
-| Emergency disabled | Safety or privacy incident | AI tasks disabled by policy; canonical platform unaffected |
+| Level              | Condition                                 | Behavior                                                   |
+| ------------------ | ----------------------------------------- | ---------------------------------------------------------- |
+| Normal             | Preferred AI routes healthy               | Full approved AI capability                                |
+| Reduced            | One provider/model unavailable            | Approved fallback route                                    |
+| Limited            | Generation unavailable, retrieval healthy | Deterministic search and source results                    |
+| Non-AI             | AI layer unavailable                      | Core platform only; clear temporary notice where relevant  |
+| Emergency disabled | Safety or privacy incident                | AI tasks disabled by policy; canonical platform unaffected |
 
 ### 20.3 No unsafe fallback
 
@@ -2065,12 +2067,12 @@ Recovery requires:
 
 AI capabilities are classified independently from their architectural description.
 
-| Status | Meaning |
-| --- | --- |
-| **Release 1** | Required, bounded AI foundations or low-risk capabilities authorized for the initial release. |
-| **Prepared** | Architecture, contracts, evaluation, or internal tooling may be prepared without public activation. |
-| **Approved Later Module** | Capability is approved in principle but requires a separate implementation and operational gate. |
-| **Future / Research** | Requires experimentation, evidence, licensing, safety evaluation, or a later product decision. |
+| Status                    | Meaning                                                                                             |
+| ------------------------- | --------------------------------------------------------------------------------------------------- |
+| **Release 1**             | Required, bounded AI foundations or low-risk capabilities authorized for the initial release.       |
+| **Prepared**              | Architecture, contracts, evaluation, or internal tooling may be prepared without public activation. |
+| **Approved Later Module** | Capability is approved in principle but requires a separate implementation and operational gate.    |
+| **Future / Research**     | Requires experimentation, evidence, licensing, safety evaluation, or a later product decision.      |
 
 Documentation does not authorize activation.
 

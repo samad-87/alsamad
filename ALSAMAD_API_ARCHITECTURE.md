@@ -41,13 +41,13 @@ flowchart TB
   P --> X["External Providers"]
 ```
 
-| Boundary | Owns | Cannot own |
-| --- | --- | --- |
-| Adapter | Parsing, negotiation, serialization, transport status | Business rules |
-| Use case | Orchestration, transaction, capability requirement | Another module's invariants |
-| Domain module | Invariants, transitions, resource ownership | Protocol/provider assumptions |
-| Provider port | Provider-neutral capability | Provider response leakage |
-| Infrastructure adapter | SDK, timeout, retry, mapping | Public identity or truth |
+| Boundary               | Owns                                                  | Cannot own                    |
+| ---------------------- | ----------------------------------------------------- | ----------------------------- |
+| Adapter                | Parsing, negotiation, serialization, transport status | Business rules                |
+| Use case               | Orchestration, transaction, capability requirement    | Another module's invariants   |
+| Domain module          | Invariants, transitions, resource ownership           | Protocol/provider assumptions |
+| Provider port          | Provider-neutral capability                           | Provider response leakage     |
+| Infrastructure adapter | SDK, timeout, retry, mapping                          | Public identity or truth      |
 
 # 4. Protocol Adapter Boundaries
 
@@ -72,31 +72,31 @@ GraphQL may compose approved read models for a proven multi-surface need. Resolv
 
 gRPC may serve measured internal throughput needs. Protobuf maps to application DTOs; field numbers are never reused. Interceptors add transport authentication and telemetry, while the same use case enforces authorization and invariants.
 
-| Concern | REST | GraphQL | gRPC |
-| --- | --- | --- | --- |
-| Identity | Canonical Alsamad ID | Same | Same |
-| Authorization | Use-case capability | Same resolver use case | Same RPC use case |
-| Errors | Problem Details | Typed extension | Canonical status/detail |
-| Idempotency | Header | Mutation input/header | Metadata/request field |
-| Observability | Route template | Operation/field | Service/method |
+| Concern       | REST                 | GraphQL                | gRPC                    |
+| ------------- | -------------------- | ---------------------- | ----------------------- |
+| Identity      | Canonical Alsamad ID | Same                   | Same                    |
+| Authorization | Use-case capability  | Same resolver use case | Same RPC use case       |
+| Errors        | Problem Details      | Typed extension        | Canonical status/detail |
+| Idempotency   | Header               | Mutation input/header  | Metadata/request field  |
+| Observability | Route template       | Operation/field        | Service/method          |
 
 # 5. Resource Ownership
 
-| Resources | Owning module | Status |
-| --- | --- | --- |
-| Locales, geographic areas | Global Architecture | Release 1 |
-| Works, editions, passages, texts, licenses, references | Content Integrity | Release 1 |
-| Surahs, ayahs, Quran texts, markers, Quran translations | Quran | Release 1 |
-| Devotional items, collections, content translations | Devotional | Release 1 |
-| Staff, role grants, reviews | Editorial | Release 1 |
-| Prayer methods and regional defaults | Prayer | Release 1 |
-| Hijri methods, adjustments, Muslim events | Calendar | Release 1 |
-| Publication and audit events | Audit/Publication | Release 1 |
-| Accounts, sessions, preferences, saved items | Identity | Prepared |
-| Hadith | Hadith | Approved Later Module |
-| Talibeen | Talibeen | Approved Later Module |
-| Subscriptions, payments, Balance | Commerce/Ledger | Approved Later Module |
-| AI answers, semantic retrieval, Knowledge Graph | AI/Knowledge Engine | Future/Research |
+| Resources                                               | Owning module       | Status                |
+| ------------------------------------------------------- | ------------------- | --------------------- |
+| Locales, geographic areas                               | Global Architecture | Release 1             |
+| Works, editions, passages, texts, licenses, references  | Content Integrity   | Release 1             |
+| Surahs, ayahs, Quran texts, markers, Quran translations | Quran               | Release 1             |
+| Devotional items, collections, content translations     | Devotional          | Release 1             |
+| Staff, role grants, reviews                             | Editorial           | Release 1             |
+| Prayer methods and regional defaults                    | Prayer              | Release 1             |
+| Hijri methods, adjustments, Muslim events               | Calendar            | Release 1             |
+| Publication and audit events                            | Audit/Publication   | Release 1             |
+| Accounts, sessions, preferences, saved items            | Identity            | Prepared              |
+| Hadith                                                  | Hadith              | Approved Later Module |
+| Talibeen                                                | Talibeen            | Approved Later Module |
+| Subscriptions, payments, Balance                        | Commerce/Ledger     | Approved Later Module |
+| AI answers, semantic retrieval, Knowledge Graph         | AI/Knowledge Engine | Future/Research       |
 
 Cross-module reads use services or approved views. Cross-module writes invoke the owner's command. Provider IDs never become public Alsamad IDs.
 
@@ -104,16 +104,16 @@ Cross-module reads use services or approved views. Cross-module writes invoke th
 
 ## 6.1 Common Headers
 
-| Header | Contract |
-| --- | --- |
-| `Accept` | Supported media type |
-| `Accept-Language` | Presentation preference, never canonical identity |
-| `Authorization` | Protected operations only |
-| `Idempotency-Key` | Required for retryable mutations |
-| `If-None-Match` | Conditional read |
-| `If-Match` | Optimistic mutation precondition |
-| `Traceparent` | Accepted when valid |
-| `X-Request-ID` | Optional client correlation; server emits canonical ID |
+| Header            | Contract                                               |
+| ----------------- | ------------------------------------------------------ |
+| `Accept`          | Supported media type                                   |
+| `Accept-Language` | Presentation preference, never canonical identity      |
+| `Authorization`   | Protected operations only                              |
+| `Idempotency-Key` | Required for retryable mutations                       |
+| `If-None-Match`   | Conditional read                                       |
+| `If-Match`        | Optimistic mutation precondition                       |
+| `Traceparent`     | Accepted when valid                                    |
+| `X-Request-ID`    | Optional client correlation; server emits canonical ID |
 
 Boundary schemas reject malformed JSON, unsupported media, unknown mutation fields, invalid UUID/locale/date/time-zone/coordinate/enum/filter/cursor values, excessive size, nesting, arrays, or strings. Server derives actor, ownership, state, checksums, and audit metadata. Generic Unicode normalization never alters canonical religious text.
 
@@ -128,8 +128,8 @@ Single reads return a stable resource representation. Collections return:
 ```json
 {
   "data": [],
-  "page": {"next_cursor": null, "has_more": false, "limit": 20},
-  "meta": {"request_id": "opaque", "locale": "ar"}
+  "page": { "next_cursor": null, "has_more": false, "limit": 20 },
+  "meta": { "request_id": "opaque", "locale": "ar" }
 }
 ```
 
@@ -156,18 +156,18 @@ Errors use `application/problem+json`:
 }
 ```
 
-| Status | Meaning |
-| --- | --- |
-| 400 | Malformed request/combination |
-| 401 | Missing or invalid authentication |
-| 403 | Capability denied |
-| 404 | Missing or intentionally concealed resource |
-| 409 | State, uniqueness, or idempotency conflict |
-| 412 | ETag/precondition failed |
-| 415 | Unsupported media type |
-| 422 | Semantic validation failure |
-| 429 | Rate/abuse limit |
-| 503 | Required dependency unavailable |
+| Status | Meaning                                     |
+| ------ | ------------------------------------------- |
+| 400    | Malformed request/combination               |
+| 401    | Missing or invalid authentication           |
+| 403    | Capability denied                           |
+| 404    | Missing or intentionally concealed resource |
+| 409    | State, uniqueness, or idempotency conflict  |
+| 412    | ETag/precondition failed                    |
+| 415    | Unsupported media type                      |
+| 422    | Semantic validation failure                 |
+| 429    | Rate/abuse limit                            |
+| 503    | Required dependency unavailable             |
 
 Errors never reveal SQL, stack traces, secrets, provider payloads, topology, concealed identity existence, or sensitive authorization detail.
 
@@ -249,13 +249,13 @@ Mutable admin resources expose ETags derived from identity/version. `If-Match` i
 
 # 16. Caching, ETags, Conditional Requests
 
-| Data | Policy |
-| --- | --- |
-| Immutable published edition/revision | Public, long-lived, immutable version URL |
-| Current canonical pointer | Public, shorter TTL, event revalidation |
-| Prayer/Hijri result | Input/method-bound; private if location sensitivity requires |
-| Public deterministic search | Short cache for non-sensitive queries only |
-| Admin, drafts, audit, identity, Talibeen | Private/no-store |
+| Data                                     | Policy                                                       |
+| ---------------------------------------- | ------------------------------------------------------------ |
+| Immutable published edition/revision     | Public, long-lived, immutable version URL                    |
+| Current canonical pointer                | Public, shorter TTL, event revalidation                      |
+| Prayer/Hijri result                      | Input/method-bound; private if location sensitivity requires |
+| Public deterministic search              | Short cache for non-sensitive queries only                   |
+| Admin, drafts, audit, identity, Talibeen | Private/no-store                                             |
 
 ETags include representation, locale, edition, expansion set, and authorization visibility. `If-None-Match` returns `304`; `Last-Modified` is supplemental. Publication/configuration events invalidate affected pointers and derived projections. `Vary` remains minimal. Sensitive responses never enter shared caches.
 
@@ -317,25 +317,25 @@ Each endpoint class requires schema/golden contract tests; authorization allow/d
 
 # 24. Release Classification
 
-| Capability | Classification |
-| --- | --- |
-| Public Quran, devotional, source, prayer, Hijri, event, locale APIs | Release 1 |
-| Deterministic search | Release 1 |
-| Editorial review/publication/configuration/grants/audit APIs | Release 1 |
-| Public accounts, sync, bookmarks, reading position | Prepared |
-| Audio catalog, correction intake, notification preferences | Prepared |
-| GraphQL, gRPC, outbox, broker, webhooks | Prepared after proven need |
-| Hadith | Approved Later Module |
-| Talibeen | Approved Later Module |
-| Subscription, payment, Balance | Approved Later Module |
-| Runtime AI, semantic search, Knowledge Graph, recommendations | Future/Research |
+| Capability                                                          | Classification             |
+| ------------------------------------------------------------------- | -------------------------- |
+| Public Quran, devotional, source, prayer, Hijri, event, locale APIs | Release 1                  |
+| Deterministic search                                                | Release 1                  |
+| Editorial review/publication/configuration/grants/audit APIs        | Release 1                  |
+| Public accounts, sync, bookmarks, reading position                  | Prepared                   |
+| Audio catalog, correction intake, notification preferences          | Prepared                   |
+| GraphQL, gRPC, outbox, broker, webhooks                             | Prepared after proven need |
+| Hadith                                                              | Approved Later Module      |
+| Talibeen                                                            | Approved Later Module      |
+| Subscription, payment, Balance                                      | Approved Later Module      |
+| Runtime AI, semantic search, Knowledge Graph, recommendations       | Future/Research            |
 
 # 25. Open Decisions
 
 - Public base URL/gateway topology and whether public reads use a dedicated origin.
 - Staff identity provider and phishing-resistant MFA rollout.
-- Quran, translation, devotional, prayer, and Hijri providers/licenses.
-- Endpoint limits, retention, cache TTLs, and public authentication activation.
+- Exact Quran.Foundation resources, Quran/translation rights, and devotional, prayer, and Hijri providers/licenses.
+- Endpoint limits, Quran.Foundation quotas, approved retention/cache TTLs, and later public-authentication activation; public authentication is Prepared in Release 1.
 - First proven GraphQL/gRPC consumer.
 - Event broker and webhook signing scheme when approved.
 - Public API documentation and controlled admin schema exposure.
@@ -343,10 +343,17 @@ Each endpoint class requires schema/golden contract tests; authorization allow/d
 
 # 26. Final Validation
 
+## 25.1 M0.5 Quran provider boundary
+
+The Quran module owns a provider-independent `QuranContentProvider` port. Its Quran.Foundation adapter normalizes chapters and chapter information; canonical ayah identities and ranges; text/script and translation editions; translation footnotes; tafsir; pages, juz, hizb, rub el hizb, ruku and manzil; reciters, audio and timing capabilities; Quran search; catalogs; synchronization; pagination; provider errors; attribution; licenses; availability; schema/API versions; freshness; and deletion signals. Raw Quran.Foundation objects, IDs, cursors, errors, credentials, and URLs never become public ALSAMAD contracts.
+
+A separate dormant `QuranUserInteropProvider` port covers optional OIDC subject linking, Quran bookmarks/Favorites/collections, reading bookmark and sessions, private progress/notes/preferences, approved non-competitive goals, Mushaf-aware synchronization, export, revocation, and deletion. Content credentials and user credentials remain separate. This port is Prepared and has no public Release 1 activation.
+
+Content and Search calls are server-side only. Quran.Foundation Search is evaluation-only until its production approval gate passes; local deterministic search remains the public Release 1 contract. Provider replacement must not change ALSAMAD public URLs, identifiers, pagination, or error semantics.
+
 - Provider/protocol independence and REST/GraphQL/gRPC boundaries are explicit.
 - IDs are stable and locale/provider independent.
 - Every resource has one owner.
 - Requests, responses, errors, auth, capabilities, localization, deterministic search, AI boundary, idempotency, pagination, filtering, sorting, expansion, cache, ETags, observability, events, webhooks, versioning, deprecation, and compatibility are governed.
 - Canonical religious truth is never duplicated; Editorial General Dua remains distinct.
 - Release 1 / Prepared / Approved Later Module / Future–Research boundaries remain intact.
-

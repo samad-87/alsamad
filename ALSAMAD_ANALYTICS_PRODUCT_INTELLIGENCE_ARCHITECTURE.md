@@ -3,9 +3,11 @@
 Provider-independent architecture for privacy-first analytics and decision support.
 
 ## Mission
+
 Analytics exists to improve trusted user journeys without becoming surveillance.
 
 ## Constitutional Principles
+
 - Purpose-Bound Measurement Principle
 - Privacy Before Insight Principle
 - Minimal Event Principle
@@ -24,229 +26,276 @@ Analytics exists to improve trusted user journeys without becoming surveillance.
 - Graceful Analytics Degradation Principle
 
 ## 1. Product Intelligence Philosophy
+
 - Alsamad-specific ownership, privacy boundaries, governance, retention, validation, release status and audit expectations.
 - Measurements are evidence-based and provider-independent.
 - Religious authority, privacy and safety override growth metrics.
 
 ## 2. North Star Architecture
+
 - Alsamad-specific ownership, privacy boundaries, governance, retention, validation, release status and audit expectations.
 - Measurements are evidence-based and provider-independent.
 - Religious authority, privacy and safety override growth metrics.
 
 ## 3. Measurement Taxonomy
+
 - Alsamad-specific ownership, privacy boundaries, governance, retention, validation, release status and audit expectations.
 - Measurements are evidence-based and provider-independent.
 - Religious authority, privacy and safety override growth metrics.
 
 ## 4. Event Governance
+
 - Alsamad-specific ownership, privacy boundaries, governance, retention, validation, release status and audit expectations.
 - Measurements are evidence-based and provider-independent.
 - Religious authority, privacy and safety override growth metrics.
 
 ## 5. Privacy-First Event Design
+
 - Alsamad-specific ownership, privacy boundaries, governance, retention, validation, release status and audit expectations.
 - Measurements are evidence-based and provider-independent.
 - Religious authority, privacy and safety override growth metrics.
 
 ## 6. Consent and User Control
+
 - Alsamad-specific ownership, privacy boundaries, governance, retention, validation, release status and audit expectations.
 - Measurements are evidence-based and provider-independent.
 - Religious authority, privacy and safety override growth metrics.
 
 ## 7. Public Reading Analytics
+
 - Alsamad-specific ownership, privacy boundaries, governance, retention, validation, release status and audit expectations.
 - Measurements are evidence-based and provider-independent.
 - Religious authority, privacy and safety override growth metrics.
 
 ## 8. Quran Product Intelligence
+
 - Alsamad-specific ownership, privacy boundaries, governance, retention, validation, release status and audit expectations.
 - Measurements are evidence-based and provider-independent.
 - Religious authority, privacy and safety override growth metrics.
 
 ## 9. Duas and Adhkar Intelligence
+
 - Alsamad-specific ownership, privacy boundaries, governance, retention, validation, release status and audit expectations.
 - Measurements are evidence-based and provider-independent.
 - Religious authority, privacy and safety override growth metrics.
 
 ## 10. Prayer and Hijri Intelligence
+
 - Alsamad-specific ownership, privacy boundaries, governance, retention, validation, release status and audit expectations.
 - Measurements are evidence-based and provider-independent.
 - Religious authority, privacy and safety override growth metrics.
 
 ## 11. Search Analytics
+
 - Alsamad-specific ownership, privacy boundaries, governance, retention, validation, release status and audit expectations.
 - Measurements are evidence-based and provider-independent.
 - Religious authority, privacy and safety override growth metrics.
 
 ## 12. Editorial Analytics
+
 - Alsamad-specific ownership, privacy boundaries, governance, retention, validation, release status and audit expectations.
 - Measurements are evidence-based and provider-independent.
 - Religious authority, privacy and safety override growth metrics.
 
 ## 13. Correction Intelligence
+
 - Alsamad-specific ownership, privacy boundaries, governance, retention, validation, release status and audit expectations.
 - Measurements are evidence-based and provider-independent.
 - Religious authority, privacy and safety override growth metrics.
 
 ## 14. Localization Intelligence
+
 - Alsamad-specific ownership, privacy boundaries, governance, retention, validation, release status and audit expectations.
 - Measurements are evidence-based and provider-independent.
 - Religious authority, privacy and safety override growth metrics.
 
 ## 15. Accessibility Intelligence
+
 - Alsamad-specific ownership, privacy boundaries, governance, retention, validation, release status and audit expectations.
 - Measurements are evidence-based and provider-independent.
 - Religious authority, privacy and safety override growth metrics.
 
 ## 16. AI Product Intelligence
+
 - Alsamad-specific ownership, privacy boundaries, governance, retention, validation, release status and audit expectations.
 - Measurements are evidence-based and provider-independent.
 - Religious authority, privacy and safety override growth metrics.
 
 ## 17. Admin Product Intelligence
+
 - Alsamad-specific ownership, privacy boundaries, governance, retention, validation, release status and audit expectations.
 - Measurements are evidence-based and provider-independent.
 - Religious authority, privacy and safety override growth metrics.
 
 ## 18. Talibeen Product Intelligence
+
 - Alsamad-specific ownership, privacy boundaries, governance, retention, validation, release status and audit expectations.
 - Measurements are evidence-based and provider-independent.
 - Religious authority, privacy and safety override growth metrics.
 
 ## 19. Subscription Intelligence
+
 - Alsamad-specific ownership, privacy boundaries, governance, retention, validation, release status and audit expectations.
 - Measurements are evidence-based and provider-independent.
 - Religious authority, privacy and safety override growth metrics.
 
 ## 20. Notification Intelligence
+
 - Alsamad-specific ownership, privacy boundaries, governance, retention, validation, release status and audit expectations.
 - Measurements are evidence-based and provider-independent.
 - Religious authority, privacy and safety override growth metrics.
 
 ## 21. Experimentation
+
 - Alsamad-specific ownership, privacy boundaries, governance, retention, validation, release status and audit expectations.
 - Measurements are evidence-based and provider-independent.
 - Religious authority, privacy and safety override growth metrics.
 
 ## 22. Prohibited Experiments
+
 - Alsamad-specific ownership, privacy boundaries, governance, retention, validation, release status and audit expectations.
 - Measurements are evidence-based and provider-independent.
 - Religious authority, privacy and safety override growth metrics.
 
 ## 23. Metric Design
+
 - Alsamad-specific ownership, privacy boundaries, governance, retention, validation, release status and audit expectations.
 - Measurements are evidence-based and provider-independent.
 - Religious authority, privacy and safety override growth metrics.
 
 ## 24. Business Intelligence
+
 - Alsamad-specific ownership, privacy boundaries, governance, retention, validation, release status and audit expectations.
 - Measurements are evidence-based and provider-independent.
 - Religious authority, privacy and safety override growth metrics.
 
 ## 25. Data Pipeline
+
 - Alsamad-specific ownership, privacy boundaries, governance, retention, validation, release status and audit expectations.
 - Measurements are evidence-based and provider-independent.
 - Religious authority, privacy and safety override growth metrics.
 
 ## 26. Event Quality
+
 - Alsamad-specific ownership, privacy boundaries, governance, retention, validation, release status and audit expectations.
 - Measurements are evidence-based and provider-independent.
 - Religious authority, privacy and safety override growth metrics.
 
 ## 27. Identity and Session Model
+
 - Alsamad-specific ownership, privacy boundaries, governance, retention, validation, release status and audit expectations.
 - Measurements are evidence-based and provider-independent.
 - Religious authority, privacy and safety override growth metrics.
 
 ## 28. Data Storage and Retention
+
 - Alsamad-specific ownership, privacy boundaries, governance, retention, validation, release status and audit expectations.
 - Measurements are evidence-based and provider-independent.
 - Religious authority, privacy and safety override growth metrics.
 
 ## 29. Analytics Access Control
+
 - Alsamad-specific ownership, privacy boundaries, governance, retention, validation, release status and audit expectations.
 - Measurements are evidence-based and provider-independent.
 - Religious authority, privacy and safety override growth metrics.
 
 ## 30. Dashboard Architecture
+
 - Alsamad-specific ownership, privacy boundaries, governance, retention, validation, release status and audit expectations.
 - Measurements are evidence-based and provider-independent.
 - Religious authority, privacy and safety override growth metrics.
 
 ## 31. Decision Records
+
 - Alsamad-specific ownership, privacy boundaries, governance, retention, validation, release status and audit expectations.
 - Measurements are evidence-based and provider-independent.
 - Religious authority, privacy and safety override growth metrics.
 
 ## 32. Data Quality
+
 - Alsamad-specific ownership, privacy boundaries, governance, retention, validation, release status and audit expectations.
 - Measurements are evidence-based and provider-independent.
 - Religious authority, privacy and safety override growth metrics.
 
 ## 33. SEO Intelligence
+
 - Alsamad-specific ownership, privacy boundaries, governance, retention, validation, release status and audit expectations.
 - Measurements are evidence-based and provider-independent.
 - Religious authority, privacy and safety override growth metrics.
 
 ## 34. Cost Governance
+
 - Alsamad-specific ownership, privacy boundaries, governance, retention, validation, release status and audit expectations.
 - Measurements are evidence-based and provider-independent.
 - Religious authority, privacy and safety override growth metrics.
 
 ## 35. Release Classification
+
 - Alsamad-specific ownership, privacy boundaries, governance, retention, validation, release status and audit expectations.
 - Measurements are evidence-based and provider-independent.
 - Religious authority, privacy and safety override growth metrics.
 
 ## 36. Open Decisions
+
 - Alsamad-specific ownership, privacy boundaries, governance, retention, validation, release status and audit expectations.
 - Measurements are evidence-based and provider-independent.
 - Religious authority, privacy and safety override growth metrics.
 
 ## 37. Final Validation
+
 - Alsamad-specific ownership, privacy boundaries, governance, retention, validation, release status and audit expectations.
 - Measurements are evidence-based and provider-independent.
 - Religious authority, privacy and safety override growth metrics.
 
 ## Mermaid Diagrams
+
 ```mermaid
 flowchart LR
 Governance-->Registry-->Review
 ```
+
 ```mermaid
 flowchart LR
 Consent-->Validation-->Storage
 ```
+
 ```mermaid
 flowchart LR
 Events-->Metrics-->Dashboards
 ```
+
 ```mermaid
 flowchart LR
 Hypothesis-->Experiment-->Decision
 ```
+
 ```mermaid
 flowchart LR
 Anon-->Pseudo-->Account
 ```
+
 ```mermaid
 flowchart LR
 Search-->Redaction-->Analytics
 ```
+
 ```mermaid
 flowchart LR
 App-->AIAdapter-->Analytics
 ```
+
 ```mermaid
 flowchart LR
 Talibeen-->IsolatedStore
 ```
+
 ```mermaid
 flowchart LR
 Evidence-->Decision
 ```
 
 ## Matrices
+
 - Event ownership
 - Metric ownership
 - Data classification
@@ -261,16 +310,25 @@ Evidence-->Decision
 - North Star guardrails
 
 ## Release Classification
+
 ### Release 1
+
 Minimal privacy-safe measurement only.
+
 ### Prepared
+
 Expanded analytics.
+
 ### Approved Later Module
+
 Talibeen and subscription intelligence.
+
 ### Future / Research
+
 Advanced experimentation and semantic intelligence.
 
 ## Open Decisions
+
 - Analytics provider
 - Consent platform
 - Warehouse timing
@@ -283,6 +341,7 @@ Advanced experimentation and semantic intelligence.
 - Talibeen isolation
 
 ## Validation
+
 - Analytics never becomes surveillance.
 - Worship is never scored.
 - Core service works without optional analytics.
@@ -957,3 +1016,9 @@ Advanced experimentation and semantic intelligence.
 - Analytics architecture guidance 947.
 - Analytics architecture guidance 948.
 - Analytics architecture guidance 949.
+
+## M0.5 — Quran provider telemetry boundaries
+
+Release 1 may measure privacy-safe aggregate Quran reader availability, approved edition usage, local-search success, QF dependency latency/error/cache state, and conditionally activated audio start/failure/completion. It must not retain raw private notes, OAuth payloads, unnecessary raw search queries, full Quran payloads, or use provider/user data for religious ranking.
+
+Streak analytics, worship scores, leaderboards, engagement pressure, public progress comparison, and social/community telemetry are prohibited. Quran.Foundation identifiers remain operational aliases and must not become durable user-facing analytics dimensions.

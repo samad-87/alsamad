@@ -3,9 +3,11 @@
 Authoritative dependency-aware implementation roadmap derived from the approved architecture documents.
 
 ## Mission
+
 Convert approved architecture into an implementation sequence while preventing premature scope.
 
 ## Core Principles
+
 - Architecture Before Implementation
 - Smallest Durable Release
 - Dependency-Ordered Delivery
@@ -19,6 +21,7 @@ Convert approved architecture into an implementation sequence while preventing p
 - One Approved Scope at a Time
 
 ## Phase 0: Repository and architecture baseline
+
 - Objective
 - Included scope
 - Explicitly excluded scope
@@ -37,24 +40,273 @@ Convert approved architecture into an implementation sequence while preventing p
 - Release status
 
 ## Phase 1: Release 1 scope freeze
-- Objective
-- Included scope
-- Explicitly excluded scope
-- Dependencies
-- Artifacts
-- Database changes allowed
-- Application capabilities
-- Admin capabilities
-- Security requirements
-- QA requirements
-- Observability requirements
-- Analytics requirements
-- Acceptance criteria
-- Completion evidence
-- Rollback/recovery
-- Release status
+
+### Objective
+
+Freeze the exact Release 1 product, module, provider, authentication, database, and delivery boundaries and produce the approved handoff into M2. M1 is a documentation-and-verification milestone. It permits no application implementation.
+
+### Dependencies
+
+- M0 Architecture Baseline Locked.
+- M0.5 Quran.Foundation Architecture Alignment complete.
+- All twelve authoritative architecture documents and this roadmap are present and semantically consistent for Release 1.
+- Prepared, Approved Later Module, and Future / Research capabilities remain isolated from Release 1.
+- The verified M0.5 commit is synchronized with `origin/main` before M1 may pass for shared execution. A verified local-only M0.5 commit permits preparation and review of this contract, but not M1 completion.
+
+### Definitive Release 1 capability checklist
+
+| Release 1 capability                             | Boundary                                                                                                        | Owning module                      |
+| ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| Arabic and English guest-first public experience | Arabic RTL and English LTR at launch; architecture remains ready for unlimited languages                        | Global and locales                 |
+| Home/Today composition                           | Calm, sourced daily composition from approved Release 1 capabilities                                            | Public experience composition      |
+| Quran index and reader                           | Provider-independent public contracts and canonical ALSAMAD identifiers                                         | Quran                              |
+| Approved Quran text and script editions          | Only exact editions that pass rights, integrity, attribution, and production gates                              | Quran                              |
+| Selected approved translations                   | Edition-specific, attributed, reviewed, and licensed                                                            | Quran                              |
+| Selected approved tafsir and footnotes           | Only where authorized, attributed, and editorially approved                                                     | Quran                              |
+| Quran audio                                      | Conditional; enabled only when all written rights and technical production gates pass                           | Quran                              |
+| Morning and evening adhkar                       | Sourced, reviewed, and publication-controlled                                                                   | Devotional content and translation |
+| Duas                                             | Sourced, reviewed, classified, translated where approved, and publication-controlled                            | Devotional content and translation |
+| Editorial General Duas                           | Explicitly classified and visibly separated from Quranic and authenticated Sunnah content                       | Devotional content and translation |
+| Deterministic cross-domain search                | Locally owned, source-aware, and limited to approved published content                                          | Deterministic search               |
+| Quran.Foundation Search                          | Optional Quran-only upstream after written production approval; never the unified-search owner                  | Quran                              |
+| Prayer times                                     | Method and regional configuration disclosed; outputs derived                                                    | Prayer and calendar configuration  |
+| Hijri calendar and Muslim events                 | Qualified method, regional adjustment, and disclosure                                                           | Prayer and calendar configuration  |
+| Tasbeeh                                          | Local-first; no account, cloud synchronization, scoring, or streak                                              | Public experience composition      |
+| Staff-only administration authentication         | Mandatory before any Release 1 administration is usable                                                         | Editorial administration           |
+| Editorial lifecycle                              | Import, review, correction, withdrawal, publication, and audit                                                  | Editorial administration           |
+| Accessibility                                    | Release gate across public and administrative surfaces                                                          | Quality assurance                  |
+| SEO                                              | Locale-aware, canonical, structured, and limited to approved public content                                     | Public experience composition      |
+| Performance                                      | Release gate with safe provider degradation                                                                     | Infrastructure and deployment      |
+| Security                                         | Least privilege, server-only secrets, authorization, and audit are release gates                                | Security                           |
+| Observability                                    | Provider, content, application, and operational health without religious-content distortion                     | Observability and monitoring       |
+| Privacy-safe minimal analytics                   | No worship scoring, invasive profiling, or unnecessary personal data                                            | Analytics and product intelligence |
+| PWA/offline shell                                | Safe application shell and degraded behavior; no unauthorized permanent provider content or offline audio packs | Infrastructure and deployment      |
+
+### Definitive excluded-scope checklist
+
+| Excluded from Release 1                                       | Classification / reason                                    |
+| ------------------------------------------------------------- | ---------------------------------------------------------- |
+| Public user accounts and public profiles                      | Prepared; guest-first Release 1                            |
+| Synchronized cloud bookmarks and reading progress             | Prepared; requires later identity/privacy approval         |
+| Quran.Foundation OAuth/User APIs                              | Prepared; never canonical ALSAMAD identity                 |
+| Streaks and worship scoring                                   | Prohibited                                                 |
+| QuranReflect social features                                  | Later or Future; no Release 1 social surface               |
+| Rooms, posts, comments, public notes, and community features  | Excluded                                                   |
+| Talibeen                                                      | Approved Later Module                                      |
+| Subscriptions, payments, and Alsamad Balance                  | Approved Later Module                                      |
+| Full Hadith corpus                                            | Approved Later Module                                      |
+| Runtime generative religious AI                               | Future / Research; prohibited in Release 1 runtime answers |
+| Semantic search, embeddings, and RAG indexing                 | Future / Research and subject to separate rights approval  |
+| Advanced notifications                                        | Later                                                      |
+| Local GPU infrastructure                                      | Future / Research                                          |
+| Multi-region deployment                                       | Later                                                      |
+| Offline audio packs                                           | Excluded unless separately authorized after Release 1      |
+| Permanent Quran.Foundation storage without written permission | Prohibited; seven-day default applies                      |
+
+All capabilities classified as Prepared, Approved Later Module, or Future / Research remain excluded even when an architecture document describes their additive future shape.
+
+### Authoritative M1 decisions
+
+1. Release 1 uses exactly 30 physical PostgreSQL tables.
+2. No optional 31st table is authorized.
+3. Additional tables require a post-M1 architecture decision. This freeze supersedes any earlier allowance to vary the Release 1 count during implementation; the approved 30-table catalog remains authoritative.
+4. Staff authentication is mandatory for Release 1 administration.
+5. Public-user authentication remains Prepared and excluded from Release 1.
+6. Quran.Foundation is the primary Quran provider behind provider-independent adapters.
+7. ALSAMAD canonical identifiers and public contracts remain provider-independent.
+8. Quran audio is conditionally in scope and must ship disabled if licensing or technical gates do not pass.
+9. No misleading audio placeholder may be shown when audio is disabled or unavailable.
+10. Quran.Foundation content retention follows the seven-day default unless written permission or independent licensing permits longer storage.
+11. Unified deterministic search remains locally owned.
+12. Quran.Foundation Search is an optional approved upstream for Quran-only search after production approval.
+13. AI remains outside runtime Release 1 religious answers.
+14. Core reading operates without optional AI and Quran.Foundation User APIs.
+15. Worship scoring and streak mechanics are prohibited.
+
+### Module ownership matrix
+
+| Owning module                      | Release 1 ownership                                                                                                                                    | Physical tables |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------: |
+| Global and locales                 | Locale registry, direction/fallback, geographic identity, Arabic/English launch readiness, unlimited-language architecture                             |               2 |
+| Content integrity                  | Works, editions, passages, exact text, licenses, sources, content identities, immutable revisions, provenance                                          |               8 |
+| Quran                              | Canonical surah/ayah identity, approved Quran renderings, translations, structure, conditional audio, provider adapters and Quran-only upstream search |               6 |
+| Devotional content and translation | Adhkar, duas, Editorial General Dua classification, collections, translations and transliterations                                                     |               4 |
+| Editorial                          | Staff identities/grants and review records; import, review, approval, correction, withdrawal, and publication workflows                                |               3 |
+| Prayer and calendar configuration  | Prayer methods/defaults, Hijri methods/adjustments, Muslim events, regional disclosure                                                                 |               5 |
+| Audit and publication history      | Append-only publication and privileged-action audit evidence                                                                                           |               2 |
+| Deterministic search               | Rebuildable local projections, normalization, filtering and ranking; no canonical or physical Release 1 table                                          |               0 |
+| Public experience composition      | Home/Today, navigation, local-first tasbeeh, SEO and PWA presentation; no canonical table ownership                                                    |               0 |
+| Security                           | Authentication and authorization policy, secrets, abuse controls and security gates; no separate canonical table ownership                             |               0 |
+| Quality assurance                  | Accessibility, religious integrity, RTL/LTR, security and release evidence; no canonical table ownership                                               |               0 |
+| Infrastructure and deployment      | PostgreSQL lifecycle, safe degraded behavior, PWA/offline shell and operational delivery; no product table ownership                                   |               0 |
+| Observability and monitoring       | Operational signals and provider health; no product-database metric tables                                                                             |               0 |
+| Analytics and product intelligence | Privacy-safe minimal analytics; no Release 1 product tables or worship metrics                                                                         |               0 |
+| **Total**                          | **Exactly one owner for every capability and physical table**                                                                                          |          **30** |
+
+### Database activation boundary
+
+- The only authorized Release 1 physical database boundary is the 30-table catalog in `ALSAMAD_DATABASE_ARCHITECTURE.md`: 2 Global and locales, 8 Content integrity, 6 Quran, 4 Devotional content and translation, 3 Editorial, 5 Prayer and calendar configuration, and 2 Audit and publication history tables.
+- Views, materialized views, indexes, constraints, and derived projections do not authorize an additional canonical physical table.
+- Deterministic search owns zero physical Release 1 tables. A physical `search_documents` table is not authorized by M1.
+- Public identity and synchronized-preference tables remain Prepared and inactive.
+- Conditional Quran audio adds no Release 1 table.
+- Prepared, Later, and Future modules add zero Release 1 tables.
+- M2 must activate tables only in its explicitly authorized dependency sequence. It may not infer permission to create all domain tables at once.
+
+### Provider dependency boundary
+
+| Boundary                | M1 freeze                                                                                                                                                                                                                  |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Primary provider        | Quran.Foundation is primary for approved Quran content only.                                                                                                                                                               |
+| Internal ports          | Provider use is mediated by the approved provider-independent contracts, beginning with `QuranContentProvider`; optional search, audio, catalog, sync, and user-interoperability ports remain separately capability-gated. |
+| Public/domain contracts | Raw provider payloads, IDs, cursors, errors, URLs, credentials, and response objects never cross into ALSAMAD public APIs or canonical domain contracts.                                                                   |
+| Canonical ownership     | ALSAMAD owns stable canonical identifiers, public routes, normalized contracts, editorial state, publication decisions, and unified deterministic search.                                                                  |
+| Credentials             | Server-side only, environment-separated, least privilege, and never exposed to public clients.                                                                                                                             |
+| Retention               | Seven days by default; longer retention requires written permission or independent direct licensing.                                                                                                                       |
+| Content activation      | Exact editions, licenses, attribution, integrity checks, quotas, credentials, fallback, deletion/exit, and production approval must pass before activation.                                                                |
+| Audio                   | Conditional and fail-closed: disabled with no misleading placeholder unless rights and technical gates pass.                                                                                                               |
+| Search                  | Unified search remains local. Quran.Foundation Search may serve Quran-only queries only after its production gate and with deterministic local fallback.                                                                   |
+| User APIs               | OAuth/User APIs remain Prepared; core reading cannot depend on them.                                                                                                                                                       |
+| Failure behavior        | Preserve verified reading and safe degraded behavior; disable optional refresh, upstream search, and audio before core reading.                                                                                            |
+
+### Application capabilities
+
+M1 authorizes no application code, UI, routes, provider integration, background jobs, or runtime behavior. The capability and exclusion checklists are frozen inputs to later phases only.
+
+### Admin capabilities
+
+M1 authorizes no administration implementation. Later Release 1 administration must require staff authentication and least-privilege authorization and must support the approved editorial and audit lifecycle. Public authentication remains separate and excluded.
+
+### Security requirements
+
+- No provider credential or provider contract is exposed to a public client.
+- Staff authentication and scoped authorization are mandatory before administrative access.
+- Guest-first public reading does not depend on user identity.
+- Provider failures, licensing failures, or unavailable optional capabilities fail closed and degrade safely.
+- No M1 activity creates secrets, application data, tables, or deployed infrastructure.
+
+### QA requirements
+
+- Cross-document Release 1 consistency review.
+- Deferred-scope review for every Prepared, Later, and Future capability.
+- Exact ownership verification for every included capability and all 30 physical tables.
+- Database, authentication, audio, provider-adapter, retention, search, AI, scoring, and streak boundary verification.
+- Roadmap-reference verification and `git diff --check`.
+- Repository status and synchronization inspection.
+
+### Observability requirements
+
+M1 creates no instrumentation. It freezes observability as a Release 1 gate covering application health, provider health, content freshness/withdrawal, import integrity, safe degradation, and operational evidence without recording worship behavior as a score.
+
+### Analytics requirements
+
+M1 creates no analytics implementation. Release 1 analytics remains minimal and privacy-safe, must avoid unnecessary identity or sensitive religious profiling, and must never introduce worship scoring, streaks, or engagement manipulation.
+
+### Artifacts
+
+This roadmap section is the sole M1 artifact and contains:
+
+- the definitive Release 1 capability checklist;
+- the definitive excluded-scope checklist;
+- the module ownership matrix;
+- the database activation boundary;
+- the provider dependency boundary;
+- the implementation-order handoff to M2;
+- the unresolved-decision register categorized by blocking gate;
+- the M1 acceptance checklist; and
+- the M1 completion-evidence checklist.
+
+No separate M1 document is required or authorized.
+
+### Unresolved-decision register by blocking gate
+
+These are activation or implementation gates, not permission to change the frozen Release 1 boundary.
+
+| Blocking gate             | Unresolved operational selection                                                                                                                                                           | Blocks                                                                          |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------- |
+| Shared-execution gate     | Synchronize the verified M0.5 commit and this approved M1 roadmap amendment with `origin/main` in an authorized later request                                                              | M1 PASS for shared execution and start of M2                                    |
+| Quran content gate        | Production access, exact text/script editions, translations, tafsir, footnotes, attribution, licenses, quotas, checksums/manifests, retention rights, fallback and deletion/exit procedure | Quran content activation, not M2 tooling foundation                             |
+| Quran audio gate          | Reciters, commercial playback rights, attribution, cache/proxy/download policy, bandwidth, CORS/Range behavior, withdrawal and deletion                                                    | Audio activation only; failure means audio ships disabled                       |
+| Quran search gate         | Production approval, quotas, privacy, edition mapping, relevance validation and fallback                                                                                                   | Quran.Foundation Quran-only Search; local deterministic search remains required |
+| Staff authentication gate | Exact approved staff authentication provider and operational configuration                                                                                                                 | Administrative activation, not public guest access or M2 tooling foundation     |
+| Devotional content gate   | Exact approved datasets, sources, licenses and review authorities                                                                                                                          | Devotional content import/publication                                           |
+| Prayer/Hijri gate         | Exact providers/method datasets, regional policies and disclosures                                                                                                                         | Prayer/Hijri activation                                                         |
+| Infrastructure gate       | PostgreSQL provider, hosting, object storage, backup/recovery objectives and production regions                                                                                            | Production deployment; local/test M2 foundation may proceed                     |
+| Presentation gate         | Approved design tokens and Quran font rights/selection                                                                                                                                     | Public UI activation                                                            |
+| Operations gate           | Analytics, observability and security provider selections plus launch date                                                                                                                 | Production launch                                                               |
+
+No unresolved decision blocks the first M2 implementation unit, provided M1 has passed and M2 remains limited to repository and database tooling foundation without domain tables.
+
+### Implementation-order handoff to M2
+
+The first and only approved initial M2 implementation unit is:
+
+> Repository and database tooling foundation for the approved 30-table Release 1 PostgreSQL architecture.
+
+Only after M1 PASS, that unit may include:
+
+- the database tooling selection already permitted by the architecture;
+- environment validation;
+- PostgreSQL local/test lifecycle;
+- migration framework foundation;
+- database safety guards; and
+- a real PostgreSQL verification harness.
+
+It may create no domain tables beyond the sequence explicitly authorized by M2. M1 itself must not implement any part of this unit.
+
+### M1 acceptance checklist
+
+- [ ] Release 1 included scope is explicit.
+- [ ] Release 1 exclusions are explicit.
+- [ ] Every capability and physical table has one owning module.
+- [ ] Exactly 30 Release 1 physical tables remain authorized, with no optional 31st table.
+- [ ] Staff authentication and public authentication are clearly separated.
+- [ ] Audio is frozen as conditional and fail-closed with no misleading placeholder.
+- [ ] Quran.Foundation ownership and provider-independent adapter boundaries are explicit.
+- [ ] All Prepared, Approved Later Module, and Future / Research capabilities remain excluded.
+- [ ] No semantic contradiction remains across the authoritative Release 1 documents.
+- [ ] M2 can identify its first implementation unit without inference.
+- [ ] All shared architecture commits are synchronized with `origin/main`.
+- [ ] The working tree is clean except explicitly acknowledged pre-existing user content.
+- [ ] No implementation has started.
+
+### M1 completion-evidence checklist
+
+- [ ] Current branch recorded.
+- [ ] HEAD hash recorded.
+- [ ] `origin/main` hash recorded.
+- [ ] Branch synchronization status recorded.
+- [ ] Roadmap-only diff reviewed.
+- [ ] `git diff --check` passed.
+- [ ] Authoritative-document consistency check passed.
+- [ ] Release 1 inclusion matrix reviewed.
+- [ ] Release 1 exclusion matrix reviewed.
+- [ ] Ownership matrix reviewed.
+- [ ] Exact 30-table boundary confirmed.
+- [ ] Staff/public authentication boundary confirmed.
+- [ ] Conditional audio boundary confirmed.
+- [ ] Quran.Foundation adapter and retention boundaries confirmed.
+- [ ] Exact first M2 implementation unit recorded.
+- [ ] No code, UI, migration, test, deployment, commit, or push occurred during M1.
+
+### Acceptance criteria
+
+M1 passes only when every M1 acceptance and completion-evidence item is satisfied. A local roadmap amendment may be complete while M1 remains blocked from PASS by unsynchronized authoritative commits, a dirty unacknowledged worktree, a cross-document contradiction, or any implementation activity.
+
+### Completion evidence
+
+The M1 report must include the current branch, exact `HEAD` and `origin/main` hashes, synchronization status, roadmap diff, `git diff --check`, consistency and deferred-scope review results, all three scope/ownership matrices, the 30-table/authentication/audio/provider confirmations, the exact first M2 unit, changed-file inventory, and confirmation that no code, UI, migration, test, push, or deployment occurred.
+
+### Rollback/recovery
+
+If this M1 amendment introduces a contradiction, revert only the M1 change to `ALSAMAD_IMPLEMENTATION_ROADMAP.md`, preserve all other architecture work and pre-existing user content, do not begin M2, and report the exact inconsistency.
+
+### Release status
+
+Documentation and verification only. M1 is `PASS` only after every checklist item passes, including synchronization of shared architecture commits with `origin/main`. Until then M1 is `BLOCKED`; M2 is not authorized.
 
 ## Phase 2: Database foundation
+
 - Objective
 - Included scope
 - Explicitly excluded scope
@@ -73,6 +325,7 @@ Convert approved architecture into an implementation sequence while preventing p
 - Release status
 
 ## Phase 3: Global locales and regional configuration
+
 - Objective
 - Included scope
 - Explicitly excluded scope
@@ -91,6 +344,7 @@ Convert approved architecture into an implementation sequence while preventing p
 - Release status
 
 ## Phase 4: Content Integrity foundation
+
 - Objective
 - Included scope
 - Explicitly excluded scope
@@ -109,6 +363,7 @@ Convert approved architecture into an implementation sequence while preventing p
 - Release status
 
 ## Phase 5: Quran data model and verified import
+
 - Objective
 - Included scope
 - Explicitly excluded scope
@@ -127,6 +382,7 @@ Convert approved architecture into an implementation sequence while preventing p
 - Release status
 
 ## Phase 6: Devotional content and Editorial General Dua
+
 - Objective
 - Included scope
 - Explicitly excluded scope
@@ -145,6 +401,7 @@ Convert approved architecture into an implementation sequence while preventing p
 - Release status
 
 ## Phase 7: Editorial administration workflows
+
 - Objective
 - Included scope
 - Explicitly excluded scope
@@ -163,6 +420,7 @@ Convert approved architecture into an implementation sequence while preventing p
 - Release status
 
 ## Phase 8: Deterministic search
+
 - Objective
 - Included scope
 - Explicitly excluded scope
@@ -181,6 +439,7 @@ Convert approved architecture into an implementation sequence while preventing p
 - Release status
 
 ## Phase 9: Prayer and Hijri configuration
+
 - Objective
 - Included scope
 - Explicitly excluded scope
@@ -199,6 +458,7 @@ Convert approved architecture into an implementation sequence while preventing p
 - Release status
 
 ## Phase 10: Public Release 1 experience
+
 - Objective
 - Included scope
 - Explicitly excluded scope
@@ -217,6 +477,7 @@ Convert approved architecture into an implementation sequence while preventing p
 - Release status
 
 ## Phase 11: Accessibility, SEO, performance and localization
+
 - Objective
 - Included scope
 - Explicitly excluded scope
@@ -235,6 +496,7 @@ Convert approved architecture into an implementation sequence while preventing p
 - Release status
 
 ## Phase 12: Security hardening
+
 - Objective
 - Included scope
 - Explicitly excluded scope
@@ -253,6 +515,7 @@ Convert approved architecture into an implementation sequence while preventing p
 - Release status
 
 ## Phase 13: Observability and analytics
+
 - Objective
 - Included scope
 - Explicitly excluded scope
@@ -271,6 +534,7 @@ Convert approved architecture into an implementation sequence while preventing p
 - Release status
 
 ## Phase 14: Release verification
+
 - Objective
 - Included scope
 - Explicitly excluded scope
@@ -289,6 +553,7 @@ Convert approved architecture into an implementation sequence while preventing p
 - Release status
 
 ## Phase 15: Production launch
+
 - Objective
 - Included scope
 - Explicitly excluded scope
@@ -307,6 +572,7 @@ Convert approved architecture into an implementation sequence while preventing p
 - Release status
 
 ## Phase 16: Post-launch stabilization
+
 - Objective
 - Included scope
 - Explicitly excluded scope
@@ -325,6 +591,7 @@ Convert approved architecture into an implementation sequence while preventing p
 - Release status
 
 ## Phase 17: Prepared foundations
+
 - Objective
 - Included scope
 - Explicitly excluded scope
@@ -343,6 +610,7 @@ Convert approved architecture into an implementation sequence while preventing p
 - Release status
 
 ## Phase 18: Approved Later Modules
+
 - Objective
 - Included scope
 - Explicitly excluded scope
@@ -361,6 +629,7 @@ Convert approved architecture into an implementation sequence while preventing p
 - Release status
 
 ## Phase 19: Future / Research
+
 - Objective
 - Included scope
 - Explicitly excluded scope
@@ -379,16 +648,20 @@ Convert approved architecture into an implementation sequence while preventing p
 - Release status
 
 ## Release 1 Scope
+
 Arabic/English public experience, Quran, translations, duas, adhkar, prayer, Hijri, tasbeeh, deterministic search, provenance, editorial workflows, accessibility, SEO, performance, security, monitoring, minimal analytics.
 Excluded: Talibeen, subscriptions, payments, Hadith corpus, runtime generative AI, semantic search, advanced notifications, community, GPU, multi-region.
 
 ## Database Sequence
+
 Implement only the approved Release 1 schema and activate the 30 Release 1 tables according to owning modules. Future tables remain prohibited until their release phase.
 
 ## Content Import Gates
-Quran provider approval, licensing, checksums, manifests, ayah/surah validation, translation approval, devotional source approval before import.
+
+Quran.Foundation is the approved primary Quran provider through `QuranContentProvider`. Before import or activation, complete exact edition selection, licensing and attribution, default seven-day retention enforcement or written durable-storage rights, checksums, manifests, ayah/surah validation, translation/footnote/tafsir approval, provider fallback, quotas, environment credentials, and deletion/exit procedures.
 
 ## Implementation Gates
+
 - Architecture Gate
 - Data Source Gate
 - Database Gate
@@ -402,6 +675,7 @@ Quran provider approval, licensing, checksums, manifests, ayah/surah validation,
 - Launch Approval Gate
 
 ## Quality Evidence
+
 - Formatting
 - Lint
 - Strict TypeScript
@@ -421,7 +695,9 @@ Quran provider approval, licensing, checksums, manifests, ayah/surah validation,
 - Observability verification
 
 ## Milestones
+
 - M0 Architecture Baseline Locked
+- M0.5 Quran.Foundation Architecture Alignment
 - M1 Release 1 Scope Frozen
 - M2 Database Foundation Verified
 - M3 Content Integrity Operational
@@ -436,12 +712,14 @@ Quran provider approval, licensing, checksums, manifests, ayah/surah validation,
 - M12 Stabilization Complete
 
 ## Dependency Map
+
 ```mermaid
 flowchart LR
-M0-->M1-->M2-->M3-->M4-->M5-->M6-->M7-->M8-->M9-->M10-->M11-->M12
+M0-->M05["M0.5"]-->M1-->M2-->M3-->M4-->M5-->M6-->M7-->M8-->M9-->M10-->M11-->M12
 ```
 
 ## Delivery Matrices
+
 - Phase ownership
 - Milestones
 - Dependencies
@@ -453,10 +731,11 @@ M0-->M1-->M2-->M3-->M4-->M5-->M6-->M7-->M8-->M9-->M10-->M11-->M12
 - Risk classification
 
 ## Open Decisions
-- Quran provider
+
+- Quran.Foundation production Content access, exact editions, quotas, attribution, retention rights, and independently licensed fallback
 - Translation licenses
 - Devotional datasets
-- Authentication
+- Staff authentication provider and operational configuration; staff authentication itself is mandatory, while public authentication remains Prepared
 - PostgreSQL provider
 - Hosting
 - Object storage
@@ -470,8 +749,20 @@ M0-->M1-->M2-->M3-->M4-->M5-->M6-->M7-->M8-->M9-->M10-->M11-->M12
 - Launch date
 
 ## Validation
+
 - Phases follow approved architecture.
 - Release 1 remains minimal.
+
+## M0.5 — Quran.Foundation Architecture Alignment
+
+M0.5 depends on the completed Quran.Foundation capability discovery and integration assessment and changes no product scope. It locks Quran.Foundation as the primary upstream Quran provider while preserving provider-independent ALSAMAD contracts, identifiers, editorial ownership, and fallback.
+
+M1 may begin only after all twelve architecture documents, this roadmap, Release 1, and M0 are consistent. M1 must sequence the `QuranContentProvider` contract and Quran.Foundation adapter before provider use. Content activation depends on approved production credentials, exact resources, commercial/attribution terms, quota limits, retention rights or an independently licensed fallback, validation/checksums, and deletion/exit handling.
+
+Release 1 includes approved text, translations, tafsir, footnotes, structural navigation, and chapter information. Audio is conditionally included only after its written rights and production gate passes; otherwise it is disabled. QF Search remains internal evaluation until its production/search gate passes, while public search stays deterministic and local. Public authentication and `QuranUserInteropProvider` remain Prepared. Streaks and Quran.Foundation social/community capabilities remain excluded.
+
+The milestone dependency chain is `M0 → M0.5 → M1`. No implementation begins until M0.5 verification passes.
+
 - Future modules not authorized.
 - Security and accessibility are release gates.
 - QA evidence required.

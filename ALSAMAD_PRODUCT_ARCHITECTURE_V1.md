@@ -18,16 +18,16 @@ Implementation timing never changes whether an architectural decision is approve
 
 ## Terminology registry
 
-| Canonical term | Meaning |
-| --- | --- |
-| **Sakīnah Design System** | Alsamad's calm visual, interaction, accessibility, and content-design system. “Sakīnah Points” is not the canonical reward term. |
-| **Alsamad Balance** | The ecosystem participation and redemption balance. It never assigns worldly point value to worship itself. |
-| **Talibeen Al-Halal / طالبين الحلال** | The privacy-first Islamic marriage product and separate approved release track. |
-| **Alsamad Knowledge Engine** | The authoritative internal knowledge discovery, deterministic search, semantic retrieval, and AI-search architecture. |
-| **Alsamad Content Integrity Framework** | The authoritative taxonomy, provenance, review, publishing, correction, versioning, and lifecycle policy. |
-| **Alsamad Global Architecture** | The authoritative global, country, locale, language, time-zone, prayer, calendar, and regional configuration model. |
-| **Alsamad SEO & Discoverability Architecture** | The authoritative external discoverability architecture. |
-| **Alsamad Governance Architecture** | The ecosystem constitution for trust, religious integrity, privacy, quality, and stewardship. |
+| Canonical term                                 | Meaning                                                                                                                          |
+| ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| **Sakīnah Design System**                      | Alsamad's calm visual, interaction, accessibility, and content-design system. “Sakīnah Points” is not the canonical reward term. |
+| **Alsamad Balance**                            | The ecosystem participation and redemption balance. It never assigns worldly point value to worship itself.                      |
+| **Talibeen Al-Halal / طالبين الحلال**          | The privacy-first Islamic marriage product and separate approved release track.                                                  |
+| **Alsamad Knowledge Engine**                   | The authoritative internal knowledge discovery, deterministic search, semantic retrieval, and AI-search architecture.            |
+| **Alsamad Content Integrity Framework**        | The authoritative taxonomy, provenance, review, publishing, correction, versioning, and lifecycle policy.                        |
+| **Alsamad Global Architecture**                | The authoritative global, country, locale, language, time-zone, prayer, calendar, and regional configuration model.              |
+| **Alsamad SEO & Discoverability Architecture** | The authoritative external discoverability architecture.                                                                         |
+| **Alsamad Governance Architecture**            | The ecosystem constitution for trust, religious integrity, privacy, quality, and stewardship.                                    |
 
 Canonical religious-content categories are **Quran**, **Authentic Sunnah**, **Quranic Dua**, **Prophetic Dua**, **Authenticated Dhikr**, **Editorial General Dua**, **Editorial Article**, **Educational Guide**, **AI-Assisted Draft**, and **Archived Content**. Verification and display states are separate: **Verified Quran**, **Verified Sunnah**, **Editorial**, **General Dua**, **AI Assisted**, **Under Review**, **Archived**, and **Withdrawn**. A content category must never be confused with its verification status.
 
@@ -111,7 +111,7 @@ This section is authoritative for the Core Release 1 daily companion. Approved L
 ### Release 1 — Trustworthy daily foundation
 
 - Home / Today
-- Quran: surah index, reading view, verse detail, translation, audio-ready UI
+- Quran: surah index, reading view, verse detail, approved text and translations, tafsir, translation footnotes, structural navigation, chapter information, and conditionally activated audio
 - Adhkar: morning and evening
 - Duas: browse, collection and detail
 - Prayer times with method disclosure and settings
@@ -1997,10 +1997,18 @@ This appendix preserves the document's original planning history. It is historic
 4. Approve deterministic sourced search first; AI-assisted answers deferred behind a safety gate.
 5. Approve local-first tasbeeh/progress and guest-first access.
 6. Approve the Sakīnah design direction and proposed palette/typography candidates.
-7. **Pending Decision:** Quran Arabic text edition/provider and redistribution license before import.
-8. **Pending Decision:** Initial English Quran translation edition(s) and license.
+7. **Approved Decision:** Quran.Foundation is the primary Quran provider through a provider-independent internal adapter. ALSAMAD identifiers, editorial authority, edition approval, license evidence, checksums, publication, correction, and withdrawal remain locally owned. Exact editions and durable-storage rights remain activation gates before import.
+8. **Approved Decision:** Quran.Foundation supplies candidate translation resources through the same adapter. ALSAMAD must approve the exact English edition(s), license, attribution, and footnote handling before activation.
 9. **Pending Decision:** Named scholarly/editorial review structure before verified duas/adhkar publication.
-10. **Pending Decision:** Whether Release 1 authentication/bookmarks ship publicly or remain Prepared and hidden.
+10. **Approved Decision:** Public authentication and bookmarks remain Prepared and hidden in Release 1. Quran.Foundation OAuth/User APIs are optional Quran-specific interoperability only and must never become canonical ALSAMAD identity.
+
+## M0.5 — Quran.Foundation architecture alignment
+
+Release 1 uses Quran.Foundation as the primary upstream provider for chapters, ayat, approved Quran text, translations, tafsir, translation footnotes, structural navigation, chapter information, and conditionally approved audio. Provider identifiers are external aliases. Public routes and domain services depend only on ALSAMAD-owned contracts and identifiers.
+
+Audio is included in Release 1 only when written reciter, commercial playback, attribution, cache, bandwidth, CORS/Range, withdrawal, and deletion approvals pass. Otherwise the reader ships text-first with playback disabled. Quran.Foundation Search remains internal evaluation until its production, quota, privacy, edition-mapping, relevance, and fallback gate passes; public Release 1 search remains deterministic and local. OAuth/User APIs remain Prepared; streaks, public profiles, QuranReflect publishing, rooms, groups, posts, comments, likes, follows, feeds, and community notifications are excluded.
+
+Quran.Foundation content retention is limited to seven days by default unless written permission or independent direct licensing permits longer storage. Quran reading must retain a legally valid independently licensed or otherwise approved fallback and must not depend exclusively on live provider availability.
 
 ## Original definition of planning approval
 

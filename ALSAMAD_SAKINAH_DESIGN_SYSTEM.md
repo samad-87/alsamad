@@ -388,20 +388,20 @@ The final palette must be:
 
 ### 8.2 Semantic color roles
 
-| Role | Purpose | Must not imply |
-| --- | --- | --- |
-| Brand primary | identity and primary action | religious authenticity |
-| Neutral surfaces | reading and structure | inactivity |
-| Text primary | main readable content | status |
-| Verified religious | approved provenance state | universal religious ruling |
-| Editorial content | editorial authorship | authenticated Sunnah |
-| AI-assisted | machine-assisted explanation | canonical truth |
-| Under review | non-public workflow state | failure |
-| Archived | retained historical state | deletion |
-| Withdrawn | no longer publicly authoritative | erasure |
-| Privacy-sensitive | protected information | danger by itself |
-| Admin warning | operational attention | public urgency |
-| Danger | destructive/security-critical action | ordinary error |
+| Role               | Purpose                              | Must not imply             |
+| ------------------ | ------------------------------------ | -------------------------- |
+| Brand primary      | identity and primary action          | religious authenticity     |
+| Neutral surfaces   | reading and structure                | inactivity                 |
+| Text primary       | main readable content                | status                     |
+| Verified religious | approved provenance state            | universal religious ruling |
+| Editorial content  | editorial authorship                 | authenticated Sunnah       |
+| AI-assisted        | machine-assisted explanation         | canonical truth            |
+| Under review       | non-public workflow state            | failure                    |
+| Archived           | retained historical state            | deletion                   |
+| Withdrawn          | no longer publicly authoritative     | erasure                    |
+| Privacy-sensitive  | protected information                | danger by itself           |
+| Admin warning      | operational attention                | public urgency             |
+| Danger             | destructive/security-critical action | ordinary error             |
 
 ### 8.3 Modes
 
@@ -518,16 +518,16 @@ Text resizing and browser zoom must not break layout, hide controls, or clip Qur
 
 ## 10. Typography Matrix
 
-| Content | Primary typographic priority | Secondary priority | Prohibited |
-| --- | --- | --- | --- |
-| Quran Arabic | fidelity, diacritics, calm reading | responsive size, stable line breaks | generic UI font |
-| Translation | readability, language-appropriate font | alignment with ayah | visually competing with Arabic |
-| Dua/Adhkar Arabic | clarity and source relation | repetition context | decorative script reducing legibility |
-| UI labels | speed and clarity | compactness | ornate display font |
-| Editorial article | long-form comfort | hierarchy | excessive width |
-| Prayer times | numeric clarity | timezone/context | ambiguous digits |
-| Transliteration | pronunciation clarity | language notes | styling as canonical Arabic |
-| Admin source comparison | glyph accuracy | dense scanning | clipping or diff by color only |
+| Content                 | Primary typographic priority           | Secondary priority                  | Prohibited                            |
+| ----------------------- | -------------------------------------- | ----------------------------------- | ------------------------------------- |
+| Quran Arabic            | fidelity, diacritics, calm reading     | responsive size, stable line breaks | generic UI font                       |
+| Translation             | readability, language-appropriate font | alignment with ayah                 | visually competing with Arabic        |
+| Dua/Adhkar Arabic       | clarity and source relation            | repetition context                  | decorative script reducing legibility |
+| UI labels               | speed and clarity                      | compactness                         | ornate display font                   |
+| Editorial article       | long-form comfort                      | hierarchy                           | excessive width                       |
+| Prayer times            | numeric clarity                        | timezone/context                    | ambiguous digits                      |
+| Transliteration         | pronunciation clarity                  | language notes                      | styling as canonical Arabic           |
+| Admin source comparison | glyph accuracy                         | dense scanning                      | clipping or diff by color only        |
 
 ## 11. Spacing and Layout Architecture
 
@@ -829,17 +829,17 @@ Accessibility failures in core journeys block release.
 
 ## 18. Accessibility Validation Matrix
 
-| Area | Automated | Manual keyboard | Screen reader | RTL | Zoom/Text scale | Release gate |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| Global navigation | yes | yes | yes | yes | yes | yes |
-| Quran reading | partial | yes | yes | yes | yes | yes |
-| Dua/Adhkar | partial | yes | yes | yes | yes | yes |
-| Prayer/Hijri | yes | yes | yes | yes | yes | yes |
-| Search | yes | yes | yes | yes | yes | yes |
-| Forms | yes | yes | yes | yes | yes | yes |
-| Admin review | yes | yes | yes | yes | yes | yes |
-| AI answer | partial | yes | yes | yes | yes | yes when released |
-| Talibeen | partial | yes | yes | yes | yes | yes when released |
+| Area              | Automated | Manual keyboard | Screen reader | RTL | Zoom/Text scale |      Release gate |
+| ----------------- | --------: | --------------: | ------------: | --: | --------------: | ----------------: |
+| Global navigation |       yes |             yes |           yes | yes |             yes |               yes |
+| Quran reading     |   partial |             yes |           yes | yes |             yes |               yes |
+| Dua/Adhkar        |   partial |             yes |           yes | yes |             yes |               yes |
+| Prayer/Hijri      |       yes |             yes |           yes | yes |             yes |               yes |
+| Search            |       yes |             yes |           yes | yes |             yes |               yes |
+| Forms             |       yes |             yes |           yes | yes |             yes |               yes |
+| Admin review      |       yes |             yes |           yes | yes |             yes |               yes |
+| AI answer         |   partial |             yes |           yes | yes |             yes | yes when released |
+| Talibeen          |   partial |             yes |           yes | yes |             yes | yes when released |
 
 ## 19. RTL and LTR Architecture
 
@@ -1878,18 +1878,18 @@ Design capabilities required for actual Release 1 scope:
 
 ## 49. Release-Status Coverage Matrix
 
-| Design area | Release 1 | Prepared | Approved Later | Future |
-| --- | ---: | ---: | ---: | ---: |
-| Quran reading | yes | enhancements |  |  |
-| Dua/Adhkar | yes | audio expansion |  |  |
-| Prayer/Hijri | yes | offline personalization | Qibla | advanced |
-| Deterministic search | yes | saved search |  | semantic |
-| AI interface | boundary only | yes | Talibeen advisor | multimodal |
-| Admin review | yes | advanced analytics | later modules | automation research |
-| Public accounts |  | yes |  |  |
-| Talibeen |  | foundations only | yes | advanced |
-| Subscription UI |  | foundation | yes |  |
-| Native apps | responsive/PWA basis | prepared |  | full native |
+| Design area          |            Release 1 |                Prepared |   Approved Later |              Future |
+| -------------------- | -------------------: | ----------------------: | ---------------: | ------------------: |
+| Quran reading        |                  yes |            enhancements |                  |                     |
+| Dua/Adhkar           |                  yes |         audio expansion |                  |                     |
+| Prayer/Hijri         |                  yes | offline personalization |            Qibla |            advanced |
+| Deterministic search |                  yes |            saved search |                  |            semantic |
+| AI interface         |        boundary only |                     yes | Talibeen advisor |          multimodal |
+| Admin review         |                  yes |      advanced analytics |    later modules | automation research |
+| Public accounts      |                      |                     yes |                  |                     |
+| Talibeen             |                      |        foundations only |              yes |            advanced |
+| Subscription UI      |                      |              foundation |              yes |                     |
+| Native apps          | responsive/PWA basis |                prepared |                  |         full native |
 
 ## 50. Open Decisions
 
@@ -1924,27 +1924,27 @@ The following decisions remain unresolved and must not be guessed:
 
 ## 51. Final Validation Matrix
 
-| Requirement | Validation |
-| --- | --- |
-| Product Architecture alignment | confirmed |
-| Database Architecture alignment | canonical/localized identity distinction preserved |
-| Admin Architecture alignment | workflow ownership and operational simplicity preserved |
-| AI Architecture alignment | AI disclosure, citations, refusal, degradation preserved |
-| API Architecture alignment | state/error/localization contracts reflected |
-| Security Architecture alignment | privacy, sensitive states, safe admin and Talibeen boundaries preserved |
-| Unlimited languages | supported |
-| Arabic and RTL first-class | confirmed |
-| Quran specialized treatment | confirmed |
-| Editorial General Dua visually distinct | confirmed |
-| AI never resembles canonical truth | confirmed |
-| Talibeen avoids dating-app patterns | confirmed |
-| Worship not gamified | confirmed |
-| Accessibility is release gate | confirmed |
-| Performance and SEO preserved | confirmed |
-| No unapproved exact brand asset invented | confirmed |
-| No application code | confirmed |
-| No UI/component files | confirmed |
-| No commit/push/deployment | confirmed |
+| Requirement                              | Validation                                                              |
+| ---------------------------------------- | ----------------------------------------------------------------------- |
+| Product Architecture alignment           | confirmed                                                               |
+| Database Architecture alignment          | canonical/localized identity distinction preserved                      |
+| Admin Architecture alignment             | workflow ownership and operational simplicity preserved                 |
+| AI Architecture alignment                | AI disclosure, citations, refusal, degradation preserved                |
+| API Architecture alignment               | state/error/localization contracts reflected                            |
+| Security Architecture alignment          | privacy, sensitive states, safe admin and Talibeen boundaries preserved |
+| Unlimited languages                      | supported                                                               |
+| Arabic and RTL first-class               | confirmed                                                               |
+| Quran specialized treatment              | confirmed                                                               |
+| Editorial General Dua visually distinct  | confirmed                                                               |
+| AI never resembles canonical truth       | confirmed                                                               |
+| Talibeen avoids dating-app patterns      | confirmed                                                               |
+| Worship not gamified                     | confirmed                                                               |
+| Accessibility is release gate            | confirmed                                                               |
+| Performance and SEO preserved            | confirmed                                                               |
+| No unapproved exact brand asset invented | confirmed                                                               |
+| No application code                      | confirmed                                                               |
+| No UI/component files                    | confirmed                                                               |
+| No commit/push/deployment                | confirmed                                                               |
 
 ## Appendix A — Component Documentation Template
 
@@ -1975,16 +1975,16 @@ Each component document records:
 
 ## Appendix B — Content-State Presentation Matrix
 
-| State | Required visual treatment | Required text | Action behavior |
-| --- | --- | --- | --- |
-| Verified religious | distinct trust label, source access | verified/source wording | normal public actions |
-| Editorial General Dua | editorial label | no authenticity implication | share/copy retains label |
-| AI-assisted | separate AI surface | disclosure + citations | inspect/refuse/retry |
-| Under review | internal/admin state | review status | not public |
-| Archived | subdued historical state | archived | no ordinary public prominence |
-| Withdrawn | prominent warning | reason category/effective state | copy/share constrained |
-| Privacy-sensitive | protected surface | audience/visibility | no public export |
-| Security hold | blocking state | safe explanation | restricted actions |
+| State                 | Required visual treatment           | Required text                   | Action behavior               |
+| --------------------- | ----------------------------------- | ------------------------------- | ----------------------------- |
+| Verified religious    | distinct trust label, source access | verified/source wording         | normal public actions         |
+| Editorial General Dua | editorial label                     | no authenticity implication     | share/copy retains label      |
+| AI-assisted           | separate AI surface                 | disclosure + citations          | inspect/refuse/retry          |
+| Under review          | internal/admin state                | review status                   | not public                    |
+| Archived              | subdued historical state            | archived                        | no ordinary public prominence |
+| Withdrawn             | prominent warning                   | reason category/effective state | copy/share constrained        |
+| Privacy-sensitive     | protected surface                   | audience/visibility             | no public export              |
+| Security hold         | blocking state                      | safe explanation                | restricted actions            |
 
 ## Appendix C — Calm Interaction Checklist
 
@@ -2005,3 +2005,9 @@ Before approving an experience, verify:
 - Does AI remain visually distinct?
 - Is worship free from scoring and streaks?
 - Are privacy-sensitive actions explicit?
+
+## M0.5 — Quran provider states
+
+Release 1 visually distinguishes Quran text, translation, translation footnote, and tafsir, each with its approved attribution. Audio supports loading, playing, paused, unavailable, timing-unavailable, and text-only fallback states; beta recitations are labelled. Controls are shown as active only after the audio approval gate passes.
+
+Provider failure never produces empty or fabricated religious content. Legally valid verified text remains primary, supplementary resources degrade calmly, and public Quran search falls back to deterministic local navigation/search. Prepared private reading progress and goals are non-competitive and never display streaks, scores, leaderboards, or social comparison.
