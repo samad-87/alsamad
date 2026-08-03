@@ -633,22 +633,146 @@ Contract complete; implementation not started by this documentation task.
 
 ## Phase 5: Quran data model and verified import
 
-- Objective
-- Included scope
-- Explicitly excluded scope
-- Dependencies
-- Artifacts
-- Database changes allowed
-- Application capabilities
-- Admin capabilities
-- Security requirements
-- QA requirements
-- Observability requirements
-- Analytics requirements
-- Acceptance criteria
-- Completion evidence
-- Rollback/recovery
-- Release status
+### Objective
+
+Implement the provider-independent Quran structural and edition-specialization foundation by activating exactly the six Quran tables in `ALSAMAD_DATABASE_ARCHITECTURE.md` section 5.3, then prove a controlled, non-production import dry run without selecting or activating religious content in the architecture task. Preserve exact Quran text, canonical ALSAMAD identity, licensing, provenance, withdrawal, and provider-exit safety on top of the approved M4 integrity tables.
+
+### Included scope and exact count
+
+M5 authorizes only `quran_surahs`, `quran_ayahs`, `quran_ayah_texts`, `quran_structural_markers`, `quran_translation_editions`, and `quran_translation_texts`, in that dependency order. M5 adds exactly six domain tables and makes the cumulative Release 1 count exactly **16 of 30**: two M3, eight M4, and six M5. Exact columns, types, defaults, constraints, indexes, FK restrictions, immutability, provider aliases, locators, edition relationships, and withdrawal behavior are normative in database architecture sections 5.3.1–5.3.9.
+
+M5 may also implement provider-independent import contracts, a Quran.Foundation content adapter, manifest validation, quarantine/staging/reconciliation logic, verification scripts, and focused database/import tests. These capabilities remain server-side and non-public.
+
+### Explicitly excluded scope
+
+- Every devotional, editorial-workflow, public-account, Talibeen, subscription, payment, AI, embedding, RAG, model-training, semantic-search, community, notification, prayer, calendar, audit/publication-history, Prepared, Later, and Future table.
+- Any seventh Quran table, provider mapping table, import/manifests table, permanent staging table, word table, audio table, search table, or infrastructure table.
+- Selection, import, seed, approval, or activation of an Arabic Quran edition, translation, tafsir, word-by-word resource, transliteration, recitation, audio, font, page layout, or Mushaf resource during this contract task.
+- OAuth, Quran.Foundation User APIs, authenticated user scopes, public authentication, UI, public/admin routes, admin UI, unified search, and user features.
+- Embeddings, RAG indexes, training corpora, raw redistribution, permanent caching, offline packs, long-term CDN mirroring, audio rehosting, word timing, and recitation timing.
+- Silent correction, whitespace folding, punctuation folding, tashkeel removal, character substitution, or any normalization of canonical Quran text beyond the existing checksum-only NFC contract. Exact source bytes and rendered text remain separately checksummed.
+
+Conditional Quran audio adds no table and is not authorized by M5 unless a later, separate activation decision proves written playback, commercial, cache/proxy/download, attribution, bandwidth, Range/CORS, retention, and withdrawal rights. Word-level and timing metadata are not in the frozen catalog and are not authorized.
+
+### Dependencies
+
+- M2 tooling, M3 locale/region foundation, and M4 content integrity: verified PASS on real PostgreSQL.
+- Exact 30-table Release 1 catalog and M4's `works`, `editions`, `passages`, `passage_texts`, `licenses`, and source/checksum/publication controls remain unchanged.
+- A source may proceed beyond discovery only after a separately approved source decision record and import manifest exist. Architecture completion alone does not approve a source.
+
+### Quran.Foundation boundary
+
+Quran.Foundation is the approved initial content provider behind provider-independent ports. Its IDs remain external aliases; ALSAMAD UUIDv7 identities and canonical locators remain authoritative. Content API credentials are server-only secrets, never schema values, manifests, logs, browser bundles, or public environment variables. Content access, Quran-only Search access, and authenticated User/OAuth scopes are separately capability-gated. M5 authorizes Content adapter work only; it authorizes no OAuth or user feature and no public search dependency.
+
+The default Quran.Foundation retention/cache boundary is seven days unless written durable rights are attached to the source decision. API availability does not prove redistribution, commercial-use, derivative, caching, mirroring, download, or rehosting rights. Deletion/withdrawal events must be enforceable through manifest-to-edition/alias mappings and fail-closed serving. Provider dependency is not resolved until a legally independent fallback—with its own rights, checksums, validation, operational test, and exit procedure—passes the same gates. Until then, the product must expose the dependency as an unresolved release risk and degrade safely.
+
+### Source-selection blocking gates
+
+No resource crosses from discovery to approved manifest until every applicable gate is recorded as PASS:
+
+| Resource class          | Blocking evidence                                                                                                                                                                                                                               |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Arabic Quran edition    | Exact script/edition and numbering authority; text provenance; surah/ayah counts; byte and manifest checksums; attribution; scholarly approval; commercial, redistribution, retention, fallback, deletion, correction, and exit rights.         |
+| Quran translations      | Exact translator/version/locale; methodology; complete/incomplete coverage; attribution; license and commercial/redistribution/retention rights; verse mapping; scholarly/language review; fallback and withdrawal procedure.                   |
+| Tafsir and footnotes    | Exact author/work/edition; whether content is tafsir or annotation; passage mapping; attribution; license; commercial/redistribution/retention; editorial and scholarly review; fallback and deletion/exit rights.                              |
+| Word-by-word resources  | Exact tokenization/script/edition alignment; token and verse checksums; linguistic attribution; license; commercial/redistribution/retention; timing separation; scholarly review; fallback and deletion. No word table is authorized.          |
+| Transliteration         | Exact scheme/version/locale; edition alignment; limitations disclosure; attribution; license; review; commercial/redistribution/retention; fallback and withdrawal rights.                                                                      |
+| Audio recitations       | Exact reciter/riwayah/mushaf alignment; file/segment checksums; written streaming, commercial, proxy/cache/download and rehosting rights; attribution; quotas/bandwidth/Range/CORS; retention; fallback; withdrawal. Ships disabled on failure. |
+| Page/font/layout        | Exact Mushaf/layout/font version; page ranges and glyph fidelity; embedding/rendering/commercial/redistribution/offline rights; checksums; attribution; browser compatibility; fallback; withdrawal. Pages bind to an exact edition only.       |
+| Every provider resource | Production credentials; stable resource/version identifiers; quotas/rate limits; privacy/security review; manifest format; SLA/degradation behavior; legally independent fallback status; deletion/exit mechanism; named approvers.             |
+
+A conditional or unknown license, attribution, commercial-use, redistribution, retention, quota, fallback, deletion/exit, or scholarly decision is a blocking failure, not permission to import.
+
+### Exact staged import lifecycle
+
+1. **Discovery:** enumerate metadata only; record resource candidates, provider capabilities, risks, and no content payload in canonical storage.
+2. **Provider resource selection:** create a source decision draft identifying exact resource, edition, version, scope, numbering/layout, and intended use; selection remains unapproved.
+3. **License approval:** legal/content owners record attribution, commercial, redistribution, derivative, retention, caching, deletion, and exit decisions; any unknown fails closed.
+4. **Manifest creation:** produce immutable canonical JSON with manifest ID/version, provider snapshot, resource list, expected bytes/rows/checksums, adapter/normalization versions, rights evidence, retention deadline, fallback and approvers.
+5. **Download/fetch:** server-side adapter fetches only manifest-listed resources with scoped credentials, quotas, timeouts, checkpoint token, and an import-attempt UUIDv7.
+6. **Raw-response quarantine:** encrypted, access-limited, non-public temporary storage keyed by attempt; never a domain table; no canonical serving; expires at the earlier of the approved retention deadline or seven days by default.
+7. **Schema validation:** reject unknown/missing fields, wrong types, unbounded payloads, unexpected resources, encoding errors, or provider-version drift.
+8. **Checksum validation:** validate transport/file/resource hashes before parsing and exact record/source hashes after parsing; mismatch aborts the affected attempt.
+9. **Normalization:** map structure and metadata deterministically while preserving exact canonical Quran UTF-8 bytes; normalization may compute a separate NFC checksum but may not alter stored canonical text.
+10. **Deterministic identity mapping:** resolve provider aliases to existing UUIDv7/canonical locators or deterministically allocate new UUIDv7 rows from the manifest mapping artifact; reject ambiguous, duplicate, moved, or reused aliases.
+11. **Staging:** load into transaction-scoped temporary tables or validated files outside the 30-table catalog; staging is isolated, non-public, retention-bound, and disposable.
+12. **Reconciliation:** compare exact surah/ayah/edition/translation/marker counts, locators, ranges, gaps, duplicates, text bytes, row/file checksums, license/source references, and prior active version; emit signed evidence.
+13. **Scholarly/content approval:** named reviewers approve exact manifest, reconciliation report, Arabic text fidelity, structural numbering, attribution, and each selected translated/tafsir/layout resource.
+14. **Activation/publication:** one transaction inserts/reconciles canonical rows and moves a complete approved release to eligible state; mixed versions and partial publication are forbidden.
+15. **Rollback:** before activation, roll back the transaction and discard staging/quarantine under retention rules; after activation, use withdrawal and a forward corrective version—never overwrite published text or migration history.
+16. **Provider deletion/withdrawal:** immediately block serving/fetching by provider/version, withdraw dependent edition/text/specialization rows, preserve lawful evidence, erase payload when required, verify propagation, and activate fallback only if independently approved.
+17. **Re-import/version transition:** create a new immutable manifest and provider snapshot, resume through checkpoints, reconcile old/new identities and content, obtain fresh approvals, atomically activate the new version, then withdraw the predecessor according to rights.
+
+### Import execution contract
+
+The idempotency key is the SHA-256 of `(manifest_id, manifest_schema_version, provider_code, provider_snapshot_version, resource_id, resource_version, adapter_version)` encoded by the manifest's canonical JSON contract. Repeating a completed key must produce no new canonical rows; repeating a failed key resumes only from the last checksum-verified immutable checkpoint. Checkpoints contain no secrets or Quran payload and identify attempt, manifest hash, resource, cursor/offset, byte count, row count, rolling checksum, and status. A changed resource/version/checksum creates a new attempt and cannot resume the old one.
+
+Fetches may retry bounded transient errors with jitter and provider rate-limit compliance. Schema, checksum, rights, retention, duplicate identity, locator, row-count, or text-integrity failures are permanent until a new approved manifest. Each resource stage is atomic; the final canonical merge and release activation are one database transaction. A partial failure leaves no published or mixed-version rows and preserves quarantine/evidence only for the approved diagnostic window. Duplicate prevention is database-enforced by canonical uniques, specialization uniques, provider-alias triggers, and M4 provider edition uniqueness.
+
+Reconciliation evidence contains manifest/import IDs and hashes, source/provider versions, adapter and schema versions, exact expected/observed counts by table/resource/surah, file and aggregate row checksums, missing/extra/duplicate locators, UTF-8 round-trip result, alias map diff, license/source decision identifiers, retention deadline, approval identities/times, database transaction/correlation ID, and final disposition. It must never log credentials or full religious payloads. No mismatch may be waived silently; a source correction requires a new provider version or explicit correction record and new manifest.
+
+### Seed and real-import authorization
+
+M5 authorizes **zero religious seed rows**. Production migrations and seeds contain no sample surah, ayah, Arabic text, translation, tafsir, marker, license assertion, provider ID, or manifest. Tests may create synthetic, clearly non-religious fixtures only inside transactions guaranteed to roll back. Real Quran data requires a separately approved source decision record and exact import manifest, followed by all provider, legal, source, scholarly, dry-run, and production gates. This documentation task selects and imports nothing.
+
+### Allowed implementation files
+
+The first implementation unit may change only:
+
+- `src/db/schema.ts`;
+- `drizzle/0004_quran_data_model.sql` as the next forward-only migration after committed `0003`;
+- `drizzle/meta/_journal.json`;
+- provider-independent contracts/modules under `src/lib/quran/import/`;
+- Quran.Foundation adapter under `src/lib/providers/quran-foundation/`;
+- import scripts `scripts/quran-import.mjs` and `scripts/quran-import-verify.mjs`;
+- focused tests under `tests/quran-data-model/` and `tests/quran-import/`;
+- `scripts/db-verify.mjs` only for cumulative schema/regression assertions;
+- `.env.example` and `src/db/env.ts` only if server-side Content API variables are proven necessary, with placeholders only;
+- `package.json` and `package-lock.json` only when an existing dependency cannot satisfy a documented checksum, schema-validation, or provider-client need.
+
+No UI, public route, admin UI, authentication, unrelated module, seed file, earlier migration rewrite, architecture document, `docs/`, or patch-file change is authorized during implementation. A package or environment change without evidence is outside scope.
+
+### Security, licensing, and privacy requirements
+
+Credentials remain server-side, least-privilege, rotated, and redacted. Raw quarantine is encrypted, access-audited, payload-minimized, and retention-enforced. Logs contain hashes/counts/IDs, not full Quran text, tokens, contracts, or secrets. Fetchers enforce HTTPS, host allowlists, response-size/time limits, schema bounds, safe decompression, and quota backoff. Provider content cannot enter training, embeddings, RAG, analytics, permanent caches, CDN mirrors, offline packs, redistribution, or audio rehosting without separate written rights. Imports stop automatically at rights expiry or retention deadline.
+
+### Observability and audit evidence
+
+Emit attempt and correlation IDs, stage transitions, durations, retry counts, quota/rate-limit state, resource/version, expected/observed byte and row counts, checksum outcomes, alias/locator conflicts, retention deadline, approval-gate state, transaction outcome, withdrawal propagation, and recovery outcome. Alerts cover checksum/schema drift, partial failure, stale provider version, approaching retention expiry, failed deletion, missing fallback, and attempted publication without gates. Metrics must not expose content payloads, credentials, or user worship behavior. Evidence is retained only as permitted by license and security policy.
+
+### M5 acceptance and separated gates
+
+All acceptance uses real PostgreSQL and controlled provider verification. A schema-only result can never mark all of M5 PASS.
+
+1. **Schema completion gate — `M5 Schema Foundation Verified`:** exact six new and 16 cumulative domain tables; all columns/types/defaults; UUIDv7; FK `RESTRICT`; unique/check/index/trigger inventories; immutability; canonical/provider separation; duplicate alias rejection; verse order and locator validation; structural range/layout validation; translation/content-integrity linkage; zero unauthorized table/seed row; synthetic UTF-8 Arabic exact round-trip and normalization-damage rejection; transaction rollback; all M2/M3/M4 checks green.
+2. **Provider credential gate:** controlled server-side Content credentials work with least scope; secrets/redaction, quotas, timeouts, retries, and Content-vs-Search/User separation pass. Failure blocks provider dry run, not schema PASS.
+3. **Legal/license gate:** exact rights for intended commercial use, attribution, redistribution, caching/retention, deletion/exit, and fallback are written and machine-enforceable. Seven-day default is tested. Unknown/expired/revoked/no-storage rights are rejected.
+4. **Source-selection gate:** exact edition/resource/version, counts, numbering/layout, checksums, manifest, provider snapshot, quotas, fallback, and correction policy are approved. No source is implied by schema completion.
+5. **Scholarly approval gate:** named reviewers approve exact Arabic bytes, verse mapping/order, structure, attribution, and each translation/tafsir/layout claim. No silent source correction is accepted.
+6. **Import dry-run gate — `M5 Provider Import Dry Run Verified`:** against approved controlled resources and non-public staging, prove schema/checksum validation, exact row-count evidence, deterministic mapping, idempotency, retry/checkpoints, duplicate rejection, partial-failure recovery, transaction rollback, provider-version transition rehearsal, withdrawal/deletion propagation, retention/license rejection, publication rejection, exact UTF-8 round-trip, and reconciliation/audit evidence. Dry run publishes nothing.
+7. **Production activation gate — `M5 Quran Import Activated`:** requires all prior gates, production manifest and source decision, legal fallback/exit decision, final scholarly approval, production dry-run parity, backup/recovery readiness, atomic activation, monitoring, withdrawal drill, and post-activation count/checksum verification. Only this gate authorizes public serving.
+
+If only gate 1 passes, report exactly `M5 Schema Foundation Verified`; do not call the milestone operational or fully PASS. Gate 6 may add `M5 Provider Import Dry Run Verified`. Only gate 7 may report `M5 Quran Import Activated`.
+
+### Verification commands and completion evidence
+
+Implementation verification must run `npm run db:up`, database safety, migrations twice, exact schema/catalog inspection, focused schema/import tests, seeds twice, `npm run test:db`, controlled adapter dry run when its gates permit, `npm run db:check`, full `npm run verify`, Prettier, `git diff --check`, and `npm run db:down` while preserving the named volume. Acceptance evidence must include exact table/FK/constraint/index/trigger inventories; expected/observed counts; accepted and rejected SQL cases; aliases and locators; manifest/provider/checksum/license/retention evidence; byte-exact synthetic Arabic round trip; idempotent reruns; rollback/recovery/version-transition/withdrawal results; regression output; changed-file list; and all blockers. Secrets and full Quran payloads are prohibited from reports.
+
+### Rollback and recovery
+
+Migration history is forward-only. Before activation, rollback discards the transaction and retention-bound staging/quarantine. After activation, withdraw the affected release, stop serving/fetching, preserve lawful checksums/attribution/audit evidence, and use a reviewed forward correction with a new manifest/version. Never edit published Quran text, reuse an import key for changed bytes, rewrite a committed migration, or fall back to an unapproved source. Restore service only from a checksum-verified approved release or legally independent approved fallback.
+
+### First implementation unit
+
+After this contract is committed, the only authorized first unit is **M5.1 — Quran Schema Foundation**: implement the six tables and database constraints in dependency order, register forward migration `0004`, extend database verification with synthetic rolled-back fixtures, and prove the Schema completion gate on real PostgreSQL. M5.1 must not add provider credentials/adapters, fetch data, create a real manifest, select a source, import Quran content, or activate publication.
+
+### Next-phase handoff
+
+After `M5 Schema Foundation Verified`, hand the stable schema to **M5.2 — Provider-Independent Import Harness and Controlled Dry Run** under a new explicit authorization. That handoff may build contracts, manifest/checksum tooling, quarantine/staging, reconciliation, and the Quran.Foundation Content adapter, but still cannot select a production resource or activate content without the remaining gates. M6 receives only a separately activated, licensed, verified Quran foundation; this contract does not authorize M5.2, production import, or M6 implementation.
+
+### Release status
+
+Architecture contract complete; implementation not started by this documentation task. No M5 PASS label is earned by documentation alone.
 
 ## Phase 6: Devotional content and Editorial General Dua
 
@@ -971,7 +1095,7 @@ Quran.Foundation is the approved primary Quran provider through `QuranContentPro
 - M2 Database Foundation Verified
 - M3 Global Locales and Regional Configuration Verified
 - M4 Content Integrity Foundation Operational
-- M5 Quran Data Model and Verified Import Operational
+- M5 Schema Foundation Verified / Provider Import Dry Run Verified / Quran Import Activated
 - M6 Devotional Content and Editorial General Dua Operational
 - M7 Editorial Operations Ready
 - M8 Deterministic Search Ready

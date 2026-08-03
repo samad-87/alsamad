@@ -430,6 +430,148 @@ Publication is a database-enforced boundary. Draft and validation data may be co
 
 Quran does not duplicate generic `works` or `editions`. Quran-specific tables reference the shared canonical identities. Quran.Foundation provider IDs are versioned aliases in bounded provider metadata, never canonical keys. Existing structural marker representation must support `ruku` and `manzil`; translation footnotes remain attached to their approved translation edition and tafsir remains a separately attributed edition/resource within the existing schema. Audio activation is conditional on its approval gate and does not add a Release 1 table.
 
+### 5.3.1 Executable M5 boundary and dependency order
+
+M5 authorizes exactly the six Quran tables already counted in the frozen catalog, in this dependency order:
+
+1. `quran_surahs`
+2. `quran_ayahs`
+3. `quran_ayah_texts`
+4. `quran_structural_markers`
+5. `quran_translation_editions`
+6. `quran_translation_texts`
+
+Together with the two M3 and eight M4 tables, M5 makes the cumulative Release 1 domain count exactly **16 of 30**. It adds no devotional, editorial-workflow, public-account, Talibeen, subscription, payment, AI, semantic-search, community, notification, audio, word, import-manifest, staging, provider-mapping, or infrastructure table. `works`, `editions`, `passages`, `passage_texts`, `licenses`, `source_references`, `content_items`, and `content_revisions` remain the M4 authorities and must not be replaced or duplicated.
+
+Every M5 primary key is an application-generated UUIDv7 with no database default. UUID version/variant validation uses the established M3/M4 database contract. All foreign keys use `ON UPDATE RESTRICT ON DELETE RESTRICT`. All timestamps are UTC `timestamptz`; `created_at` defaults to `current_timestamp`, and `updated_at` defaults to `current_timestamp` and changes only through an authorized mutation. Canonical identities, locators, coordinates, parentage, source bindings, checksums, and published rows are immutable as specified below. Hard deletion of referenced, validated, published, withdrawn, or imported rows is prohibited.
+
+### 5.3.2 `quran_surahs`
+
+| Column                   | PostgreSQL type | Nullability and default               | Contract                                                                                               |
+| ------------------------ | --------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `id`                     | `uuid`          | Required; no database default         | UUIDv7 primary key; immutable.                                                                         |
+| `work_id`                | `uuid`          | Required                              | FK to the single approved Quran `works.id`; immutable.                                                 |
+| `passage_id`             | `uuid`          | Required                              | Unique FK to the matching chapter `passages.id`; immutable.                                            |
+| `canonical_key`          | `varchar(64)`   | Required                              | Provider-independent lowercase key `quran:surah:<number>`; immutable.                                  |
+| `surah_number`           | `smallint`      | Required                              | Canonical chapter order, 1 through 114; immutable.                                                     |
+| `ayah_count`             | `smallint`      | Required                              | Positive approved count for the selected canonical numbering contract; immutable after validation.     |
+| `name_arabic`            | `varchar(120)`  | Required                              | Exact approved Arabic chapter name; nonblank; source-controlled, not silently normalized.              |
+| `revelation_order`       | `smallint`      | Nullable                              | Positive and unique when an approved scholarly source supplies it.                                     |
+| `revelation_place`       | `varchar(16)`   | Nullable                              | `makkah` or `madinah` only when approved; null means no claim.                                         |
+| `provider_aliases`       | `jsonb`         | Required; default `'[]'::jsonb`       | Bounded array of external aliases; never canonical identity or credentials.                            |
+| `source_record_checksum` | `varchar(64)`   | Required                              | SHA-256 of exact approved source record bytes; links reconciliation evidence to the approved manifest. |
+| `publication_state`      | `varchar(16)`   | Required; default `draft`             | `draft`, `validated`, `published`, or `withdrawn`.                                                     |
+| `published_at`           | `timestamptz`   | Nullable                              | Required exactly for `published` or `withdrawn`.                                                       |
+| `created_at`             | `timestamptz`   | Required; default `current_timestamp` | Creation time.                                                                                         |
+| `updated_at`             | `timestamptz`   | Required; default `current_timestamp` | Last authorized pre-publication or withdrawal update.                                                  |
+
+Constraints are `UNIQUE (work_id, surah_number)`, uniqueness of `passage_id` and `canonical_key`, `surah_number BETWEEN 1 AND 114`, positive `ayah_count`, bounded revelation order, closed optional revelation place and publication state, exact canonical-key derivation, coherent `published_at`, valid lowercase SHA-256, and a provider-alias array no larger than 16 KiB. Aliases have exactly nonblank lowercase `provider_code`, `resource_type = 'surah'`, opaque `external_id`, and `provider_version`; a constraint trigger rejects a duplicate `(provider_code, resource_type, external_id, provider_version)` across Quran surahs. A trigger requires the work type to be `quran`, the passage to belong to that work, have type `chapter`, locator `surah:<number>`, depth one, and sequence equal to `surah_number`. Indexes are `(work_id, surah_number)`, `passage_id`, `publication_state`, and a GIN index on `provider_aliases`.
+
+`id`, `work_id`, `passage_id`, `canonical_key`, `surah_number`, structural facts, and the original source checksum are immutable at first validation. Provider aliases may only be append-only additions, or receive withdrawal metadata, through a reviewed source-version transition; an existing alias can never be reassigned or rewritten. Only `validated -> published -> withdrawn` and its timestamps may otherwise change afterward. Publication additionally requires the approved Quran work, complete 114-surah reconciliation, manifest/checksum evidence, active rights, and scholarly approval.
+
+### 5.3.3 `quran_ayahs`
+
+| Column                   | PostgreSQL type | Nullability and default               | Contract                                                                                    |
+| ------------------------ | --------------- | ------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `id`                     | `uuid`          | Required; no database default         | UUIDv7 primary key; immutable.                                                              |
+| `surah_id`               | `uuid`          | Required                              | FK to `quran_surahs.id`; immutable.                                                         |
+| `passage_id`             | `uuid`          | Required                              | Unique FK to the matching verse `passages.id`; immutable.                                   |
+| `canonical_key`          | `varchar(80)`   | Required                              | Provider-independent lowercase key `quran:ayah:<surah>:<ayah>`; immutable.                  |
+| `ayah_number`            | `smallint`      | Required                              | Positive verse number within the surah; immutable.                                          |
+| `global_sequence_number` | `smallint`      | Required                              | Positive gap-free Release 1 reader order across the approved numbering contract; immutable. |
+| `provider_aliases`       | `jsonb`         | Required; default `'[]'::jsonb`       | Bounded external aliases with `resource_type = 'ayah'`; never canonical identity.           |
+| `source_record_checksum` | `varchar(64)`   | Required                              | SHA-256 of exact approved structural source record bytes.                                   |
+| `publication_state`      | `varchar(16)`   | Required; default `draft`             | `draft`, `validated`, `published`, or `withdrawn`.                                          |
+| `published_at`           | `timestamptz`   | Nullable                              | Required exactly for `published` or `withdrawn`.                                            |
+| `created_at`             | `timestamptz`   | Required; default `current_timestamp` | Creation time.                                                                              |
+| `updated_at`             | `timestamptz`   | Required; default `current_timestamp` | Last authorized pre-publication or withdrawal update.                                       |
+
+Constraints are `UNIQUE (surah_id, ayah_number)`, global uniqueness of `passage_id`, `canonical_key`, and `global_sequence_number`, positive coordinates, exact canonical-key derivation, valid checksum, bounded aliases, closed publication state, and coherent publication time. A deferred constraint trigger requires `ayah_number <= quran_surahs.ayah_count`, contiguous `1..ayah_count` coordinates per complete surah, a gap-free global sequence across a complete release, and a verse passage whose work matches the surah work, whose parent is the surah passage, whose type is `verse`, whose locator is `<surah_number>:<ayah_number>`, and whose sequence equals `ayah_number`. A separate alias constraint trigger rejects duplicate provider/version ayah mappings. Indexes are `(surah_id, ayah_number)`, `global_sequence_number`, `passage_id`, `publication_state`, and GIN on aliases.
+
+Identity, coordinates, order, passage binding, and the original source checksum freeze at validation. Provider aliases follow the same append-only/version-transition and no-reassignment rule as surah aliases. Publication requires its surah to be published, exact per-surah and release row counts to reconcile with the approved manifest, and all referenced rights and scholarly gates to pass. No provider's global verse ID becomes an ALSAMAD locator.
+
+### 5.3.4 `quran_ayah_texts`
+
+| Column                   | PostgreSQL type | Nullability and default               | Contract                                                                                  |
+| ------------------------ | --------------- | ------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `id`                     | `uuid`          | Required; no database default         | UUIDv7 primary key; immutable.                                                            |
+| `edition_id`             | `uuid`          | Required                              | FK to an approved Quran `editions.id`; immutable.                                         |
+| `ayah_id`                | `uuid`          | Required                              | FK to `quran_ayahs.id`; immutable.                                                        |
+| `passage_text_id`        | `uuid`          | Required                              | Unique FK to the exact M4 `passage_texts.id`; immutable.                                  |
+| `source_record_checksum` | `varchar(64)`   | Required                              | SHA-256 of the provider record/envelope used for reconciliation; immutable at validation. |
+| `created_at`             | `timestamptz`   | Required; default `current_timestamp` | Creation time.                                                                            |
+| `updated_at`             | `timestamptz`   | Required; default `current_timestamp` | Pre-validation metadata time; not a text-edit channel.                                    |
+
+Constraints are `UNIQUE (edition_id, ayah_id)`, uniqueness of `passage_text_id`, and valid lowercase SHA-256. Indexes are `ayah_id`, `(edition_id, ayah_id)`, and `passage_text_id`. A constraint trigger requires the edition's work to be the ayah's Quran work, the passage text's edition to equal `edition_id`, and its passage to equal the ayah passage. Publication state, exact UTF-8 text, normalized and source checksums, license, manifest checksum, retention, and withdrawal are inherited from the referenced M4 edition and passage text; M5 never stores a second text payload. Every column freezes when the referenced passage text first becomes validated. Withdrawal of the edition or passage text immediately makes this row ineligible for serving. Payload deletion required by rights is performed through the M4 withdrawal/recovery contract and cannot orphan this specialization.
+
+### 5.3.5 `quran_structural_markers`
+
+| Column                   | PostgreSQL type | Nullability and default               | Contract                                                              |
+| ------------------------ | --------------- | ------------------------------------- | --------------------------------------------------------------------- |
+| `id`                     | `uuid`          | Required; no database default         | UUIDv7 primary key; immutable.                                        |
+| `edition_id`             | `uuid`          | Required                              | FK to the exact Quran/Mushaf `editions.id`; immutable.                |
+| `parent_marker_id`       | `uuid`          | Nullable                              | Self-FK for approved containment; same edition; no cycles.            |
+| `marker_kind`            | `varchar(16)`   | Required                              | `juz`, `hizb`, `rub`, `manzil`, `ruku`, `page`, or `sajdah`.          |
+| `marker_number`          | `smallint`      | Required                              | Positive ordinal within kind and edition.                             |
+| `canonical_key`          | `varchar(96)`   | Required                              | Provider-independent edition-scoped key `<kind>:<number>`; immutable. |
+| `start_ayah_id`          | `uuid`          | Required                              | FK to inclusive start `quran_ayahs.id`; immutable at validation.      |
+| `end_ayah_id`            | `uuid`          | Required                              | FK to inclusive end `quran_ayahs.id`; immutable at validation.        |
+| `provider_aliases`       | `jsonb`         | Required; default `'[]'::jsonb`       | Bounded external structural aliases; never canonical identity.        |
+| `source_record_checksum` | `varchar(64)`   | Required                              | SHA-256 of exact structural source record bytes.                      |
+| `publication_state`      | `varchar(16)`   | Required; default `draft`             | `draft`, `validated`, `published`, or `withdrawn`.                    |
+| `published_at`           | `timestamptz`   | Nullable                              | Required exactly for `published` or `withdrawn`.                      |
+| `created_at`             | `timestamptz`   | Required; default `current_timestamp` | Creation time.                                                        |
+| `updated_at`             | `timestamptz`   | Required; default `current_timestamp` | Last authorized pre-publication or withdrawal update.                 |
+
+Constraints are `UNIQUE (edition_id, marker_kind, marker_number)`, `UNIQUE (edition_id, canonical_key)`, closed kind/state, positive number, exact canonical-key derivation, valid checksum, bounded aliases, and coherent publication time. A deferred trigger requires both ayahs to belong to the edition's Quran work, start global sequence not exceed end, same-edition parentage, strict range containment, and no parent cycle. Approved containment is `juz -> hizb -> rub`; `page`, `manzil`, `ruku`, and `sajdah` may be roots unless the source decision record explicitly approves a parent relation. Page numbers and ranges belong to an exact Mushaf/layout edition and are never treated as universal Quran coordinates. Indexes are `(edition_id, marker_kind, marker_number)`, `(edition_id, start_ayah_id, end_ayah_id)`, `parent_marker_id`, `publication_state`, and GIN on aliases. Duplicate provider/version aliases are rejected.
+
+Identity, edition, kind, number, range, parentage, and the original source checksum freeze at validation. Provider aliases follow the same append-only/version-transition and no-reassignment rule as surah aliases. Publication requires the edition and all covered ayahs/texts to be publication-eligible and the marker set's declared counts/ranges to match the approved manifest. No word boundary, glyph position, font binary, word timing, or recitation timing is authorized in this table.
+
+### 5.3.6 `quran_translation_editions`
+
+| Column            | PostgreSQL type | Nullability and default               | Contract                                                                                 |
+| ----------------- | --------------- | ------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `id`              | `uuid`          | Required; no database default         | UUIDv7 primary key; immutable.                                                           |
+| `edition_id`      | `uuid`          | Required                              | Unique FK to the attributed M4 translation `editions.id`; immutable.                     |
+| `locale_id`       | `uuid`          | Required                              | FK to `locales.id`; immutable after validation.                                          |
+| `license_id`      | `uuid`          | Required                              | FK to `licenses.id`; must equal the generic edition license; immutable after validation. |
+| `translator_name` | `varchar(300)`  | Required                              | Exact approved public attribution; nonblank.                                             |
+| `methodology`     | `text`          | Required                              | Bounded nonblank approved methodology disclosure.                                        |
+| `review_status`   | `varchar(16)`   | Required; default `pending`           | `pending`, `approved`, `rejected`, or `withdrawn`.                                       |
+| `reviewed_at`     | `timestamptz`   | Nullable                              | Required for `approved`, `rejected`, or `withdrawn`; null for pending.                   |
+| `created_at`      | `timestamptz`   | Required; default `current_timestamp` | Creation time.                                                                           |
+| `updated_at`      | `timestamptz`   | Required; default `current_timestamp` | Last authorized pre-approval or withdrawal update.                                       |
+
+Constraints are uniqueness of `edition_id`, closed review status, coherent review time, nonblank attribution/methodology, and methodology length at most 8 KiB. A trigger requires the generic edition to belong to the approved Quran work, use the locale language, reference the same license, and carry its provider alias, import version, manifest checksum, and publication lifecycle in the M4 fields. Indexes are `(locale_id, review_status)`, `license_id`, and `review_status`. Publication requires `review_status = 'approved'`, active license and attribution, approved source decision, complete verse reconciliation, and the generic edition to be published. Published identity and attribution freeze; withdrawal is one-way and propagates to all translation texts.
+
+Tafsir, footnotes, transliteration, and word-by-word resources do not masquerade as translations. If separately selected within Release 1, tafsir and footnotes use an attributed generic `edition` and its exact `passage_texts` under the existing M4 relationships; this table is reserved for approved translations. No such resource is selected or activated by M5's schema unit.
+
+### 5.3.7 `quran_translation_texts`
+
+| Column                   | PostgreSQL type | Nullability and default               | Contract                                                            |
+| ------------------------ | --------------- | ------------------------------------- | ------------------------------------------------------------------- |
+| `id`                     | `uuid`          | Required; no database default         | UUIDv7 primary key; immutable.                                      |
+| `translation_edition_id` | `uuid`          | Required                              | FK to `quran_translation_editions.id`; immutable.                   |
+| `ayah_id`                | `uuid`          | Required                              | FK to `quran_ayahs.id`; immutable.                                  |
+| `passage_text_id`        | `uuid`          | Required                              | Unique FK to the exact translated M4 `passage_texts.id`; immutable. |
+| `source_record_checksum` | `varchar(64)`   | Required                              | SHA-256 of exact provider record/envelope used for reconciliation.  |
+| `created_at`             | `timestamptz`   | Required; default `current_timestamp` | Creation time.                                                      |
+| `updated_at`             | `timestamptz`   | Required; default `current_timestamp` | Pre-validation metadata time; not a translation-edit channel.       |
+
+Constraints are `UNIQUE (translation_edition_id, ayah_id)`, uniqueness of `passage_text_id`, and valid lowercase SHA-256. Indexes are `ayah_id`, `(translation_edition_id, ayah_id)`, and `passage_text_id`. A constraint trigger requires the passage text edition to equal the translation edition's generic edition and its passage to equal the ayah passage. Text, checksum, publication, license, manifest, retention, and withdrawal remain governed by M4. Every field freezes at validation. A translation row is publicly eligible only while its translation edition is approved and published, its passage text is published, its locale is enabled, and all license/retention gates remain valid.
+
+### 5.3.8 Canonical identity, provider aliases, and manifest boundary
+
+ALSAMAD UUIDv7 IDs and canonical keys/locators are the only canonical identities. The canonical verse locator is exactly `<surah_number>:<ayah_number>` in decimal ASCII without padding; URLs and references resolve through it, never through provider IDs. Surah and ayah passage identities must match the Quran specialization one-to-one. Provider aliases are typed, versioned, opaque, bounded, non-secret JSON records; database triggers and import reconciliation reject an alias mapping to more than one canonical row. An alias may be added only through a reviewed source-version transition and may never rewrite canonical identity.
+
+An approved import manifest is a version-controlled, immutable JSON artifact, not a Release 1 table. It contains a schema version; UUIDv7 `manifest_id`; provider code; provider snapshot/resource/version identifiers; requested resources and scopes; retrieval instant; source decision record; license and attribution evidence identifiers; retention deadline; redistribution/commercial-use decisions; expected files/resources, byte lengths, media types, row counts, and SHA-256 checksums; canonical numbering/layout declaration; adapter and normalization versions; fallback and deletion/exit procedures; and approver evidence. Its canonical UTF-8 bytes are SHA-256 hashed. The hash is persisted in `editions.source_manifest_checksum`; exact record hashes are persisted in the Quran tables and M4 passage texts. Surah/ayah structures without an edition are released only as part of a manifest-bound Quran work import whose manifest hash is recorded in the accompanying canonical Quran edition and reconciliation report. A missing or mismatched manifest, file checksum, record checksum, row count, source, license, retention decision, or approval fails closed.
+
+### 5.3.9 Publication, withdrawal, retention, and deletion propagation
+
+Publication is a release-level atomic transition, not row-by-row best effort. A Quran release is eligible only when canonical structure, exact passage texts, selected translations or structural layouts, manifests, row counts, checksums, licenses, attribution, source decisions, and scholarly approvals all reconcile. Draft or staging rows are never publicly served. M5 activation must use a stable release/version selector outside the canonical table count so readers cannot observe a mixed provider version.
+
+Provider or rights withdrawal first disables fetching and public serving, records the event in operational audit evidence, and transactionally changes affected M4 editions/passage texts and M5 published rows to `withdrawn`. Dependents become ineligible even if propagation is still processing. Hard deletion is restricted. When a license requires payload deletion, the recovery process erases only the licensed payload after withdrawal and preserves only lawful minimum identity, checksum, attribution, manifest, decision, and audit evidence. Quran.Foundation material defaults to no more than seven days of cache/retention unless written durable rights or legally independent licensing is documented. Provider API availability alone never establishes redistribution, commercial, permanent-storage, or rehosting rights.
+
 ## 5.4 Devotional content and translation — 4 tables
 
 | Table                         | Purpose and exact journey                                                          | Essential constraints                                                                                                              | Why it cannot wait                                                                                          |
