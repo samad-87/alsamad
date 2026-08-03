@@ -8,6 +8,13 @@
       "when": 1785796800000,
       "tag": "0000_foundation",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1785796801000,
+      "tag": "0001_global_locales_geography",
+      "breakpoints": true
     }
   ]
 }
