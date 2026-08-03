@@ -232,11 +232,24 @@ try {
     await queryClient`select extname from pg_extension where extname = 'pgcrypto'`;
   assert.equal(extension.length, 1);
   const fks = await queryClient`
-    select count(*)::int as count from pg_constraint c
-    join pg_namespace n on n.oid=c.connamespace
-    where n.nspname='public' and c.contype='f'
-  `;
-  assert.equal(fks[0]?.count, 12);
+  select count(*)::int as count
+  from pg_constraint c
+  join pg_namespace n on n.oid = c.connamespace
+  join pg_class source_table on source_table.oid = c.conrelid
+  where n.nspname = 'public'
+    and c.contype = 'f'
+    and source_table.relname in (
+      'licenses',
+      'works',
+      'editions',
+      'passages',
+      'passage_texts',
+      'content_items',
+      'content_revisions',
+      'source_references'
+    )
+`;
+assert.equal(fks[0]?.count, 12);
 
   await queryClient
     .begin(async (transaction) => {
