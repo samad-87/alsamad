@@ -71,7 +71,18 @@ try {
   `;
   assert.deepEqual(
     tables.map(({ table_name }) => table_name),
-    ["geographic_areas", "locales"],
+    [
+      "content_items",
+      "content_revisions",
+      "editions",
+      "geographic_areas",
+      "licenses",
+      "locales",
+      "passage_texts",
+      "passages",
+      "source_references",
+      "works",
+    ],
   );
 
   const locales = await queryClient`
@@ -198,7 +209,94 @@ try {
     },
   );
 
-  console.log("PASS schema tables: geographic_areas, locales (exactly 2)");
+  const m4Tables = [
+    "licenses",
+    "works",
+    "editions",
+    "passages",
+    "passage_texts",
+    "content_items",
+    "content_revisions",
+    "source_references",
+  ];
+  for (const table of m4Tables) {
+    assert.equal(
+      (
+        await queryClient`select count(*)::int as count from ${queryClient(table)}`
+      )[0]?.count,
+      0,
+    );
+  }
+
+  const extension =
+    await queryClient`select extname from pg_extension where extname = 'pgcrypto'`;
+  assert.equal(extension.length, 1);
+  const fks = await queryClient`
+    select count(*)::int as count from pg_constraint c
+    join pg_namespace n on n.oid=c.connamespace
+    where n.nspname='public' and c.contype='f'
+  `;
+  assert.equal(fks[0]?.count, 12);
+
+  await queryClient
+    .begin(async (transaction) => {
+      await transaction`set constraints all deferred`;
+      const ids4 = {
+        license: "0198a7b0-4000-7000-8000-000000000001",
+        work: "0198a7b0-4000-7000-8000-000000000002",
+        edition: "0198a7b0-4000-7000-8000-000000000003",
+        passage: "0198a7b0-4000-7000-8000-000000000004",
+        text: "0198a7b0-4000-7000-8000-000000000005",
+        item: "0198a7b0-4000-7000-8000-000000000006",
+        revision: "0198a7b0-4000-7000-8000-000000000007",
+        source: "0198a7b0-4000-7000-8000-000000000008",
+      };
+      const arabic = "اللَّهُمَّ اهْدِنَا\r\nإِلَى الْخَيْرِ";
+      const sums = (
+        await transaction`select alsamad_exact_sha256(${arabic}) exact, alsamad_normalized_sha256(${arabic}) normalized`
+      )[0];
+      assert.notEqual(sums.exact, sums.normalized);
+      await transaction`insert into licenses(id,provider_code,license_key,version,name,rights_scope,attribution_text,retention_policy,redistribution_allowed,effective_from,status)
+      values(${ids4.license}::uuid,'fixture','rights','1','Fixture rights','permission','Fixture attribution','permanent',true,current_timestamp-'1 day'::interval,'active')`;
+      await transaction`insert into works(id,canonical_key,work_type,title,original_language_code) values(${ids4.work}::uuid,'fixture-work','reference_work','Fixture work','ar')`;
+      await transaction`insert into editions(id,work_id,license_id,edition_key,version,language_code,script_code,display_name,provider_code,provider_edition_id,import_version,source_manifest_checksum)
+      values(${ids4.edition}::uuid,${ids4.work}::uuid,${ids4.license}::uuid,'canonical-edition','1','ar','Arab','Fixture edition','fixture','external-alias','snapshot-1',repeat('a',64))`;
+      await transaction`update editions set publication_state='published',published_at=current_timestamp where id=${ids4.edition}::uuid`;
+      await transaction`insert into passages(id,work_id,canonical_locator,passage_type,sequence_number,depth) values(${ids4.passage}::uuid,${ids4.work}::uuid,'1','entry',1,0)`;
+      await transaction`insert into passage_texts(id,edition_id,passage_id,text_content,normalized_checksum,source_checksum,publication_state,published_at)
+      values(${ids4.text}::uuid,${ids4.edition}::uuid,${ids4.passage}::uuid,${arabic},${sums.normalized},${sums.exact},'published',current_timestamp)`;
+      assert.equal(
+        (
+          await transaction`select text_content from passage_texts where id=${ids4.text}::uuid`
+        )[0]?.text_content,
+        arabic,
+      );
+      await transaction`insert into content_items(id,canonical_key,content_type,origin_kind,owning_module) values(${ids4.item}::uuid,'fixture-article','article','canonical_source','knowledge')`;
+      await transaction`insert into content_revisions(id,content_item_id,revision_number,source_text,source_language_code,verification_state,publication_state,provenance_kind,content_checksum,published_at)
+      values(${ids4.revision}::uuid,${ids4.item}::uuid,1,${arabic},'ar','source_verified','published','manual',${sums.normalized},current_timestamp)`;
+      await transaction`insert into source_references(id,content_revision_id,cited_work_id,cited_edition_id,cited_passage_id,reference_role,locator_label)
+      values(${ids4.source}::uuid,${ids4.revision}::uuid,${ids4.work}::uuid,${ids4.edition}::uuid,${ids4.passage}::uuid,'primary_source','Fixture 1')`;
+      await transaction`set constraints all immediate`;
+      throw new Error("M4 fixture rollback");
+    })
+    .catch((error) => assert.equal(error.message, "M4 fixture rollback"));
+
+  await expectDatabaseRejection("checksum mismatch", async (transaction) => {
+    await transaction`insert into content_items(id,canonical_key,content_type,origin_kind,owning_module) values('0198a7b0-5000-7000-8000-000000000001','bad-checksum','article','canonical_source','knowledge')`;
+    await transaction`insert into content_revisions(id,content_item_id,revision_number,source_text,source_language_code,provenance_kind,content_checksum) values('0198a7b0-5000-7000-8000-000000000002','0198a7b0-5000-7000-8000-000000000001',1,'نص','ar','manual',repeat('0',64))`;
+  });
+  await expectDatabaseRejection(
+    "revision sequence gap",
+    async (transaction) => {
+      await transaction`insert into content_items(id,canonical_key,content_type,origin_kind,owning_module) values('0198a7b0-5000-7000-8000-000000000003','gap','article','canonical_source','knowledge')`;
+      await transaction`insert into content_revisions(id,content_item_id,revision_number,source_text,source_language_code,provenance_kind,content_checksum) values('0198a7b0-5000-7000-8000-000000000004','0198a7b0-5000-7000-8000-000000000003',2,'text','en','manual',alsamad_normalized_sha256('text'))`;
+    },
+  );
+
+  console.log("PASS schema tables: exactly 10 cumulative Release 1 tables");
+  console.log(
+    "PASS M4: 8 tables, 12 restrictive foreign keys, pgcrypto checksums, zero seed rows",
+  );
   console.log("PASS seeds: ar=1, en=1, geographic_areas=0");
   console.log("Real PostgreSQL M3 verification passed.");
 } finally {

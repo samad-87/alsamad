@@ -15,6 +15,13 @@
       "when": 1785796801000,
       "tag": "0001_global_locales_geography",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1785796802000,
+      "tag": "0002_content_integrity_foundation",
+      "breakpoints": true
     }
   ]
 }

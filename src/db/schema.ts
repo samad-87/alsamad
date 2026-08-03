@@ -5,8 +5,11 @@ import {
   foreignKey,
   index,
   integer,
+  jsonb,
   numeric,
   pgTable,
+  smallint,
+  text,
   timestamp,
   unique,
   uniqueIndex,
@@ -150,4 +153,211 @@ export const geographicAreas = pgTable(
   ],
 );
 
-export const release1DomainTableCount = 2 as const;
+export const m3DomainTableCount = 2 as const;
+
+export const licenses = pgTable("licenses", {
+  id: uuid("id").primaryKey(),
+  providerCode: varchar("provider_code", { length: 64 }).notNull(),
+  licenseKey: varchar("license_key", { length: 128 }).notNull(),
+  version: varchar("version", { length: 64 }).notNull(),
+  name: varchar("name", { length: 200 }).notNull(),
+  rightsScope: varchar("rights_scope", { length: 24 }).notNull(),
+  attributionText: text("attribution_text").notNull(),
+  termsUrl: text("terms_url"),
+  retentionPolicy: varchar("retention_policy", { length: 24 }).notNull(),
+  retentionDays: integer("retention_days"),
+  redistributionAllowed: boolean("redistribution_allowed")
+    .notNull()
+    .default(false),
+  derivativesAllowed: boolean("derivatives_allowed").notNull().default(false),
+  effectiveFrom: timestamp("effective_from", { withTimezone: true }).notNull(),
+  effectiveUntil: timestamp("effective_until", { withTimezone: true }),
+  status: varchar("status", { length: 16 }).notNull().default("draft"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+export const works = pgTable("works", {
+  id: uuid("id").primaryKey(),
+  canonicalKey: varchar("canonical_key", { length: 160 }).notNull().unique(),
+  workType: varchar("work_type", { length: 24 }).notNull(),
+  title: varchar("title", { length: 300 }).notNull(),
+  originalLanguageCode: varchar("original_language_code", {
+    length: 8,
+  }).notNull(),
+  authorityName: varchar("authority_name", { length: 300 }),
+  description: text("description"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+export const editions = pgTable("editions", {
+  id: uuid("id").primaryKey(),
+  workId: uuid("work_id")
+    .notNull()
+    .references(() => works.id, { onDelete: "restrict", onUpdate: "restrict" }),
+  licenseId: uuid("license_id")
+    .notNull()
+    .references(() => licenses.id, {
+      onDelete: "restrict",
+      onUpdate: "restrict",
+    }),
+  editionKey: varchar("edition_key", { length: 160 }).notNull(),
+  version: varchar("version", { length: 64 }).notNull(),
+  languageCode: varchar("language_code", { length: 8 }).notNull(),
+  scriptCode: varchar("script_code", { length: 4 }),
+  displayName: varchar("display_name", { length: 300 }).notNull(),
+  providerCode: varchar("provider_code", { length: 64 }).notNull(),
+  providerEditionId: varchar("provider_edition_id", { length: 256 }).notNull(),
+  importVersion: varchar("import_version", { length: 128 }).notNull(),
+  sourceManifestChecksum: varchar("source_manifest_checksum", {
+    length: 64,
+  }).notNull(),
+  providerMetadata: jsonb("provider_metadata").notNull().default({}),
+  publicationState: varchar("publication_state", { length: 16 })
+    .notNull()
+    .default("draft"),
+  publishedAt: timestamp("published_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+export const passages = pgTable("passages", {
+  id: uuid("id").primaryKey(),
+  workId: uuid("work_id")
+    .notNull()
+    .references(() => works.id, { onDelete: "restrict", onUpdate: "restrict" }),
+  parentPassageId: uuid("parent_passage_id"),
+  canonicalLocator: varchar("canonical_locator", { length: 200 }).notNull(),
+  passageType: varchar("passage_type", { length: 24 }).notNull(),
+  sequenceNumber: integer("sequence_number").notNull(),
+  depth: smallint("depth").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+export const passageTexts = pgTable("passage_texts", {
+  id: uuid("id").primaryKey(),
+  editionId: uuid("edition_id")
+    .notNull()
+    .references(() => editions.id, {
+      onDelete: "restrict",
+      onUpdate: "restrict",
+    }),
+  passageId: uuid("passage_id")
+    .notNull()
+    .references(() => passages.id, {
+      onDelete: "restrict",
+      onUpdate: "restrict",
+    }),
+  textContent: text("text_content").notNull(),
+  normalizedChecksum: varchar("normalized_checksum", { length: 64 }).notNull(),
+  sourceChecksum: varchar("source_checksum", { length: 64 }).notNull(),
+  publicationState: varchar("publication_state", { length: 16 })
+    .notNull()
+    .default("draft"),
+  publishedAt: timestamp("published_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+export const contentItems = pgTable("content_items", {
+  id: uuid("id").primaryKey(),
+  canonicalKey: varchar("canonical_key", { length: 160 }).notNull().unique(),
+  contentType: varchar("content_type", { length: 32 }).notNull(),
+  originKind: varchar("origin_kind", { length: 16 }).notNull(),
+  owningModule: varchar("owning_module", { length: 32 }).notNull(),
+  isSensitive: boolean("is_sensitive").notNull().default(false),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+export const contentRevisions = pgTable("content_revisions", {
+  id: uuid("id").primaryKey(),
+  contentItemId: uuid("content_item_id")
+    .notNull()
+    .references(() => contentItems.id, {
+      onDelete: "restrict",
+      onUpdate: "restrict",
+    }),
+  predecessorRevisionId: uuid("predecessor_revision_id"),
+  revisionNumber: integer("revision_number").notNull(),
+  sourceText: text("source_text").notNull(),
+  sourceLanguageCode: varchar("source_language_code", { length: 8 }).notNull(),
+  verificationState: varchar("verification_state", { length: 20 })
+    .notNull()
+    .default("unverified"),
+  publicationState: varchar("publication_state", { length: 16 })
+    .notNull()
+    .default("draft"),
+  provenanceKind: varchar("provenance_kind", { length: 16 }).notNull(),
+  providerCode: varchar("provider_code", { length: 64 }),
+  providerRecordId: varchar("provider_record_id", { length: 256 }),
+  sourceManifestChecksum: varchar("source_manifest_checksum", { length: 64 }),
+  contentChecksum: varchar("content_checksum", { length: 64 }).notNull(),
+  schemaVersion: integer("schema_version").notNull().default(1),
+  lockVersion: integer("lock_version").notNull().default(1),
+  publishedAt: timestamp("published_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+export const sourceReferences = pgTable("source_references", {
+  id: uuid("id").primaryKey(),
+  contentRevisionId: uuid("content_revision_id")
+    .notNull()
+    .references(() => contentRevisions.id, {
+      onDelete: "restrict",
+      onUpdate: "restrict",
+    }),
+  citedWorkId: uuid("cited_work_id")
+    .notNull()
+    .references(() => works.id, { onDelete: "restrict", onUpdate: "restrict" }),
+  citedEditionId: uuid("cited_edition_id").references(() => editions.id, {
+    onDelete: "restrict",
+    onUpdate: "restrict",
+  }),
+  citedPassageId: uuid("cited_passage_id").references(() => passages.id, {
+    onDelete: "restrict",
+    onUpdate: "restrict",
+  }),
+  referenceRole: varchar("reference_role", { length: 20 }).notNull(),
+  locatorLabel: varchar("locator_label", { length: 300 }).notNull(),
+  quotation: text("quotation"),
+  quotationChecksum: varchar("quotation_checksum", { length: 64 }),
+  sourceUrl: text("source_url"),
+  sortOrder: integer("sort_order").notNull().default(0),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+export const release1DomainTableCount = 10 as const;
