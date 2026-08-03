@@ -43,7 +43,7 @@ A physical table may exist only if it represents a durable integrity boundary th
 - a bounded JSONB structure; or
 - an additive future migration.
 
-The objective is not “30 tables.” The objective is **the smallest correct schema**. A final count of 28, 30, 31, or 33 is acceptable when every retained table has a clear architectural justification.
+The objective is not to maximize table count. The objective is **the smallest correct schema**. M1 froze the approved Release 1 catalog at exactly 30 physical tables. Any change to that boundary requires a post-M1 architecture decision before implementation; implementation evidence alone does not authorize a 29th or 31st table.
 
 Tables must not be preserved for symmetry, hypothetical future needs, an unapproved workflow, or merely to avoid an additive future migration. Before a table can enter Release 1, its proposal must identify:
 
@@ -145,18 +145,81 @@ Every physical table has exactly one owning module. Cross-module writes use expl
 | Identity and synchronized preferences |               0 |
 | **Total Release 1**                   |          **30** |
 
-The number 30 is the outcome of the approved journeys and integrity boundaries, not a target quota. If implementation evidence proves that one boundary must split or can safely merge, the count may change under the Schema Minimalism Principle.
+The number 30 is the outcome of the approved journeys and integrity boundaries, not a target quota. It is nevertheless the frozen Release 1 boundary: a proposed split or merge must stop for a separately approved post-M1 architecture decision before changing the physical catalog.
 
 # 5. Minimal Release 1 Catalog
 
 ## 5.1 Global and locales — 2 tables
 
-| Table              | Purpose and exact journey                                                                   | Essential constraints                                                                                                        | Why it cannot wait                                                                                                                                                                                             |
-| ------------------ | ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `locales`          | Enabled locale registry for routing, direction, content availability, and fallback (J1).    | Unique valid BCP 47 `tag`; checked `direction`; fallback FK is non-self and cycles are rejected; enabled status.             | Arabic and English routes and content references need stable locale identity. Scripts, UI messages, fallback rules, and CLDR formatting do not need separate tables.                                           |
-| `geographic_areas` | Hierarchical country, region, and city identity used by prayer and Hijri defaults (J8, J9). | Checked `kind`; unique scoped canonical code; valid parent-kind hierarchy; valid coordinates; validated IANA time-zone text. | Manual worldwide city selection and regional qualification require one stable geographic key. Separate country, region, city, and time-zone tables would add fragmentation without a stronger launch boundary. |
+| Table              | Purpose and exact journey                                                                   | Essential constraints                                                                                                          | Why it cannot wait                                                                                                                                                                                             |
+| ------------------ | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `locales`          | Enabled locale registry for routing, direction, content availability, and fallback (J1).    | Unique canonical `code` and BCP 47-compatible `language_tag`; checked `direction`; non-self, acyclic fallback; enabled status. | Arabic and English routes and content references need stable locale identity. Scripts, UI messages, fallback rules, and CLDR formatting do not need separate tables.                                           |
+| `geographic_areas` | Hierarchical country, region, and city identity used by prayer and Hijri defaults (J8, J9). | Checked `area_type`; scoped canonical codes; valid acyclic parent hierarchy; coordinates and IANA time-zone rules.             | Manual worldwide city selection and regional qualification require one stable geographic key. Separate country, region, city, and time-zone tables would add fragmentation without a stronger launch boundary. |
 
 Standard script direction, CLDR formatting, IANA registries, UI strings, and locale fallback policy remain version-controlled configuration. Only exceptional, non-critical locale options may use bounded configuration data.
+
+### 5.1.1 Executable M3 contract: `locales`
+
+M3 authorizes this table as the first of exactly two Global and locales physical tables. No other Release 1, Prepared, Later, or Future table is authorized by M3.
+
+| Column               | PostgreSQL type | Nullability and default                 | Contract                                                                                          |
+| -------------------- | --------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `id`                 | `uuid`          | Required; no database-generated default | Primary key generated by the application using UUIDv7; immutable.                                 |
+| `code`               | `varchar(16)`   | Required                                | Unique lowercase canonical internal locale code, such as `ar` or `en`; immutable after reference. |
+| `language_tag`       | `varchar(35)`   | Required                                | Unique, canonical BCP 47-compatible tag; case-normalized before persistence.                      |
+| `language_code`      | `varchar(8)`    | Required                                | Lowercase ISO-style language identity.                                                            |
+| `script_code`        | `varchar(4)`    | Nullable                                | When present, exactly four letters in title-case ISO 15924 style, such as `Arab` or `Latn`.       |
+| `region_code`        | `varchar(3)`    | Nullable                                | When present, uppercase ISO 3166-1 alpha-2 or an approved numeric region code.                    |
+| `direction`          | `varchar(3)`    | Required                                | Closed values `rtl` or `ltr`.                                                                     |
+| `display_name`       | `varchar(100)`  | Required                                | Administrative English/global display label.                                                      |
+| `native_name`        | `varchar(100)`  | Required                                | Native-language display label.                                                                    |
+| `fallback_locale_id` | `uuid`          | Nullable                                | Self-reference to `locales.id`; `ON DELETE RESTRICT`; must not reference itself or form a cycle.  |
+| `is_enabled`         | `boolean`       | Required; default `false`               | Operational locale activation state.                                                              |
+| `sort_order`         | `integer`       | Required; default `0`                   | Deterministic, non-negative ordering.                                                             |
+| `created_at`         | `timestamptz`   | Required; default `current_timestamp`   | Stored and interpreted in UTC.                                                                    |
+| `updated_at`         | `timestamptz`   | Required; default `current_timestamp`   | Stored and interpreted in UTC.                                                                    |
+
+The table has named uniqueness constraints on `code` and `language_tag`; checks for `direction IN ('rtl', 'ltr')`, `sort_order >= 0`, `fallback_locale_id <> id`, lowercase `code`, lowercase `language_code`, valid four-letter title-case `script_code` when present, and uppercase alphabetic or approved numeric `region_code` when present. It has indexes on `(is_enabled, sort_order)` and `fallback_locale_id`.
+
+Direct self-reference is rejected by a check constraint. A PostgreSQL constraint trigger, `DEFERRABLE INITIALLY IMMEDIATE`, must inspect the complete fallback ancestor chain and reject every multi-level cycle by failing the transaction. An enabled locale may be a root with no fallback. Arabic and English are independent Release 1 root locales; neither falls back to the other. `language_tag` changes require an explicit administrative migration.
+
+### 5.1.2 Executable M3 contract: `geographic_areas`
+
+| Column             | PostgreSQL type | Nullability and default               | Contract                                                                                             |
+| ------------------ | --------------- | ------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `id`               | `uuid`          | Required; no database default         | UUIDv7 primary key generated by the application; immutable.                                          |
+| `parent_id`        | `uuid`          | Nullable                              | Self-reference to `geographic_areas.id`; `ON DELETE RESTRICT`; no self-reference or hierarchy cycle. |
+| `area_type`        | `varchar(16)`   | Required                              | Release 1 closed values `country`, `region`, or `city`.                                              |
+| `country_code`     | `varchar(2)`    | Nullable at type level                | Uppercase ISO 3166-1 alpha-2; logically required for every Release 1 row.                            |
+| `subdivision_code` | `varchar(16)`   | Nullable                              | Uppercase or provider-neutral canonical regional code.                                               |
+| `city_code`        | `varchar(64)`   | Nullable                              | Provider-neutral stable city code where available.                                                   |
+| `slug`             | `varchar(128)`  | Required                              | Lowercase ASCII canonical slug, unique within the same parent and area type.                         |
+| `display_name`     | `varchar(160)`  | Required                              | Neutral administrative display name; not a localized public-name payload.                            |
+| `timezone`         | `varchar(64)`   | Nullable                              | Valid IANA identifier; required for cities and optional for countries and regions.                   |
+| `latitude`         | `numeric(9,6)`  | Nullable                              | When present, between -90 and 90.                                                                    |
+| `longitude`        | `numeric(9,6)`  | Nullable                              | When present, between -180 and 180.                                                                  |
+| `is_active`        | `boolean`       | Required; default `true`              | Operational activation state; deactivation is the normal removal mechanism.                          |
+| `created_at`       | `timestamptz`   | Required; default `current_timestamp` | Stored and interpreted in UTC.                                                                       |
+| `updated_at`       | `timestamptz`   | Required; default `current_timestamp` | Stored and interpreted in UTC.                                                                       |
+
+The table checks `parent_id <> id`, the closed `area_type`, uppercase `country_code` when present, required `country_code` for all three Release 1 types, coordinate ranges, and the city parent/time-zone requirements. A country has no parent; a region has a country parent; a city has either a region or country parent. Every descendant must share the `country_code` of its country root. These type and country-root rules are database-enforced, including when parent inspection requires a trigger.
+
+Uniqueness is enforced for `(parent_id, area_type, slug)`, for `country_code` on country rows, for `(country_code, subdivision_code)` where `subdivision_code` is non-null, and for `(country_code, city_code)` where `city_code` is non-null. Required indexes cover `parent_id`, `area_type`, `country_code`, `timezone`, and `is_active`. A `(latitude, longitude)` index is prohibited until an approved query demonstrates its need.
+
+Direct self-parenting is rejected by a check. A PostgreSQL constraint trigger, `DEFERRABLE INITIALLY IMMEDIATE`, must inspect the complete ancestor chain and reject every multi-level hierarchy cycle by failing the transaction. Parent deletion is restricted; physical deletion is prohibited while descendants or dependent configuration exist; there is no cascade deletion. Operational removal uses `is_active = false`.
+
+M3 adds neither a geographic-area translation table nor JSON localization columns. `display_name` is administrative and neutral. Localized public geographic names remain deferred to a separately approved later schema unit.
+
+### 5.1.3 M3 deterministic seed authorization
+
+M3 authorizes exactly two locale seed rows and no geographic rows:
+
+| `code` | `language_tag` | `language_code` | `script_code` | `region_code` | `direction` | `display_name` | `native_name` | `is_enabled` | `sort_order` | fallback |
+| ------ | -------------- | --------------- | ------------- | ------------- | ----------- | -------------- | ------------- | ------------ | ------------ | -------- |
+| `ar`   | `ar`           | `ar`            | `Arab`        | `NULL`        | `rtl`       | `Arabic`       | `العربية`     | `true`       | `10`         | none     |
+| `en`   | `en`           | `en`            | `Latn`        | `NULL`        | `ltr`       | `English`      | `English`     | `true`       | `20`         | none     |
+
+The seed must use deterministic UUIDv7 identifiers, be idempotent, and leave each canonical locale present exactly once. Countries, regions, and cities enter only through a separately approved import or administrative workflow; M3 authorizes no geographic seed data.
 
 ## 5.2 Content integrity — 8 tables
 

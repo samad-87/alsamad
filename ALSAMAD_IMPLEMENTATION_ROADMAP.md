@@ -326,22 +326,148 @@ Documentation and verification only. M1 is `PASS` only after every checklist ite
 
 ## Phase 3: Global locales and regional configuration
 
-- Objective
-- Included scope
-- Explicitly excluded scope
-- Dependencies
-- Artifacts
-- Database changes allowed
-- Application capabilities
-- Admin capabilities
-- Security requirements
-- QA requirements
-- Observability requirements
-- Analytics requirements
-- Acceptance criteria
-- Completion evidence
-- Rollback/recovery
-- Release status
+### Objective
+
+Implement the provider-independent Global Locales and Regional Configuration foundation by activating exactly the first two authorized Release 1 domain tables, `locales` and `geographic_areas`, in dependency order. Preserve the frozen 30-table Release 1 catalog and establish database-enforced canonical locale identity, direction, fallback safety, geographic hierarchy, and regional identity without exposing a user interface or public API.
+
+### Included scope
+
+- Drizzle mappings for exactly `locales` and `geographic_areas`.
+- One reviewed, forward-only migration for those two tables, their constraints, foreign keys, indexes, trigger functions, and constraint triggers.
+- Deterministic, idempotent Release 1 seed rows for Arabic and English only.
+- Real PostgreSQL verification of persistence, constraints, cycles, hierarchy, seed idempotency, and physical table count.
+- Provider-independent canonical codes and UUIDv7 application-generated identities.
+
+### Explicitly excluded scope
+
+- Every other Release 1 physical table and every Prepared, Approved Later, or Future / Research table.
+- Geographic seed rows, geographic imports, or administrative geographic workflows.
+- A geographic translation table, JSON localization payload, or localized public area names.
+- Quran.Foundation, Quran data, UI, public APIs, authentication, and administration features.
+- M4 Content Integrity implementation.
+
+### Dependencies
+
+- M1 Release 1 scope freeze and exact 30-table catalog: PASS.
+- M2 repository and database tooling foundation, including real PostgreSQL verification: PASS.
+- The executable definitions in `ALSAMAD_DATABASE_ARCHITECTURE.md` section 5.1 are authoritative for all M3 columns and rules.
+
+### Artifacts
+
+- `src/db/schema.ts`
+- `drizzle/0001_global_locales_geography.sql`
+- `drizzle/meta/_journal.json`
+- `scripts/db-seed.mjs`
+- `scripts/db-verify.mjs`
+- Database tests authorized below
+- Schema diff; constraint, trigger, index, and seed inventories; and real PostgreSQL evidence
+
+### Allowed files
+
+Implementation may modify only:
+
+- `src/db/schema.ts`
+- `src/db/ids.ts`, only if required without changing UUIDv7 semantics
+- `drizzle/0001_global_locales_geography.sql`
+- `drizzle/meta/_journal.json`
+- `scripts/db-seed.mjs`
+- `scripts/db-verify.mjs`
+- `tests/database-foundation.test.mjs`
+- one new focused database test file, if required
+- `package.json`, only if a verification command is strictly required
+
+No other file may change without first proving necessity and obtaining scope approval.
+
+### Database changes allowed
+
+M3 authorizes exactly two Release 1 physical tables: `locales` and `geographic_areas`. Their exact columns, types, nullability, defaults, checks, unique constraints, foreign keys, indexes, immutability rules, and deletion behavior are defined in `ALSAMAD_DATABASE_ARCHITECTURE.md` sections 5.1.1–5.1.3. No infrastructure bookkeeping table may consume or exceed the approved 30-table boundary.
+
+Direct self-reference is prevented by checks. Multi-level locale fallback and geographic hierarchy cycles are prevented by PostgreSQL constraint triggers that are `DEFERRABLE INITIALLY IMMEDIATE`, inspect the complete ancestor chain, and fail the transaction on any cycle. The migration contains the trigger functions and triggers, and real PostgreSQL tests cover their behavior.
+
+### Seed authorization
+
+The seed contains exactly the two independently rooted, enabled locales defined in the database architecture:
+
+- Arabic: `ar`, `Arab`, `rtl`, sort order 10, no fallback.
+- English: `en`, `Latn`, `ltr`, sort order 20, no fallback.
+
+Both use deterministic application-generated UUIDv7 identifiers and persist exactly once under repeated seed execution. No geographic seed data is authorized.
+
+### Application capabilities
+
+This phase adds typed database access and verification only. It does not authorize UI, routes, public APIs, runtime locale switching, provider integration, or public geographic lookup.
+
+### Admin capabilities
+
+None. Countries, regions, and cities require a separately approved import or administrative workflow later.
+
+### Security requirements
+
+- Retain M2 database safety guards and reject unsafe database targets.
+- Enforce canonical identity, hierarchy, cycle, coordinate, direction, country consistency, and deletion rules in PostgreSQL, not only application code.
+- Use `ON DELETE RESTRICT`; prohibit cascade deletion and physical deletion while descendants or dependent configuration exist.
+- Keep identifiers provider-independent and do not persist secrets or unnecessary user location.
+- Treat `id` as immutable, `code` as immutable after reference, and `language_tag` changes as explicit administrative migrations.
+
+### QA requirements
+
+- `npm run format:check`
+- `npm run lint`
+- `npm run typecheck`
+- `npm run build`
+- `npm run db:up`
+- `npm run db:safety`
+- `npm run db:migrate`
+- `npm run db:seed` twice
+- `npm run test:db`
+- `npm run db:check`
+- Real PostgreSQL constraint, trigger, schema, and table-count verification
+- `git diff --check`
+- `npm run db:down` while preserving the named volume
+
+Migration reruns must be safe. All M2 verification remains green. Tests must prove UUIDv7 persistence, UTC timestamps, UTF-8 and Arabic/English round-trip, valid `rtl`/`ltr`, and rejection of every invalid case in the acceptance criteria.
+
+### Observability requirements
+
+Database verification must emit actionable pass/fail evidence without secrets or religious/user behavior. Migration failure, constraint rejection, trigger rejection, seed counts, table count, and clean shutdown must be visible in local/test output. M3 adds no production analytics or product instrumentation.
+
+### Analytics requirements
+
+None. Locale and geographic records are configuration, not user analytics. No user-location telemetry or worship measurement is authorized.
+
+### Acceptance criteria
+
+M3 passes only when:
+
+- exactly two domain tables and zero unauthorized infrastructure tables exist;
+- both schemas exactly match the approved section 5.1 contract;
+- Arabic and English seed locales each exist exactly once and no geographic row is seeded;
+- repeated migration and seed execution is safe and seed execution is idempotent;
+- UUIDv7, UTC timestamps, UTF-8, Arabic and English round-trip, and `rtl`/`ltr` values persist correctly;
+- invalid direction and locale self-fallback fail;
+- a multi-level locale fallback cycle fails;
+- geographic self-parenting and a multi-level geographic cycle fail;
+- invalid hierarchy type and country-code inconsistency fail;
+- invalid latitude or longitude and a city without a time zone fail;
+- parent deletion with descendants fails;
+- the physical table-count query returns exactly 2 domain tables;
+- all existing M2 and repository verification is green.
+
+### Completion evidence
+
+Return the exact migration file; schema diff; inventories of constraints, triggers, indexes, and seeds; real PostgreSQL command results; the physical table-count query and result; cycle- and hierarchy-rejection evidence; seed-idempotency evidence; repository verification results; `git diff --check`; and clean shutdown evidence preserving the database volume.
+
+### Rollback/recovery
+
+Production migrations remain forward-only. Before release, failure recovery uses a disposable local/test database or restoration of the preserved named volume from a known-good backup; it must not use destructive ad hoc rollback against production. A corrective forward migration requires explicit review and must preserve canonical identifiers. Failed seed transactions roll back atomically and may be rerun safely.
+
+### Next-phase handoff
+
+After every M3 acceptance criterion passes, hand off the two stable canonical identities to **M4 — Content Integrity Foundation**. This contract does not authorize M4 implementation.
+
+### Release status
+
+Contract complete; implementation not started by this documentation task.
 
 ## Phase 4: Content Integrity foundation
 
@@ -700,8 +826,8 @@ Quran.Foundation is the approved primary Quran provider through `QuranContentPro
 - M0.5 Quran.Foundation Architecture Alignment
 - M1 Release 1 Scope Frozen
 - M2 Database Foundation Verified
-- M3 Content Integrity Operational
-- M4 Quran Foundation Verified
+- M3 Global Locales and Regional Configuration Verified
+- M4 Content Integrity Foundation Operational
 - M5 Devotional Content Operational
 - M6 Editorial Operations Ready
 - M7 Deterministic Search Ready
