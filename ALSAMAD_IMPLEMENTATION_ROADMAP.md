@@ -774,6 +774,115 @@ After `M5 Schema Foundation Verified`, hand the stable schema to **M5.2 — Prov
 
 Architecture contract complete; implementation not started by this documentation task. No M5 PASS label is earned by documentation alone.
 
+### M5.2 — Provider-Independent Import Harness and Controlled Dry Run
+
+This is the new explicit authorization named by the Next-phase handoff above. It is a documentation-only architecture contract: it authorizes no code, migration, test, adapter, credential, fetch, import, or seed. `M5 Schema Foundation Verified` (M5.1) must already be `PASS` before any implementation against this contract begins.
+
+**Objective.** Define the exact executable contract for a provider-independent Quran import harness that can support Quran.Foundation initially without coupling ALSAMAD canonical identity to provider IDs.
+
+**Included scope.** Provider-independent import contracts; the import manifest schema in `ALSAMAD_DATABASE_ARCHITECTURE.md` sections 5.3.8 and 5.3.10; the adapter interface below; the quarantine and staging workflow in database architecture 5.3.11; dry-run execution; reconciliation; checkpoint and retry behavior; idempotency; withdrawal and deletion handling; and import evidence/audit outputs.
+
+**Explicitly excluded scope.** Production activation; public Quran publication; real Quran.Foundation credentials (only placeholder/synthetic sandbox configuration is authorized); real provider fetch or real content import; Quran.Foundation Search API integration; OAuth/User API integration; audio ingestion; offline packs; permanent provider caching; embeddings, RAG, training, or semantic indexing of any provider or canonical content; UI or admin UI; and any new physical database table. M5.2 authorizes zero tables beyond the frozen 30-table catalog; the manifest, quarantine, checkpoint, and reconciliation artifacts remain non-table JSON/object-storage artifacts exactly as scoped in database architecture 5.3.8 and 5.3.10–5.3.11.
+
+### M5.2 provider adapter interface
+
+The Quran.Foundation adapter, and any future provider adapter, implements exactly this interface behind the existing provider-independent `QuranContentProvider` port defined in `ALSAMAD_API_ARCHITECTURE.md`'s M0.5 Quran provider boundary section:
+
+| Method | Return contract |
+| --- | --- |
+| `discoverResources()` | List of resource descriptors (type, `provider_resource_id`, `provider_resource_version`, declared counts) with no content payload; read-only, no side effects. |
+| `fetchResourceMetadata(resourceRef)` | Single resource's HTTP-safe metadata (version token, counts, provider-supplied checksums if any); never full content. |
+| `fetchPage(resourceRef, cursor)` / `fetchBatch(resourceRef, cursor)` | One bounded page/batch of raw provider records plus a next-cursor and byte/row counts; writes only to encrypted quarantine, never to canonical or staging tables. |
+| `normalizeProviderRecord(rawRecord)` | A structurally normalized record matching the manifest's declared shape, plus a computed normalized checksum; must preserve exact canonical Quran UTF-8 bytes unchanged. |
+| `mapProviderIdentity(normalizedRecord)` | A proposed alias mapping (`provider_code`, `resource_type`, `external_id`, `provider_version`) to an existing canonical row or a deterministic new-row candidate; never a canonical UUID assignment by itself. |
+| `validateProviderRecord(normalizedRecord)` | Pass/fail plus the list of violated rules; failure routes the record to quarantine, never to staging. |
+| `getVersionToken(resourceRef)` | Opaque provider version/snapshot token used to detect drift and force a new manifest. |
+| `getDeletionOrWithdrawalSignals(resourceRef)` | List of provider-reported deletion/withdrawal events since a given checkpoint; feeds the `withdrawn`/`deleted` state transitions. |
+| `verifyCompleteness(resourceType, expectedCounts)` | Pass/fail plus the exact count and locator diff, feeding reconciliation evidence. |
+| `produceAttribution(resourceRef)` | The exact required attribution text/reference for the resource; never invented or paraphrased. |
+| `close()` / `cleanup()` | Releases connections/credentials and clears in-memory secrets; idempotent. |
+
+The adapter must never: create ALSAMAD canonical IDs directly from provider IDs; publish content; bypass a license gate; persist secrets in logs; silently normalize canonical Quran text; or convert a provider error into a success result.
+
+### M5.2 import state machine
+
+`created` → `awaiting_source_approval` → `awaiting_license_approval` → `ready` → `fetching` → `quarantined` → `validating` → `normalized` → `staged` → `reconciling` → `dry_run_passed` | `dry_run_failed` → `awaiting_scholarly_approval` → `blocked` | `withdrawn` | `deleted` | `expired` | `superseded`.
+
+- `created`: manifest drafted; no fetch attempted.
+- `awaiting_source_approval`: blocked on the Phase 5 source-selection gate.
+- `awaiting_license_approval`: blocked on the Phase 5 legal/license gate.
+- `ready`: all pre-fetch approvals recorded; fetch not yet started.
+- `fetching`: adapter retrieving pages/batches into quarantine.
+- `quarantined`: raw response held in encrypted temporary storage pending validation.
+- `validating`: schema and checksum validation in progress.
+- `normalized`: structure/metadata normalized; canonical text bytes unchanged.
+- `staged`: loaded into transaction-scoped or disposable staging outside the 30-table catalog.
+- `reconciling`: counts, locators, checksums, and license/attribution evidence being compared.
+- `dry_run_passed` / `dry_run_failed`: terminal dry-run outcome; `dry_run_passed` still publishes nothing.
+- `awaiting_scholarly_approval`: reconciliation passed; awaiting named reviewer sign-off, still pre-activation.
+- `blocked`: any unresolved gate failure; requires a new manifest or decision to proceed.
+- `withdrawn`: a provider or rights withdrawal signal was received for this manifest's resource.
+- `deleted`: quarantine/staging payload purged, by retention expiry or provider deletion signal.
+- `expired`: retention deadline passed without activation; payload purged, manifest kept only as evidence.
+- `superseded`: a newer manifest for the same resource/version lineage has replaced this one.
+
+No production activation state (for example `activated` or `published`) is authorized by M5.2. Transitions are forward-only except into `blocked`, `withdrawn`, `deleted`, `expired`, or `superseded`, none of which may re-enter an earlier non-terminal state.
+
+### M5.2 dry-run output contract
+
+Every dry run emits, machine-readable (JSON) and human-readable (report), the same evidence set: manifest summary (`manifest_id`, `provider_code`, `resource_type`, `provider_resource_version`, `dry_run = true`); provider/resource identity and mapped canonical identity candidates; expected vs. actual counts; source and normalized checksums; non-blocking warnings; blocking errors (schema, checksum, rights, duplicate, or count failures); the reconciliation matrix defined in database architecture 5.3.11; unmapped and duplicate records; the retention deadline; the license decision and its status; the scholarly review status (always pre-approval in M5.2); publication eligibility, which is always `false` in M5.2; and rollback evidence describing what was discarded or purged and when.
+
+### M5.2 security and observability requirements
+
+Security: provider credentials remain server-side, environment-separated, and least-privilege scoped, and are never logged or embedded in a manifest, fixture, or patch; M5.2 authorizes no real credential, only placeholder/synthetic sandbox configuration. Secrets are redacted from every log, checkpoint, and evidence artifact. Every fetch attempt carries a correlation/request ID. No raw token is persisted. Idempotency keys and checkpoint tokens provide replay resistance. Adapters honor provider quotas with bounded retry and jitter; sustained limit breach moves the attempt to `blocked`, never a silent skip. Bounded per-request timeouts and a circuit breaker that opens on sustained provider failure force `blocked` rather than indefinite retry.
+
+Observability: emit import run IDs, per-stage timings, request counts, retry counts, failure categories, provider-version drift, checksum drift, deletion/withdrawal events, retention-expiry proximity, dry-run pass/fail outcome, and provider quota/cost visibility. All logs are privacy-safe: no credentials, no full Quran or provider payload, no user data.
+
+### M5.2 allowed implementation files
+
+This is a documentation-only contract; no file below is created by this task. When a separately authorized implementation contract follows, it may modify only:
+
+- `src/lib/quran/import/contracts.ts`
+- `src/lib/quran/import/manifest.ts`
+- `src/lib/quran/import/state-machine.ts`
+- `src/lib/quran/import/reconciliation.ts`
+- `src/lib/quran/import/checkpoints.ts`
+- `src/lib/providers/quran-foundation/adapter.ts`
+- `src/lib/providers/quran-foundation/types.ts`
+- `scripts/quran-import.mjs`
+- `scripts/quran-import-verify.mjs`
+- focused tests under `tests/quran-import/`
+- `.env.example` and `src/db/env.ts`, only if credentials are later separately authorized, with placeholders only
+- `package.json` and `package-lock.json`, only with proven necessity
+
+This list refines, for this specific implementation unit, the general `src/lib/quran/import/` and `src/lib/providers/quran-foundation/` grants already recorded in this phase's "Allowed implementation files" section; it does not add a file class beyond what that section already authorizes.
+
+### M5.2 acceptance gates
+
+Separated and sequential; passing one does not imply the next passes:
+
+1. Contract complete — this document.
+2. Provider credentials available — controlled sandbox credentials provisioned server-side.
+3. Legal/license approval — rights, attribution, retention, commercial-use, and redistribution decisions recorded.
+4. Source-selection approval — exact resource/edition/version approved for controlled use.
+5. Controlled sandbox fetch — adapter fetch proven against sandbox/staging only.
+6. Manifest generation — an immutable manifest is produced matching database architecture 5.3.10.
+7. Quarantine validation — schema, checksum, and size validation proven on quarantined payloads.
+8. Dry-run import — the full staged pipeline executes with `dry_run = true`.
+9. Reconciliation pass — the reconciliation matrix shows zero unresolved blocking mismatch.
+10. Scholarly review — named reviewers sign off on the dry-run evidence.
+11. Production activation — outside M5.2; requires all prior gates plus the Phase 5 production activation gate (`M5 Quran Import Activated`).
+
+This refines gate 6 (`M5 Provider Import Dry Run Verified`) from the M5 acceptance table above into its component sub-gates; it does not replace or relax that table.
+
+### M5.2 open decisions
+
+Left unresolved until Quran.Foundation replies: permanent storage rights beyond the seven-day default; exact attribution wording; commercial-use rights; translation-specific licenses; audio usage rights; Search API production access; exact quotas; long-term caching; offline use; redistribution rights; provider SLA; deletion/exit rights; and the approved legally independent fallback source. None of these unresolved items blocks this architecture contract; each blocks only the acceptance gate that depends on it.
+
+### M5.2 release status
+
+Architecture contract complete; implementation not started by this documentation task. No M5.2 PASS label is authorized until a separately approved implementation contract executes this unit and its dry-run gate passes on real PostgreSQL and a controlled sandbox provider.
+
 ## Phase 6: Devotional content and Editorial General Dua
 
 - Objective

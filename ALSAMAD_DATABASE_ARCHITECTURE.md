@@ -572,6 +572,50 @@ Publication is a release-level atomic transition, not row-by-row best effort. A 
 
 Provider or rights withdrawal first disables fetching and public serving, records the event in operational audit evidence, and transactionally changes affected M4 editions/passage texts and M5 published rows to `withdrawn`. Dependents become ineligible even if propagation is still processing. Hard deletion is restricted. When a license requires payload deletion, the recovery process erases only the licensed payload after withdrawal and preserves only lawful minimum identity, checksum, attribution, manifest, decision, and audit evidence. Quran.Foundation material defaults to no more than seven days of cache/retention unless written durable rights or legally independent licensing is documented. Provider API availability alone never establishes redistribution, commercial, permanent-storage, or rehosting rights.
 
+### 5.3.10 Executable M5.2 import manifest field contract
+
+M5.2 defines the exact fields of the immutable import manifest introduced narratively in 5.3.8. The manifest remains a version-controlled JSON artifact, never a physical table.
+
+| Field | Type/form | Contract |
+| --- | --- | --- |
+| `manifest_id` | UUIDv7 string | Immutable identity of one manifest version; never reused across a content or version change. |
+| `provider_code` | lowercase string | External provider namespace matching the `editions.provider_code`/`licenses.provider_code` vocabulary; never canonical identity. |
+| `provider_environment` | closed enum `sandbox`, `staging`, `production` | Declares controlled-vs-production origin; M5.2 authorizes only `sandbox`/`staging` manifests. |
+| `resource_type` | closed enum `surah`, `ayah`, `ayah_text`, `structural_marker`, `translation_edition`, `translation_text` | Matches the M5 table it targets; never a seventh resource kind. |
+| `provider_resource_id` | opaque string | Provider-scoped external alias; never a primary or canonical key. |
+| `provider_resource_version` | opaque string | Provider snapshot/resource version; a changed value forces a new manifest. |
+| `requested_at` | `timestamptz` UTC | Instant the fetch was requested. |
+| `fetched_at` | `timestamptz` UTC, nullable | Instant the resource was retrieved; null while pending. |
+| `source_endpoint` | string (URL or documented endpoint identity) | HTTPS endpoint or internal endpoint identity; never embeds credentials. |
+| `http_status`, `http_content_type`, `http_etag`, `http_last_modified` | safe HTTP metadata | Recorded only when non-secret; no header containing a token or cookie is persisted. |
+| `source_checksum` | lowercase SHA-256 hex | Exact transport/file bytes before parsing. |
+| `normalized_checksum` | lowercase SHA-256 hex, nullable | Present only for resources with a normalized-text counterpart (ayah/translation text); computed under the existing M4 NFC contract. |
+| `license_decision_ref` | reference identifier | Points to the recorded license/attribution/retention decision; never embeds contract text. |
+| `retention_decision` | closed enum matching `licenses.retention_policy` | `permanent`, `time_limited`, or `no_storage`; defaults to the seven-day `time_limited` boundary absent written permission. |
+| `attribution_decision` | reference to approved attribution text | Nonblank pointer; never invented at import time. |
+| `commercial_use_decision` | explicit boolean/decision reference | Unknown is treated as denied. |
+| `redistribution_decision` | explicit boolean/decision reference | Unknown is treated as denied. |
+| `selected_edition_or_translation_ref` | reference identifier | Points to the target `editions.id` or `quran_translation_editions.id` candidate; never invents a new canonical identity from provider data. |
+| `expected_counts`, `actual_counts` | bounded JSON count map | Per-resource and per-surah expected vs. observed row/byte counts, used only for reconciliation; never persisted as canonical rows. |
+| `import_mode` | closed enum `full`, `incremental`, `correction` | Declares the scope of the attempt. |
+| `dry_run` | boolean | `true` for every M5.2 manifest; `false` is out of scope until the production activation gate. |
+| `status` | closed enum matching the M5.2 import state machine | See `ALSAMAD_IMPLEMENTATION_ROADMAP.md`'s M5.2 import state machine. |
+| `failure_reason` | bounded text, nullable | Present only when `status` denotes failure; never contains secrets or full payload. |
+| `created_by_process` | service/process identity string | Identifies the server-side job/service account; never a personal credential. |
+| `software_version` | semantic version string | Adapter/import-harness release identifier. |
+| `schema_version` | positive integer | Manifest schema-contract version; a changed value requires a compatible reader. |
+| `retry_metadata` | bounded JSON (`attempt_count`, `last_checkpoint_token`, `last_checkpoint_at`) | See the idempotency contract in 5.3.11. |
+| `withdrawal_deletion_status` | closed enum `none`, `withdrawn`, `deleted` | Mirrors provider withdrawal/deletion signals for the resource. |
+| `evidence_refs` | bounded array of identifiers | Points to the reconciliation report ID, quarantine object ID, and audit/correlation IDs; never the payload itself. |
+
+### 5.3.11 Quarantine, idempotency, and reconciliation contract (M5.2)
+
+**Quarantine.** Raw provider responses are held only in encrypted, access-limited, non-public temporary storage keyed by an import-attempt UUIDv7; quarantine is never a domain table and is never generally queryable. Default retention is seven days from `fetched_at` unless the recorded `retention_decision` grants a longer written right; expiry triggers automatic deletion. Logs and evidence redact payload and secrets, keeping only hashes, counts, and identifiers. Each quarantined object is bounded by the adapter's declared maximum payload size; oversized, malformed, or schema-invalid payloads are isolated as `quarantined` and never reach normalization or staging. Quarantined data may never feed general analytics, model training, or embeddings, and is purged, not archived, at retention expiry.
+
+**Idempotency and checkpointing.** The deterministic import run key is the SHA-256 of `(manifest_id, manifest_schema_version, provider_code, provider_snapshot_version, resource_id, resource_version, adapter_version)`, matching this phase's import execution contract. Repeating a completed key produces no new canonical rows; repeating a failed key resumes only from the last checksum-verified checkpoint recorded in `retry_metadata`. Checkpoints identify attempt, manifest hash, resource, cursor/offset, byte/row counts, rolling checksum, and status, and contain no secret or payload. A changed resource, version, or checksum always starts a new attempt and cannot resume the old one. An attempt idle beyond its declared timeout is a stale run and must be cancelable by an operator without corrupting checkpoint state. Canonical uniqueness in `quran_surahs`, `quran_ayahs`, `quran_structural_markers`, and the alias-duplicate triggers in 5.3.2–5.3.7 remain the final backstop against duplicate canonical rows regardless of import-harness behavior.
+
+**Reconciliation evidence.** A completed dry run emits, per manifest, the expected-vs-actual surah and ayah counts, per-surah ayah counts, global-sequence continuity, duplicate and missing locators, checksum mismatches, translation coverage, orphaned provider records, unmatched provider aliases, withdrawn/deleted provider records, license/attribution completeness, and retention-deadline compliance. Any mismatch is a blocking failure recorded in `failure_reason`; reconciliation evidence is retained as audit evidence and is never silently waived.
+
 ## 5.4 Devotional content and translation — 4 tables
 
 | Table                         | Purpose and exact journey                                                          | Essential constraints                                                                                                              | Why it cannot wait                                                                                          |
