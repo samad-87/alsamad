@@ -29,6 +29,13 @@
       "when": 1785796803000,
       "tag": "0003_fix_m4_source_reference_trigger",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1785796804000,
+      "tag": "0004_quran_data_model",
+      "breakpoints": true
     }
   ]
 }

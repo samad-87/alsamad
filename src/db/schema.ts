@@ -361,3 +361,311 @@ export const sourceReferences = pgTable("source_references", {
 });
 
 export const release1DomainTableCount = 10 as const;
+
+export const quranSurahs = pgTable(
+  "quran_surahs",
+  {
+    id: uuid("id").primaryKey(),
+    workId: uuid("work_id")
+      .notNull()
+      .references(() => works.id, {
+        onDelete: "restrict",
+        onUpdate: "restrict",
+      }),
+    passageId: uuid("passage_id")
+      .notNull()
+      .references(() => passages.id, {
+        onDelete: "restrict",
+        onUpdate: "restrict",
+      }),
+    canonicalKey: varchar("canonical_key", { length: 64 }).notNull(),
+    surahNumber: smallint("surah_number").notNull(),
+    ayahCount: smallint("ayah_count").notNull(),
+    nameArabic: varchar("name_arabic", { length: 120 }).notNull(),
+    revelationOrder: smallint("revelation_order"),
+    revelationPlace: varchar("revelation_place", { length: 16 }),
+    providerAliases: jsonb("provider_aliases").notNull().default([]),
+    sourceRecordChecksum: varchar("source_record_checksum", {
+      length: 64,
+    }).notNull(),
+    publicationState: varchar("publication_state", { length: 16 })
+      .notNull()
+      .default("draft"),
+    publishedAt: timestamp("published_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    unique("uq_quran_surahs__work_number").on(table.workId, table.surahNumber),
+    unique("uq_quran_surahs__passage").on(table.passageId),
+    unique("uq_quran_surahs__canonical_key").on(table.canonicalKey),
+    unique("uq_quran_surahs__revelation_order").on(table.revelationOrder),
+    index("ix_quran_surahs__work_number").on(table.workId, table.surahNumber),
+    index("ix_quran_surahs__publication_state").on(table.publicationState),
+    index("ix_quran_surahs__provider_aliases").using(
+      "gin",
+      table.providerAliases,
+    ),
+  ],
+);
+
+export const quranAyahs = pgTable(
+  "quran_ayahs",
+  {
+    id: uuid("id").primaryKey(),
+    surahId: uuid("surah_id")
+      .notNull()
+      .references(() => quranSurahs.id, {
+        onDelete: "restrict",
+        onUpdate: "restrict",
+      }),
+    passageId: uuid("passage_id")
+      .notNull()
+      .references(() => passages.id, {
+        onDelete: "restrict",
+        onUpdate: "restrict",
+      }),
+    canonicalKey: varchar("canonical_key", { length: 80 }).notNull(),
+    ayahNumber: smallint("ayah_number").notNull(),
+    globalSequenceNumber: smallint("global_sequence_number").notNull(),
+    providerAliases: jsonb("provider_aliases").notNull().default([]),
+    sourceRecordChecksum: varchar("source_record_checksum", {
+      length: 64,
+    }).notNull(),
+    publicationState: varchar("publication_state", { length: 16 })
+      .notNull()
+      .default("draft"),
+    publishedAt: timestamp("published_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    unique("uq_quran_ayahs__surah_number").on(table.surahId, table.ayahNumber),
+    unique("uq_quran_ayahs__passage").on(table.passageId),
+    unique("uq_quran_ayahs__canonical_key").on(table.canonicalKey),
+    unique("uq_quran_ayahs__global_sequence").on(table.globalSequenceNumber),
+    index("ix_quran_ayahs__surah_number").on(table.surahId, table.ayahNumber),
+    index("ix_quran_ayahs__publication_state").on(table.publicationState),
+    index("ix_quran_ayahs__provider_aliases").using(
+      "gin",
+      table.providerAliases,
+    ),
+  ],
+);
+
+export const quranAyahTexts = pgTable(
+  "quran_ayah_texts",
+  {
+    id: uuid("id").primaryKey(),
+    editionId: uuid("edition_id")
+      .notNull()
+      .references(() => editions.id, {
+        onDelete: "restrict",
+        onUpdate: "restrict",
+      }),
+    ayahId: uuid("ayah_id")
+      .notNull()
+      .references(() => quranAyahs.id, {
+        onDelete: "restrict",
+        onUpdate: "restrict",
+      }),
+    passageTextId: uuid("passage_text_id")
+      .notNull()
+      .references(() => passageTexts.id, {
+        onDelete: "restrict",
+        onUpdate: "restrict",
+      }),
+    sourceRecordChecksum: varchar("source_record_checksum", {
+      length: 64,
+    }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    unique("uq_quran_ayah_texts__edition_ayah").on(
+      table.editionId,
+      table.ayahId,
+    ),
+    unique("uq_quran_ayah_texts__passage_text").on(table.passageTextId),
+    index("ix_quran_ayah_texts__ayah").on(table.ayahId),
+  ],
+);
+
+export const quranStructuralMarkers = pgTable(
+  "quran_structural_markers",
+  {
+    id: uuid("id").primaryKey(),
+    editionId: uuid("edition_id")
+      .notNull()
+      .references(() => editions.id, {
+        onDelete: "restrict",
+        onUpdate: "restrict",
+      }),
+    parentMarkerId: uuid("parent_marker_id"),
+    markerKind: varchar("marker_kind", { length: 16 }).notNull(),
+    markerNumber: smallint("marker_number").notNull(),
+    canonicalKey: varchar("canonical_key", { length: 96 }).notNull(),
+    startAyahId: uuid("start_ayah_id")
+      .notNull()
+      .references(() => quranAyahs.id, {
+        onDelete: "restrict",
+        onUpdate: "restrict",
+      }),
+    endAyahId: uuid("end_ayah_id")
+      .notNull()
+      .references(() => quranAyahs.id, {
+        onDelete: "restrict",
+        onUpdate: "restrict",
+      }),
+    providerAliases: jsonb("provider_aliases").notNull().default([]),
+    sourceRecordChecksum: varchar("source_record_checksum", {
+      length: 64,
+    }).notNull(),
+    publicationState: varchar("publication_state", { length: 16 })
+      .notNull()
+      .default("draft"),
+    publishedAt: timestamp("published_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    foreignKey({
+      name: "fk_quran_structural_markers__parent",
+      columns: [table.parentMarkerId],
+      foreignColumns: [table.id],
+    })
+      .onDelete("restrict")
+      .onUpdate("restrict"),
+    unique("uq_quran_structural_markers__kind_number").on(
+      table.editionId,
+      table.markerKind,
+      table.markerNumber,
+    ),
+    unique("uq_quran_structural_markers__canonical_key").on(
+      table.editionId,
+      table.canonicalKey,
+    ),
+    index("ix_quran_structural_markers__range").on(
+      table.editionId,
+      table.startAyahId,
+      table.endAyahId,
+    ),
+    index("ix_quran_structural_markers__parent").on(table.parentMarkerId),
+    index("ix_quran_structural_markers__publication_state").on(
+      table.publicationState,
+    ),
+    index("ix_quran_structural_markers__provider_aliases").using(
+      "gin",
+      table.providerAliases,
+    ),
+  ],
+);
+
+export const quranTranslationEditions = pgTable(
+  "quran_translation_editions",
+  {
+    id: uuid("id").primaryKey(),
+    editionId: uuid("edition_id")
+      .notNull()
+      .references(() => editions.id, {
+        onDelete: "restrict",
+        onUpdate: "restrict",
+      }),
+    localeId: uuid("locale_id")
+      .notNull()
+      .references(() => locales.id, {
+        onDelete: "restrict",
+        onUpdate: "restrict",
+      }),
+    licenseId: uuid("license_id")
+      .notNull()
+      .references(() => licenses.id, {
+        onDelete: "restrict",
+        onUpdate: "restrict",
+      }),
+    translatorName: varchar("translator_name", { length: 300 }).notNull(),
+    methodology: text("methodology").notNull(),
+    reviewStatus: varchar("review_status", { length: 16 })
+      .notNull()
+      .default("pending"),
+    reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    unique("uq_quran_translation_editions__edition").on(table.editionId),
+    index("ix_quran_translation_editions__locale_status").on(
+      table.localeId,
+      table.reviewStatus,
+    ),
+    index("ix_quran_translation_editions__license").on(table.licenseId),
+    index("ix_quran_translation_editions__review_status").on(
+      table.reviewStatus,
+    ),
+  ],
+);
+
+export const quranTranslationTexts = pgTable(
+  "quran_translation_texts",
+  {
+    id: uuid("id").primaryKey(),
+    translationEditionId: uuid("translation_edition_id")
+      .notNull()
+      .references(() => quranTranslationEditions.id, {
+        onDelete: "restrict",
+        onUpdate: "restrict",
+      }),
+    ayahId: uuid("ayah_id")
+      .notNull()
+      .references(() => quranAyahs.id, {
+        onDelete: "restrict",
+        onUpdate: "restrict",
+      }),
+    passageTextId: uuid("passage_text_id")
+      .notNull()
+      .references(() => passageTexts.id, {
+        onDelete: "restrict",
+        onUpdate: "restrict",
+      }),
+    sourceRecordChecksum: varchar("source_record_checksum", {
+      length: 64,
+    }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    unique("uq_quran_translation_texts__edition_ayah").on(
+      table.translationEditionId,
+      table.ayahId,
+    ),
+    unique("uq_quran_translation_texts__passage_text").on(table.passageTextId),
+    index("ix_quran_translation_texts__ayah").on(table.ayahId),
+  ],
+);
+
+export const m5DomainTableCount = 6 as const;
+export const release1DomainTableCountAfterM5 = 16 as const;

@@ -80,6 +80,12 @@ try {
       "locales",
       "passage_texts",
       "passages",
+      "quran_ayah_texts",
+      "quran_ayahs",
+      "quran_structural_markers",
+      "quran_surahs",
+      "quran_translation_editions",
+      "quran_translation_texts",
       "source_references",
       "works",
     ],
@@ -228,28 +234,44 @@ try {
     );
   }
 
+  const m5Tables = [
+    "quran_surahs",
+    "quran_ayahs",
+    "quran_ayah_texts",
+    "quran_structural_markers",
+    "quran_translation_editions",
+    "quran_translation_texts",
+  ];
+  for (const table of m5Tables) {
+    assert.equal(
+      (
+        await queryClient`select count(*)::int as count from ${queryClient(table)}`
+      )[0]?.count,
+      0,
+    );
+  }
+
   const extension =
     await queryClient`select extname from pg_extension where extname = 'pgcrypto'`;
   assert.equal(extension.length, 1);
   const fks = await queryClient`
-  select count(*)::int as count
-  from pg_constraint c
-  join pg_namespace n on n.oid = c.connamespace
-  join pg_class source_table on source_table.oid = c.conrelid
-  where n.nspname = 'public'
-    and c.contype = 'f'
-    and source_table.relname in (
-      'licenses',
-      'works',
-      'editions',
-      'passages',
-      'passage_texts',
-      'content_items',
-      'content_revisions',
-      'source_references'
-    )
-`;
-assert.equal(fks[0]?.count, 12);
+    select count(*)::int as count from pg_constraint c
+    join pg_namespace n on n.oid=c.connamespace
+    join pg_class source_table on source_table.oid=c.conrelid
+    where n.nspname='public'
+      and c.contype='f'
+      and source_table.relname in (
+        'licenses',
+        'works',
+        'editions',
+        'passages',
+        'passage_texts',
+        'content_items',
+        'content_revisions',
+        'source_references'
+      )
+  `;
+  assert.equal(fks[0]?.count, 12);
 
   await queryClient
     .begin(async (transaction) => {
@@ -306,12 +328,152 @@ assert.equal(fks[0]?.count, 12);
     },
   );
 
-  console.log("PASS schema tables: exactly 10 cumulative Release 1 tables");
+  const insertM5Foundation = async (transaction) => {
+    const fixture = {
+      license: "0198a7b0-6000-7000-8000-000000000001",
+      work: "0198a7b0-6000-7000-8000-000000000002",
+      arabicEdition: "0198a7b0-6000-7000-8000-000000000003",
+      translationEdition: "0198a7b0-6000-7000-8000-000000000004",
+      rootPassage: "0198a7b0-6000-7000-8000-000000000005",
+      surahPassage: "0198a7b0-6000-7000-8000-000000000006",
+      ayahPassage: "0198a7b0-6000-7000-8000-000000000007",
+      arabicPassageText: "0198a7b0-6000-7000-8000-000000000008",
+      translatedPassageText: "0198a7b0-6000-7000-8000-000000000009",
+      surah: "0198a7b0-6000-7000-8000-00000000000a",
+      ayah: "0198a7b0-6000-7000-8000-00000000000b",
+      ayahText: "0198a7b0-6000-7000-8000-00000000000c",
+      marker: "0198a7b0-6000-7000-8000-00000000000d",
+      translation: "0198a7b0-6000-7000-8000-00000000000e",
+      translationText: "0198a7b0-6000-7000-8000-00000000000f",
+    };
+    const exactArabic = "نَصٌّ عَرَبِيٌّ تَجْرِيبِيٌّ\r\nغَيْرُ دِينِيٍّ";
+    const translated = "Synthetic non-religious fixture";
+    const checksums = (
+      await transaction`select alsamad_exact_sha256(${exactArabic}) exact_arabic, alsamad_normalized_sha256(${exactArabic}) normalized_arabic, alsamad_exact_sha256(${translated}) exact_translation, alsamad_normalized_sha256(${translated}) normalized_translation`
+    )[0];
+    await transaction`insert into licenses(id,provider_code,license_key,version,name,rights_scope,attribution_text,retention_policy,redistribution_allowed,effective_from,status)
+      values(${fixture.license}::uuid,'synthetic','m5-test','1','Synthetic test license','permission','Synthetic attribution','permanent',true,current_timestamp-'1 day'::interval,'active')`;
+    await transaction`insert into works(id,canonical_key,work_type,title,original_language_code) values(${fixture.work}::uuid,'synthetic-quran-work','quran','Synthetic Quran-shaped work','ar')`;
+    await transaction`insert into editions(id,work_id,license_id,edition_key,version,language_code,script_code,display_name,provider_code,provider_edition_id,import_version,source_manifest_checksum)
+      values(${fixture.arabicEdition}::uuid,${fixture.work}::uuid,${fixture.license}::uuid,'synthetic-ar','1','ar','Arab','Synthetic Arabic edition','synthetic','ar-alias','test-v1',repeat('a',64)),
+      (${fixture.translationEdition}::uuid,${fixture.work}::uuid,${fixture.license}::uuid,'synthetic-en','1','en','Latn','Synthetic translation edition','synthetic','en-alias','test-v1',repeat('b',64))`;
+    await transaction`insert into passages(id,work_id,parent_passage_id,canonical_locator,passage_type,sequence_number,depth) values
+      (${fixture.rootPassage}::uuid,${fixture.work}::uuid,null,'quran','work',1,0),
+      (${fixture.surahPassage}::uuid,${fixture.work}::uuid,${fixture.rootPassage}::uuid,'surah:1','chapter',1,1),
+      (${fixture.ayahPassage}::uuid,${fixture.work}::uuid,${fixture.surahPassage}::uuid,'1:1','verse',1,2)`;
+    await transaction`insert into passage_texts(id,edition_id,passage_id,text_content,normalized_checksum,source_checksum) values
+      (${fixture.arabicPassageText}::uuid,${fixture.arabicEdition}::uuid,${fixture.ayahPassage}::uuid,${exactArabic},${checksums.normalized_arabic},${checksums.exact_arabic}),
+      (${fixture.translatedPassageText}::uuid,${fixture.translationEdition}::uuid,${fixture.ayahPassage}::uuid,${translated},${checksums.normalized_translation},${checksums.exact_translation})`;
+    await transaction`insert into quran_surahs(id,work_id,passage_id,canonical_key,surah_number,ayah_count,name_arabic,source_record_checksum)
+      values(${fixture.surah}::uuid,${fixture.work}::uuid,${fixture.surahPassage}::uuid,'quran:surah:1',1,1,'اسم تجريبي',repeat('c',64))`;
+    await transaction`insert into quran_ayahs(id,surah_id,passage_id,canonical_key,ayah_number,global_sequence_number,source_record_checksum)
+      values(${fixture.ayah}::uuid,${fixture.surah}::uuid,${fixture.ayahPassage}::uuid,'quran:ayah:1:1',1,1,repeat('d',64))`;
+    await transaction`insert into quran_ayah_texts(id,edition_id,ayah_id,passage_text_id,source_record_checksum)
+      values(${fixture.ayahText}::uuid,${fixture.arabicEdition}::uuid,${fixture.ayah}::uuid,${fixture.arabicPassageText}::uuid,repeat('e',64))`;
+    await transaction`insert into quran_structural_markers(id,edition_id,marker_kind,marker_number,canonical_key,start_ayah_id,end_ayah_id,source_record_checksum)
+      values(${fixture.marker}::uuid,${fixture.arabicEdition}::uuid,'juz',1,'juz:1',${fixture.ayah}::uuid,${fixture.ayah}::uuid,repeat('f',64))`;
+    await transaction`insert into quran_translation_editions(id,edition_id,locale_id,license_id,translator_name,methodology)
+      select ${fixture.translation}::uuid,${fixture.translationEdition}::uuid,id,${fixture.license}::uuid,'Synthetic Translator','Synthetic test methodology' from locales where code='en'`;
+    await transaction`insert into quran_translation_texts(id,translation_edition_id,ayah_id,passage_text_id,source_record_checksum)
+      values(${fixture.translationText}::uuid,${fixture.translation}::uuid,${fixture.ayah}::uuid,${fixture.translatedPassageText}::uuid,repeat('1',64))`;
+    assert.equal(
+      (
+        await transaction`select text_content from passage_texts where id=${fixture.arabicPassageText}::uuid`
+      )[0]?.text_content,
+      exactArabic,
+    );
+    for (const value of Object.values(fixture))
+      assert.equal(uuidVersion(value), 7);
+    return fixture;
+  };
+
+  await assert.rejects(
+    () =>
+      queryClient.begin(async (transaction) => {
+        await transaction`set constraints all deferred`;
+        await insertM5Foundation(transaction);
+        await transaction`set constraints all immediate`;
+        throw new Error("M5 fixture rollback");
+      }),
+    /M5 fixture rollback/,
+  );
+  for (const table of m5Tables) {
+    assert.equal(
+      (
+        await queryClient`select count(*)::int as count from ${queryClient(table)}`
+      )[0]?.count,
+      0,
+    );
+  }
+
+  await expectDatabaseRejection("invalid surah number", async (transaction) => {
+    await transaction`insert into quran_surahs(id,work_id,passage_id,canonical_key,surah_number,ayah_count,name_arabic,source_record_checksum)
+      values('0198a7b0-7000-7000-8000-000000000001','0198a7b0-7000-7000-8000-000000000002','0198a7b0-7000-7000-8000-000000000003','quran:surah:115',115,1,'Synthetic',repeat('a',64))`;
+  });
+  await expectDatabaseRejection("invalid ayah number", async (transaction) => {
+    const fixture = await insertM5Foundation(transaction);
+    await transaction`update quran_ayahs set ayah_number=2,canonical_key='quran:ayah:1:2' where id=${fixture.ayah}::uuid`;
+  });
+  await expectDatabaseRejection(
+    "duplicate ayah locator",
+    async (transaction) => {
+      const fixture = await insertM5Foundation(transaction);
+      await transaction`insert into quran_ayahs(id,surah_id,passage_id,canonical_key,ayah_number,global_sequence_number,source_record_checksum)
+      values('0198a7b0-7000-7000-8000-000000000004',${fixture.surah}::uuid,${fixture.ayahPassage}::uuid,'quran:ayah:1:1',1,2,repeat('a',64))`;
+    },
+  );
+  await expectDatabaseRejection("ayah surah mismatch", async (transaction) => {
+    const fixture = await insertM5Foundation(transaction);
+    await transaction`update passages set canonical_locator='2:1' where id=${fixture.ayahPassage}::uuid`;
+  });
+  await expectDatabaseRejection(
+    "invalid structural marker",
+    async (transaction) => {
+      const fixture = await insertM5Foundation(transaction);
+      await transaction`update quran_structural_markers set end_ayah_id=null where id=${fixture.marker}::uuid`;
+    },
+  );
+  await expectDatabaseRejection(
+    "translation edition linkage",
+    async (transaction) => {
+      const fixture = await insertM5Foundation(transaction);
+      await transaction`update quran_translation_editions set license_id='0198a7b0-7000-7000-8000-000000000005' where id=${fixture.translation}::uuid`;
+    },
+  );
+  await expectDatabaseRejection(
+    "translation text uniqueness",
+    async (transaction) => {
+      const fixture = await insertM5Foundation(transaction);
+      await transaction`insert into quran_translation_texts(id,translation_edition_id,ayah_id,passage_text_id,source_record_checksum)
+        values('0198a7b0-7000-7000-8000-000000000006',${fixture.translation}::uuid,${fixture.ayah}::uuid,${fixture.translatedPassageText}::uuid,repeat('a',64))`;
+    },
+  );
+  await expectDatabaseRejection("M5 checksum mismatch", async (transaction) => {
+    const fixture = await insertM5Foundation(transaction);
+    await transaction`update quran_surahs set source_record_checksum='bad' where id=${fixture.surah}::uuid`;
+  });
+  await expectDatabaseRejection(
+    "M5 publication eligibility",
+    async (transaction) => {
+      const fixture = await insertM5Foundation(transaction);
+      await transaction`update quran_surahs set publication_state='published',published_at=current_timestamp where id=${fixture.surah}::uuid`;
+    },
+  );
+  await expectDatabaseRejection(
+    "M5 restrictive deletion",
+    async (transaction) => {
+      const fixture = await insertM5Foundation(transaction);
+      await transaction`delete from quran_surahs where id=${fixture.surah}::uuid`;
+    },
+  );
+
+  console.log("PASS schema tables: exactly 16 cumulative Release 1 tables");
   console.log(
     "PASS M4: 8 tables, 12 restrictive foreign keys, pgcrypto checksums, zero seed rows",
   );
   console.log("PASS seeds: ar=1, en=1, geographic_areas=0");
-  console.log("Real PostgreSQL M3 verification passed.");
+  console.log("PASS M5.1: 6 Quran tables, synthetic fixtures rolled back");
+  console.log("Real PostgreSQL M3/M4/M5.1 verification passed.");
 } finally {
   await queryClient.end();
 }
