@@ -51,3 +51,35 @@ export const BookIcon = (p: IconProps) => (
     <path d="M4 5.5A3.5 3.5 0 0 1 7.5 2H11v17H7.5A3.5 3.5 0 0 0 4 22V5.5ZM20 5.5A3.5 3.5 0 0 0 16.5 2H13v17h3.5A3.5 3.5 0 0 1 20 22V5.5Z" />
   </Svg>
 );
+export const BookmarkIcon = ({
+  filled = false,
+  ...p
+}: IconProps & { filled?: boolean }) => (
+  <Svg {...p}>
+    <path
+      d="M6 3.5h12a1 1 0 0 1 1 1V21l-7-4-7 4V4.5a1 1 0 0 1 1-1Z"
+      fill={filled ? "currentColor" : "none"}
+    />
+  </Svg>
+);
+export const SettingsIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M4 7h10M18 7h2M4 12h2M10 12h10M4 17h14M22 17h0" />
+    <circle cx="16" cy="7" r="2.2" />
+    <circle cx="8" cy="12" r="2.2" />
+    <circle cx="18" cy="17" r="2.2" />
+  </Svg>
+);
+export const ClockIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <circle cx="12" cy="12" r="8.5" />
+    <path d="M12 7.5V12l3 2" />
+  </Svg>
+);
+export const TargetIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <circle cx="12" cy="12" r="8.5" />
+    <circle cx="12" cy="12" r="3.5" />
+    <path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3" />
+  </Svg>
+);
