@@ -77,6 +77,7 @@ The first release should be deliberately narrow: Quran reading, authenticated du
 6. **Progressive complexity:** Guests can read immediately; preferences and accounts add value but never gate worship content.
 7. **Accessible devotion:** Keyboard navigation, screen readers, reduced motion, scalable Arabic text, high contrast, and low-bandwidth behavior are release requirements.
 8. **AI never becomes an authority:** Generated language is clearly labeled and constrained to verified retrieved evidence with citations.
+9. **Mobile First, Desktop Excellent:** ALSAMAD is a Mobile First product. The phone experience is the permanent reference implementation for every screen, component, interaction, navigation flow, and reading experience; desktop expands that experience with more space, never with additional complexity or a competing design reference. This reflects the expected audience of approximately 85–95% mobile and 5–15% desktop, arriving predominantly from Android and iPhone. See `ALSAMAD_SAKINAH_DESIGN_SYSTEM.md` §2.12 and §43 for the authoritative design contract.
 
 ## 3. Assumptions and clarifications
 
@@ -157,7 +158,9 @@ This section is authoritative for the Core Release 1 daily companion. Approved L
 | Prayer      | الصلاة  | Prayer times, next prayer, method and location controls                |
 | More        | المزيد  | Calendar, tasbeeh, learning, settings and about/trust                  |
 
-On desktop, Calendar and Search may be promoted to the primary header. On mobile, use a restrained bottom navigation with no more than five destinations; Search opens as a global command/search surface.
+Navigation is designed Mobile First: the phone information architecture is authored first, and desktop expands it rather than redefining it. On mobile, use a restrained bottom navigation with no more than five destinations, each reachable one-handed within comfortable thumb reach; Search opens as a global command/search surface. On desktop, Calendar and Search may be promoted to the primary header, and keyboard shortcuts are added, but the underlying information architecture and destination set remain identical to mobile.
+
+A future ecosystem-wide bottom navigation shape of Home, Quran, Search, Journey (Talibeen Al-Halal), and Profile is under evaluation once device testing and the Talibeen release track justify it; see `UNRESOLVED_DESIGN_DECISIONS.md` item 7. Any such change must preserve the Release 1 destination table above and follow the Sakīnah Design System's navigation-component contract in `ALSAMAD_SAKINAH_DESIGN_SYSTEM.md` §25.
 
 ### 5.2 Release 1 route examples
 
@@ -202,7 +205,7 @@ For the Release 1 Arabic and English rollout, use explicit locale prefixes such 
 6. Fast actions: Quran, duas, calendar, tasbeeh
 7. Trust statement and source methodology, low on page
 
-The home page should adapt modestly to time and preferences, not become an algorithmic feed.
+The home page should adapt modestly to time and preferences, not become an algorithmic feed. The Home/Today composition is designed Mobile First: it is authored once for the phone viewport and desktop inherits and expands that same composition. There is exactly one Homepage design, not a separate desktop concept.
 
 #### Quran
 
@@ -211,6 +214,8 @@ The home page should adapt modestly to time and preferences, not become an algor
 - Verse actions: translation, tafsir-ready reference, audio, copy, share canonical link, bookmark
 - Mushaf-style and reading-style presentation can be separate modes later
 - Never insert promotional content between verses
+
+The Quran Reader is primarily a mobile reading experience: one-handed reading, comfortable typography, large touch targets, minimal distractions, reading controls kept within thumb reach, and an uninterrupted reading flow are Release 1 requirements, not later refinements. Desktop may add a surah/navigation sidebar, a wider reading column, and keyboard shortcuts, but it must preserve the same reading experience rather than replace it. See `ALSAMAD_SAKINAH_DESIGN_SYSTEM.md` §31–32 for the component-level contract.
 
 #### Adhkar
 
@@ -380,7 +385,7 @@ The Alsamad Global Architecture is authoritative. These requirements implement i
 
 ### 7.6 Performance budgets
 
-- Mobile-first, low-end Android and weak network included in testing
+- Performance targets are measured on phones first: low-end Android and weak network conditions are the primary test profile for Home/Today, Quran, Search, the reader, Daily Ayah, prayer times, and accessibility, across every route. Desktop optimization never compensates for slow mobile performance.
 - Initial route JavaScript target under 170 KB gzip for content pages, reviewed per route
 - LCP under 2.5 s at p75 field data; INP under 200 ms; CLS under 0.1
 - Self-host/subset fonts responsibly; preload only essential faces
@@ -776,6 +781,10 @@ Talibeen Al-Halal must never reduce people to a score such as **“95% Match.”
 - Future Plans
 
 Where the assistant provides a recommendation, it must explain **why** in plain, respectful language. Categories should help people have thoughtful conversations; they must not imply certainty, divine approval, or guaranteed compatibility.
+
+### Talibeen Mobile-First Principle
+
+Talibeen Al-Halal is designed Mobile First, consistent with the ecosystem-wide product principle. Profile creation, matching, chat, family participation, verification, and notifications must all prioritize phone usability as the reference implementation; desktop expands the same journey with more space and never becomes a separate or primary design target.
 
 ### Talibeen Premium Design Principles
 

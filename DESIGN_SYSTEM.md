@@ -2,6 +2,10 @@
 
 Sakīnah expresses calm, reverence, clarity, and trust through typography, proportion, whitespace, and explicit provenance—not ornamental excess.
 
+## Mobile First, Desktop Excellent
+
+ALSAMAD is a Mobile First product. The phone experience is the reference implementation for every screen and component; desktop expands it with more space, never with more complexity, and never becomes the design reference. Full contract: `ALSAMAD_SAKINAH_DESIGN_SYSTEM.md` §2.12, §25, §32, §43.
+
 ## Tokens
 
 - Canvas: `#F8FBF9` light / `#07130F` dark.

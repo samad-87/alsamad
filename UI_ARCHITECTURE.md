@@ -11,4 +11,6 @@
 
 Routes are Server Components by default. Client Components are limited to stateful behavior. Locale direction is set on the document boundary and links retain the active locale. CSS logical properties support both directions.
 
+ALSAMAD is a Mobile First product (see `DESIGN_SYSTEM.md` and `ALSAMAD_SAKINAH_DESIGN_SYSTEM.md` §2.12). Every route and component is authored for the phone viewport first; desktop breakpoints expand that same layout and never introduce a separate design reference.
+
 No backend concern is represented as a fake frontend service. Future content, prayer, search, identity, and preferences modules should replace fixture adapters through explicit typed boundaries.

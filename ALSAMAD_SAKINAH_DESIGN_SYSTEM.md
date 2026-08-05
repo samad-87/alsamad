@@ -101,7 +101,27 @@ Density follows task context. Public reading is spacious; administrative workflo
 
 ### 2.12 Mobile-First Principle
 
-Core journeys are designed for constrained screens and touch before being expanded to larger canvases.
+Mobile First, Desktop Excellent. The phone experience is the permanent reference implementation for every screen, component, interaction, navigation flow, and reading experience — not an implicit afterthought to a desktop design. Every journey is authored for constrained screens and touch first, then expanded to larger canvases; desktop receives additional space, never additional complexity, and must never become the design reference. This reflects an expected audience of approximately 85–95% mobile (predominantly Android and iPhone) and 5–15% desktop. See §43 for the device-architecture contract and §43.1 for the associated design-review rule.
+
+### 2.12.1 Thumb-First Navigation
+
+Primary actions remain reachable one-handed. Destinations, controls, and reading actions that a user reaches for repeatedly are placed within comfortable thumb range on a phone, not merely visible on screen.
+
+### 2.12.2 Reading-First Layout
+
+Especially Quran reading: the reading surface, not surrounding chrome, is the visual and interaction center of the experience on every screen size.
+
+### 2.12.3 Minimal Chrome
+
+Content always outranks interface in visual priority. Navigation, toolbars, and controls recede so that religious and devotional content remains dominant.
+
+### 2.12.4 Fast Interaction
+
+Users should never wait for unnecessary transitions. Perceived responsiveness on mobile hardware and networks is a design requirement, not solely an engineering one.
+
+### 2.12.5 Progressive Enhancement, Not Progressive Complexity
+
+Desktop gains additional space. It never gains additional complexity, additional required steps, or a competing information architecture relative to mobile.
 
 ### 2.13 Performance-Aware Design Principle
 
@@ -721,6 +741,10 @@ Sectarian propaganda, political endorsement, sensational fear imagery, casual da
 
 ## 16. Motion System
 
+### 16.0 Mobile-first motion priority
+
+The motion system prioritizes mobile performance first: every transition is validated for low-end Android hardware and weak networks before any desktop refinement is added. Desktop may add light decorative depth only (for example a subtle parallax or hover affordance); it must never introduce motion that mobile lacks for comprehension, and it must never become the primary motion reference.
+
 ### 16.1 Motion purposes
 
 Motion may:
@@ -804,7 +828,14 @@ Support browser zoom and text scaling without horizontal page scrolling for ordi
 
 ### 17.8 Touch targets
 
-Primary controls meet accessible target sizing and spacing.
+Touch accessibility is primary, consistent with the Mobile-First Principle. Primary controls meet accessible target sizing and spacing, specifically:
+
+- minimum touch target size sufficient for reliable one-handed use;
+- comfortable spacing between adjacent controls to prevent mis-taps;
+- gesture safety: no destructive or irreversible action is triggerable by an accidental swipe, long-press, or edge gesture without confirmation;
+- primary actions kept within comfortable thumb reach on one-handed phone use;
+- reduced-motion behavior respected identically on touch and pointer input;
+- full keyboard support is preserved on desktop alongside touch and screen-reader support.
 
 ### 17.9 Cognitive accessibility
 
@@ -971,7 +1002,7 @@ Every component definition must include:
 8. Accessibility semantics.
 9. Keyboard behavior.
 10. RTL behavior.
-11. Mobile behavior.
+11. Mobile behavior, then tablet behavior, then desktop behavior, defined in that order — mobile is authored first and desktop is documented as its expansion, not as an independent definition.
 12. Loading/error/empty behavior.
 13. Token dependencies.
 14. Security/privacy considerations.
@@ -1040,6 +1071,16 @@ Prepared/future. Requires file type, size, privacy, scan state, progress, cancel
 - account/admin separated;
 - mobile drawer with focus management;
 - no hidden critical functions.
+
+### Navigation philosophy
+
+Mobile is the primary navigation model; desktop navigation expands the same information architecture without changing it. A bottom navigation bar is the primary candidate pattern for core mobile destinations (illustratively Home, Quran, Search, Journey, Profile once Talibeen Al-Halal ships) and remains under evaluation pending device testing; see `UNRESOLVED_DESIGN_DECISIONS.md` item 7 and `ALSAMAD_PRODUCT_ARCHITECTURE_V1.md` §5.1 for the current Release 1 destination set. Any bottom navigation must:
+
+- hold no more than five destinations;
+- keep every destination reachable one-handed within thumb reach;
+- remain visible without consuming the reading surface;
+- respect safe-area insets;
+- expand naturally into a desktop header without altering destination meaning or order.
 
 ### Breadcrumbs
 
@@ -1246,6 +1287,19 @@ flowchart TB
 The anatomy may simplify by reading mode, but canonical Arabic remains primary.
 
 ## 32. Quran Reading Experience
+
+### Mobile-first reading requirements
+
+The Quran Reader is primarily a mobile reading experience and is designed and validated on phones first:
+
+- one-handed reading;
+- comfortable typography at a legible default size;
+- large touch targets for verse actions and navigation;
+- minimal distractions in and around the reading surface;
+- reading controls kept within thumb reach;
+- uninterrupted reading flow, with no promotional or unrelated interruption.
+
+Desktop may add a surah/navigation sidebar, a wider reading column, and keyboard shortcuts, but must preserve — not replace — this same reading experience.
 
 ### Index
 
@@ -1682,6 +1736,7 @@ Supported contexts:
 
 ### Principles
 
+- the phone experience is authored first and is the permanent design reference; desktop is an expansion of it, never a redefinition;
 - do not shrink desktop layouts;
 - prioritize one-handed core actions on compact screens;
 - keep reading width bounded on large screens;
@@ -1691,7 +1746,28 @@ Supported contexts:
 - do not require hover;
 - maintain useful server-rendered content without client JavaScript where feasible.
 
+### 43.1 Design review rule
+
+A feature passes design review only when it is exceptional on mobile and excellent on desktop. A feature that is exceptional on desktop but merely acceptable on mobile fails review; the reverse relationship is not required and is the expected default. This rule applies to every screen, component, interaction, navigation flow, and reading experience across the ecosystem, including Talibeen Al-Halal. Future UI milestones must explicitly record their mobile-first status, using wording such as "Designed Mobile First. Desktop Expanded." in their objective or acceptance criteria.
+
+### 43.2 PWA and native-app feel
+
+ALSAMAD's installable PWA foundation (Release 1 scope; see `ALSAMAD_PRODUCT_ARCHITECTURE_V1.md` §4) should feel indistinguishable from a native mobile application, not a browser tab. Design targets:
+
+- fast launch from the home-screen icon;
+- an offline shell that degrades calmly rather than showing a browser error;
+- smooth, native-like screen and navigation transitions within the motion budgets in §16;
+- native-like navigation patterns (for example bottom navigation per §25) rather than desktop-web chrome shrunk to fit a phone;
+- installability with a clear, non-intrusive install affordance;
+- minimal browser-chrome feeling: address bars, tab UI, and other browser furniture recede as much as the platform allows.
+
+These are product-design targets for the PWA experience only. The underlying service-worker, caching, and offline-data behavior remain owned by the Infrastructure and deployment module per `ALSAMAD_IMPLEMENTATION_ROADMAP.md`'s module ownership matrix, and this section does not define or authorize that technical implementation.
+
 ## 44. Performance-Aware UI Architecture
+
+### Phones-first measurement
+
+Performance is measured on phones first. Home/Today, Quran, Search, the reader, Daily Ayah, prayer times, and accessibility are all evaluated against low-end Android and weak-network conditions as the primary profile, for every route. Desktop optimization never compensates for slow mobile performance, and a design does not pass review on the strength of desktop metrics alone.
 
 ### Rendering
 
@@ -1924,27 +2000,29 @@ The following decisions remain unresolved and must not be guessed:
 
 ## 51. Final Validation Matrix
 
-| Requirement                              | Validation                                                              |
-| ---------------------------------------- | ----------------------------------------------------------------------- |
-| Product Architecture alignment           | confirmed                                                               |
-| Database Architecture alignment          | canonical/localized identity distinction preserved                      |
-| Admin Architecture alignment             | workflow ownership and operational simplicity preserved                 |
-| AI Architecture alignment                | AI disclosure, citations, refusal, degradation preserved                |
-| API Architecture alignment               | state/error/localization contracts reflected                            |
-| Security Architecture alignment          | privacy, sensitive states, safe admin and Talibeen boundaries preserved |
-| Unlimited languages                      | supported                                                               |
-| Arabic and RTL first-class               | confirmed                                                               |
-| Quran specialized treatment              | confirmed                                                               |
-| Editorial General Dua visually distinct  | confirmed                                                               |
-| AI never resembles canonical truth       | confirmed                                                               |
-| Talibeen avoids dating-app patterns      | confirmed                                                               |
-| Worship not gamified                     | confirmed                                                               |
-| Accessibility is release gate            | confirmed                                                               |
-| Performance and SEO preserved            | confirmed                                                               |
-| No unapproved exact brand asset invented | confirmed                                                               |
-| No application code                      | confirmed                                                               |
-| No UI/component files                    | confirmed                                                               |
-| No commit/push/deployment                | confirmed                                                               |
+| Requirement                               | Validation                                                              |
+| ----------------------------------------- | ----------------------------------------------------------------------- |
+| Mobile First, Desktop Excellent principle | confirmed permanent product principle                                   |
+| Mobile-first design review rule           | confirmed (exceptional on mobile, excellent on desktop, required)       |
+| Product Architecture alignment            | confirmed                                                               |
+| Database Architecture alignment           | canonical/localized identity distinction preserved                      |
+| Admin Architecture alignment              | workflow ownership and operational simplicity preserved                 |
+| AI Architecture alignment                 | AI disclosure, citations, refusal, degradation preserved                |
+| API Architecture alignment                | state/error/localization contracts reflected                            |
+| Security Architecture alignment           | privacy, sensitive states, safe admin and Talibeen boundaries preserved |
+| Unlimited languages                       | supported                                                               |
+| Arabic and RTL first-class                | confirmed                                                               |
+| Quran specialized treatment               | confirmed                                                               |
+| Editorial General Dua visually distinct   | confirmed                                                               |
+| AI never resembles canonical truth        | confirmed                                                               |
+| Talibeen avoids dating-app patterns       | confirmed                                                               |
+| Worship not gamified                      | confirmed                                                               |
+| Accessibility is release gate             | confirmed                                                               |
+| Performance and SEO preserved             | confirmed                                                               |
+| No unapproved exact brand asset invented  | confirmed                                                               |
+| No application code                       | confirmed                                                               |
+| No UI/component files                     | confirmed                                                               |
+| No commit/push/deployment                 | confirmed                                                               |
 
 ## Appendix A — Component Documentation Template
 

@@ -19,6 +19,11 @@ Convert approved architecture into an implementation sequence while preventing p
 - Additive Evolution
 - Reversible Delivery
 - One Approved Scope at a Time
+- Mobile First, Desktop Excellent
+
+### Mobile-first UI milestone requirement
+
+ALSAMAD is a permanent Mobile First product (`ALSAMAD_PRODUCT_ARCHITECTURE_V1.md` §2, `ALSAMAD_SAKINAH_DESIGN_SYSTEM.md` §2.12/§43). Every future UI implementation milestone's objective or acceptance criteria must explicitly state its mobile-first status, using wording such as "Designed Mobile First. Desktop Expanded." A UI milestone that does not record this status is incomplete and does not authorize implementation. This requirement applies only to milestones that implement UI; it does not retroactively reopen or modify the database-only milestones already defined below.
 
 ## Phase 0: Repository and architecture baseline
 
@@ -788,19 +793,19 @@ This is the new explicit authorization named by the Next-phase handoff above. It
 
 The Quran.Foundation adapter, and any future provider adapter, implements exactly this interface behind the existing provider-independent `QuranContentProvider` port defined in `ALSAMAD_API_ARCHITECTURE.md`'s M0.5 Quran provider boundary section:
 
-| Method | Return contract |
-| --- | --- |
-| `discoverResources()` | List of resource descriptors (type, `provider_resource_id`, `provider_resource_version`, declared counts) with no content payload; read-only, no side effects. |
-| `fetchResourceMetadata(resourceRef)` | Single resource's HTTP-safe metadata (version token, counts, provider-supplied checksums if any); never full content. |
-| `fetchPage(resourceRef, cursor)` / `fetchBatch(resourceRef, cursor)` | One bounded page/batch of raw provider records plus a next-cursor and byte/row counts; writes only to encrypted quarantine, never to canonical or staging tables. |
-| `normalizeProviderRecord(rawRecord)` | A structurally normalized record matching the manifest's declared shape, plus a computed normalized checksum; must preserve exact canonical Quran UTF-8 bytes unchanged. |
-| `mapProviderIdentity(normalizedRecord)` | A proposed alias mapping (`provider_code`, `resource_type`, `external_id`, `provider_version`) to an existing canonical row or a deterministic new-row candidate; never a canonical UUID assignment by itself. |
-| `validateProviderRecord(normalizedRecord)` | Pass/fail plus the list of violated rules; failure routes the record to quarantine, never to staging. |
-| `getVersionToken(resourceRef)` | Opaque provider version/snapshot token used to detect drift and force a new manifest. |
-| `getDeletionOrWithdrawalSignals(resourceRef)` | List of provider-reported deletion/withdrawal events since a given checkpoint; feeds the `withdrawn`/`deleted` state transitions. |
-| `verifyCompleteness(resourceType, expectedCounts)` | Pass/fail plus the exact count and locator diff, feeding reconciliation evidence. |
-| `produceAttribution(resourceRef)` | The exact required attribution text/reference for the resource; never invented or paraphrased. |
-| `close()` / `cleanup()` | Releases connections/credentials and clears in-memory secrets; idempotent. |
+| Method                                                               | Return contract                                                                                                                                                                                                |
+| -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `discoverResources()`                                                | List of resource descriptors (type, `provider_resource_id`, `provider_resource_version`, declared counts) with no content payload; read-only, no side effects.                                                 |
+| `fetchResourceMetadata(resourceRef)`                                 | Single resource's HTTP-safe metadata (version token, counts, provider-supplied checksums if any); never full content.                                                                                          |
+| `fetchPage(resourceRef, cursor)` / `fetchBatch(resourceRef, cursor)` | One bounded page/batch of raw provider records plus a next-cursor and byte/row counts; writes only to encrypted quarantine, never to canonical or staging tables.                                              |
+| `normalizeProviderRecord(rawRecord)`                                 | A structurally normalized record matching the manifest's declared shape, plus a computed normalized checksum; must preserve exact canonical Quran UTF-8 bytes unchanged.                                       |
+| `mapProviderIdentity(normalizedRecord)`                              | A proposed alias mapping (`provider_code`, `resource_type`, `external_id`, `provider_version`) to an existing canonical row or a deterministic new-row candidate; never a canonical UUID assignment by itself. |
+| `validateProviderRecord(normalizedRecord)`                           | Pass/fail plus the list of violated rules; failure routes the record to quarantine, never to staging.                                                                                                          |
+| `getVersionToken(resourceRef)`                                       | Opaque provider version/snapshot token used to detect drift and force a new manifest.                                                                                                                          |
+| `getDeletionOrWithdrawalSignals(resourceRef)`                        | List of provider-reported deletion/withdrawal events since a given checkpoint; feeds the `withdrawn`/`deleted` state transitions.                                                                              |
+| `verifyCompleteness(resourceType, expectedCounts)`                   | Pass/fail plus the exact count and locator diff, feeding reconciliation evidence.                                                                                                                              |
+| `produceAttribution(resourceRef)`                                    | The exact required attribution text/reference for the resource; never invented or paraphrased.                                                                                                                 |
+| `close()` / `cleanup()`                                              | Releases connections/credentials and clears in-memory secrets; idempotent.                                                                                                                                     |
 
 The adapter must never: create ALSAMAD canonical IDs directly from provider IDs; publish content; bypass a license gate; persist secrets in logs; silently normalize canonical Quran text; or convert a provider error into a success result.
 
