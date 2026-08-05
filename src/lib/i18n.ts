@@ -114,6 +114,32 @@ const copy = {
     surahIndexOf: "من ١١٤ سورة",
     placeholderNoticeShort: "بانتظار المحتوى المرخّص",
     reference: "الموضع",
+    heroSecondaryCta: "استكشف الأذكار",
+    more: "المزيد",
+    comingSoon: "قريباً",
+    futureModule: "وحدة مستقبلية",
+    setupRequired: "يلزم إعداد الموقع والمصدر أولاً.",
+    noLiveStatus: "لا توجد بيانات حية بعد.",
+    dailyJourneyTitle: "رحلة روحية يومية",
+    dailyJourneyBody:
+      "مساحة مستقبلية لآية اليوم والذكر والدعاء والتأمل المراجَع ومتابعة القراءة، بلا تنافس أو ضغط استمرارية.",
+    dailyJourneyFuture: "فئات مستقبلية",
+    quranSectionEyebrow: "المساحة الرئيسية للمحتوى",
+    quranSectionBody:
+      "افتح فهرس السور، تابع من آخر موضع، واضبط تجربة القراءة — دون نص تجريبي منسوب زوراً إلى المصحف.",
+    knowledgeTitle: "محرك المعرفة",
+    knowledgeBody:
+      "بحث تجريبي مباشر في القرآن والأذكار والأدعية، دون مربع إجابة بالذكاء الاصطناعي ودون ادعاء بحث إنتاجي موحّد بعد.",
+    marriageJourneyTitle: "طالبين الحلال",
+    marriageJourneyBody: "طريقٌ محترمٌ يراعي الأسرة نحو الزواج.",
+    marriageJourneyNote:
+      "لا ملفات تعريف، لا عدّادات تطابق، لا محادثات — هذه أول واجهة تعريفية لوحدة مستقبلية معتمدة.",
+    articlesTitle: "مقالات وأدلة",
+    articlesBody:
+      "مساحة تحريرية مستقبلية للمقالات والأدلة التعليمية المراجَعة. لا مقالات منشورة بعد.",
+    trustAiNote:
+      "لا نستخدم الذكاء الاصطناعي لإنشاء نص قرآني أو ديني، ونرحّب بتصحيح المصادر وتتبعها بشفافية.",
+    continueReadingPlaceholder: "نموذج جلسة قراءة",
   },
   en: {
     brand: "Alsamad",
@@ -225,6 +251,32 @@ const copy = {
     surahIndexOf: "of 114 surahs",
     placeholderNoticeShort: "Awaiting licensed content",
     reference: "Reference",
+    heroSecondaryCta: "Explore adhkar",
+    more: "More",
+    comingSoon: "Coming soon",
+    futureModule: "Future module",
+    setupRequired: "Location and source setup are required first.",
+    noLiveStatus: "No live data yet.",
+    dailyJourneyTitle: "Daily Spiritual Journey",
+    dailyJourneyBody:
+      "A future space for the daily ayah, dhikr, dua, a reviewed reflection and reading continuation — with no competition or streak pressure.",
+    dailyJourneyFuture: "Future categories",
+    quranSectionEyebrow: "The homepage's primary content area",
+    quranSectionBody:
+      "Open the surah index, continue from your last position, and adjust the reading experience — with no invented verse text.",
+    knowledgeTitle: "Knowledge Engine",
+    knowledgeBody:
+      "A live prototype search across Quran, adhkar and duas, with no AI answer box and no claim of unified production search yet.",
+    marriageJourneyTitle: "Marriage Journey",
+    marriageJourneyBody: "A respectful, family-friendly path toward marriage.",
+    marriageJourneyNote:
+      "No profile cards, no match counts, no chat — this is the first introductory presence for an approved future module.",
+    articlesTitle: "Articles & Guides",
+    articlesBody:
+      "A future editorial space for reviewed articles and guides. No articles are published yet.",
+    trustAiNote:
+      "We do not use AI to generate Quranic or religious text, and we welcome transparent source correction.",
+    continueReadingPlaceholder: "Reading session prototype",
   },
 } as const;
 export const t = (locale: Locale) => copy[locale];

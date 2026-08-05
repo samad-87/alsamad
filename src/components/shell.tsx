@@ -2,7 +2,8 @@ import Link from "next/link";
 import type { Locale } from "@/lib/i18n";
 import { t } from "@/lib/i18n";
 import { SearchIcon } from "./icons";
-import { MobileMenu, ThemeSwitcher } from "./client-controls";
+import { ThemeSwitcher } from "./client-controls";
+import { BottomNav } from "./bottom-nav";
 
 export function LocaleSwitcher({
   locale,
@@ -12,9 +13,20 @@ export function LocaleSwitcher({
   path?: string;
 }) {
   const other = locale === "ar" ? "en" : "ar";
+  const label = other === "ar" ? "العربية" : "English";
+  const short = other === "ar" ? "AR" : "EN";
   return (
-    <Link className="button locale-button" href={`/${other}${path}`}>
-      {other === "ar" ? "العربية" : "English"}
+    <Link
+      className="button locale-button"
+      href={`/${other}${path}`}
+      aria-label={label}
+    >
+      <span className="locale-label-full" aria-hidden="true">
+        {label}
+      </span>
+      <span className="locale-label-short" aria-hidden="true">
+        {short}
+      </span>
     </Link>
   );
 }
@@ -55,32 +67,26 @@ export function AppShell({
               <span className="brand-mark" aria-hidden="true">
                 ص
               </span>
-              <span>{c.brand}</span>
+              <span className="brand-wordmark">{c.brand}</span>
             </Link>
             <nav aria-label={c.menu} className="desktop-nav">
               {links}
             </nav>
             <div className="header-actions">
               <Link
-                className="button search-button"
+                className="button icon-button"
                 href={`/${locale}/search`}
                 aria-label={c.search}
               >
                 <SearchIcon />
               </Link>
               <LocaleSwitcher locale={locale} />
-              <ThemeSwitcher locale={locale} />
-              <MobileMenu locale={locale}>
-                <nav className="mobile-nav">
-                  {links}
-                  <Link href={`/${locale}/calendar`}>{c.calendar}</Link>
-                  <Link href={`/${locale}/tasbeeh`}>{c.tasbeeh}</Link>
-                </nav>
-              </MobileMenu>
+              <ThemeSwitcher locale={locale} className="icon-button" />
             </div>
           </div>
         </header>
         <main id="main">{children}</main>
+        <BottomNav locale={locale} />
         <Footer locale={locale} />
       </body>
     </html>

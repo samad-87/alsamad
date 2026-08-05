@@ -224,9 +224,11 @@ button.chip[aria-pressed="true"] {
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
   }
 }
 
@@ -245,15 +247,22 @@ button.chip[aria-pressed="true"] {
   position: sticky;
   inset-block-start: 0;
   z-index: 50;
+  padding-block-start: env(safe-area-inset-top);
   border-block-end: 1px solid color-mix(in srgb, var(--border) 75%, transparent);
   background: color-mix(in srgb, var(--background) 88%, transparent);
   backdrop-filter: blur(18px);
 }
 .header-inner {
-  min-height: 4.75rem;
+  min-height: 3.75rem;
   display: flex;
   align-items: center;
-  gap: 2rem;
+  gap: 1rem;
+}
+.brand-wordmark {
+  white-space: nowrap;
+}
+.locale-label-full {
+  display: none;
 }
 .brand {
   display: inline-flex;
@@ -288,9 +297,10 @@ button.chip[aria-pressed="true"] {
   gap: 0.45rem;
   align-items: center;
 }
-.search-button {
+.icon-button {
   width: 2.85rem;
   padding: 0;
+  flex-shrink: 0;
 }
 .mobile-menu {
   display: none;
@@ -1044,9 +1054,6 @@ button.chip[aria-pressed="true"] {
   .brand {
     margin-inline-end: auto;
   }
-  .locale-button {
-    display: none;
-  }
   .hero {
     min-height: auto;
     padding: 2rem 1.25rem;
@@ -1107,9 +1114,6 @@ button.chip[aria-pressed="true"] {
   }
   .footer-bottom {
     flex-direction: column;
-  }
-  .search-button {
-    display: none;
   }
   .reader-toolbar {
     align-items: stretch;
@@ -1499,5 +1503,265 @@ button.chip[aria-pressed="true"] {
   .reader-settings-panel {
     inset-inline-end: -0.5rem;
     width: min(20rem, 92vw);
+  }
+}
+
+/* ==========================================================================
+   Sakīnah Motion Foundation — semantic tokens. CSS only, no JS animation
+   library. Mobile performance first; desktop may add light decorative
+   depth only. Fully neutralized by the reduced-motion block above.
+   ========================================================================== */
+
+:root {
+  --duration-instant: 80ms;
+  --duration-fast: 140ms;
+  --duration-standard: 220ms;
+  --duration-calm: 420ms;
+  --duration-ambient: 16s;
+  --ease-sakinah: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --distance-micro: 4px;
+  --distance-small: 10px;
+  --distance-max: 16px;
+}
+
+@keyframes sakinah-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes sakinah-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(var(--distance-max));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes sakinah-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes sakinah-ambient-drift {
+  from {
+    transform: translate(-2%, -1%) scale(1);
+  }
+  to {
+    transform: translate(2%, 1%) scale(1.03);
+  }
+}
+
+.home-reveal {
+  animation: sakinah-fade-up var(--duration-calm) var(--ease-sakinah) both;
+}
+.home-reveal-scale {
+  animation: sakinah-scale-in var(--duration-standard) var(--ease-sakinah) both;
+}
+.chip-row > *,
+.knowledge-links > * {
+  animation: sakinah-fade var(--duration-fast) var(--ease-sakinah) both;
+}
+.chip-row > *:nth-child(2),
+.knowledge-links > *:nth-child(2) {
+  animation-delay: 40ms;
+}
+.chip-row > *:nth-child(3),
+.knowledge-links > *:nth-child(3) {
+  animation-delay: 80ms;
+}
+.chip-row > *:nth-child(4),
+.knowledge-links > *:nth-child(4) {
+  animation-delay: 120ms;
+}
+.chip-row > *:nth-child(n + 5),
+.knowledge-links > *:nth-child(n + 5) {
+  animation-delay: 160ms;
+}
+
+/* ==========================================================================
+   Mobile bottom navigation — thumb-reachable, safe-area aware, mobile/
+   tablet only. Desktop expands into the existing header nav instead.
+   ========================================================================== */
+
+.bottom-nav {
+  position: fixed;
+  z-index: 60;
+  inset-inline: 0;
+  inset-block-end: 0;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-around;
+  gap: 0.25rem;
+  padding-inline: 0.5rem;
+  padding-block-start: 0.4rem;
+  padding-block-end: calc(0.4rem + env(safe-area-inset-bottom));
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  backdrop-filter: blur(16px);
+  border-block-start: 1px solid var(--border);
+}
+.bottom-nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  min-height: 3.25rem;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+  border-radius: var(--radius-control);
+  cursor: pointer;
+  transition:
+    color var(--duration-fast) var(--ease-sakinah),
+    background var(--duration-fast) var(--ease-sakinah);
+}
+.bottom-nav-item[aria-current="page"],
+.bottom-nav-item[aria-expanded="true"] {
+  color: var(--primary-strong);
+}
+.bottom-nav-more {
+  flex: 1;
+  display: flex;
+}
+.bottom-nav-more .bottom-nav-item {
+  width: 100%;
+}
+.bottom-nav-more .mobile-panel {
+  z-index: 71;
+}
+
+@media (max-width: 1023.98px) {
+  body {
+    padding-block-end: calc(4.6rem + env(safe-area-inset-bottom));
+  }
+}
+@media (min-width: 1024px) {
+  .bottom-nav {
+    display: none;
+  }
+  .header-inner {
+    min-height: 4.75rem;
+    gap: 2rem;
+  }
+  .locale-label-full {
+    display: inline;
+  }
+  .locale-label-short {
+    display: none;
+  }
+}
+
+/* ==========================================================================
+   Homepage sections — Mobile First, Desktop Excellent. Base rules below
+   are the mobile layout; min-width queries expand for tablet/desktop.
+   ========================================================================== */
+
+.status-chip {
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 0.78rem;
+}
+.daily-journey-card {
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+  display: grid;
+  gap: 1.25rem;
+}
+.daily-journey-categories {
+  display: grid;
+  gap: 0.6rem;
+}
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.quran-entry-grid {
+  display: grid;
+  gap: 1.25rem;
+}
+.quran-entry-main {
+  padding: clamp(1.5rem, 5vw, 2.5rem);
+  display: grid;
+  gap: 1rem;
+  align-content: start;
+}
+.quran-entry-side {
+  display: grid;
+  gap: 1rem;
+}
+.placeholder-card {
+  gap: 0.6rem;
+}
+.knowledge-body {
+  max-width: 46rem;
+}
+.knowledge-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-block-start: 1rem;
+}
+.knowledge-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.marriage-journey-card {
+  max-width: 42rem;
+  margin-inline: auto;
+  padding: clamp(2rem, 6vw, 3.5rem);
+  text-align: center;
+  display: grid;
+  justify-items: center;
+  gap: 0.65rem;
+  position: relative;
+  overflow: hidden;
+}
+.marriage-journey-card::before {
+  content: "";
+  position: absolute;
+  inset: -30%;
+  background: radial-gradient(
+    circle at 30% 20%,
+    color-mix(in srgb, var(--gold) 14%, transparent),
+    transparent 60%
+  );
+  animation: sakinah-ambient-drift var(--duration-ambient) ease-in-out infinite
+    alternate;
+  pointer-events: none;
+  z-index: 0;
+}
+.marriage-journey-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+@media (min-width: 1024px) {
+  .quran-entry-grid {
+    grid-template-columns: 1.6fr 1fr;
+    align-items: start;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .knowledge-chip:hover {
+    border-color: var(--primary);
+    color: var(--primary-strong);
+  }
+  .bottom-nav-item:hover {
+    color: var(--primary-strong);
   }
 }

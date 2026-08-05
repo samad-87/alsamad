@@ -1,10 +1,17 @@
 "use client";
 import { useEffect, useState, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 import { MenuIcon, MoonIcon, SunIcon } from "./icons";
 import type { Locale } from "@/lib/i18n";
 import { t } from "@/lib/i18n";
 
-export function ThemeSwitcher({ locale }: { locale: Locale }) {
+export function ThemeSwitcher({
+  locale,
+  className = "",
+}: {
+  locale: Locale;
+  className?: string;
+}) {
   const c = t(locale);
   const dark = useSyncExternalStore(
     (notify) => {
@@ -33,7 +40,7 @@ export function ThemeSwitcher({ locale }: { locale: Locale }) {
   }
   return (
     <button
-      className="button"
+      className={`button ${className}`.trim()}
       onClick={toggle}
       aria-label={dark ? c.light : c.dark}
     >
@@ -45,31 +52,46 @@ export function ThemeSwitcher({ locale }: { locale: Locale }) {
 export function MobileMenu({
   locale,
   children,
+  trigger,
+  triggerClassName = "button",
+  panelId = "mobile-navigation",
+  wrapperClassName = "mobile-menu",
 }: {
   locale: Locale;
   children: React.ReactNode;
+  trigger?: React.ReactNode;
+  triggerClassName?: string;
+  panelId?: string;
+  wrapperClassName?: string;
 }) {
   const [open, setOpen] = useState(false);
   const c = t(locale);
   return (
-    <div className="mobile-menu">
+    <div className={wrapperClassName}>
       <button
-        className="button"
+        className={triggerClassName}
         onClick={() => setOpen(!open)}
         aria-expanded={open}
-        aria-controls="mobile-navigation"
+        aria-controls={panelId}
       >
-        <MenuIcon />
-        <span className="sr-only">{c.menu}</span>
+        {trigger ?? (
+          <>
+            <MenuIcon />
+            <span className="sr-only">{c.menu}</span>
+          </>
+        )}
       </button>
-      {open && (
-        <div id="mobile-navigation" className="mobile-panel">
-          <button className="mobile-close" onClick={() => setOpen(false)}>
-            {c.close} ×
-          </button>
-          {children}
-        </div>
-      )}
+      {open &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div id={panelId} className="mobile-panel">
+            <button className="mobile-close" onClick={() => setOpen(false)}>
+              {c.close} ×
+            </button>
+            {children}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

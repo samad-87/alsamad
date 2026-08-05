@@ -83,3 +83,32 @@ export const TargetIcon = (p: IconProps) => (
     <path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3" />
   </Svg>
 );
+export const HomeIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M4 11.5 12 4l8 7.5" />
+    <path d="M6 9.5V20h12V9.5" />
+    <path d="M10 20v-6h4v6" />
+  </Svg>
+);
+export const SparkleIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M12 3v4M12 17v4M3 12h4M17 12h4" />
+    <path
+      d="M12 8.5 13.6 12 12 15.5 10.4 12Z"
+      fill="currentColor"
+      stroke="none"
+    />
+  </Svg>
+);
+export const MoreIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <circle cx="5" cy="12" r="1.3" fill="currentColor" stroke="none" />
+    <circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none" />
+    <circle cx="19" cy="12" r="1.3" fill="currentColor" stroke="none" />
+  </Svg>
+);
+export const HeartHandsIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M12 20s-6.5-4.1-9-8.2C1.2 8.6 3 5 6.4 5c1.7 0 3 .9 3.6 2 .6-1.1 1.9-2 3.6-2 3.4 0 5.2 3.6 3.4 6.8-2.5 4.1-9 8.2-9 8.2Z" />
+  </Svg>
+);
