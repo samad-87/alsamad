@@ -4,6 +4,7 @@ import { SearchBar } from "@/components/quran/search-bar";
 import { SurahSidebar } from "@/components/quran/surah-sidebar";
 import { Container, FixtureNotice, PageHeader, Section } from "@/components/ui";
 import { isLocale, t } from "@/lib/i18n";
+import { listSurahReaderData } from "@/lib/quran/content/reader-data";
 
 export default async function Page({
   params,
@@ -13,6 +14,7 @@ export default async function Page({
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
   const c = t(locale);
+  const surahs = await listSurahReaderData();
   return (
     <Section>
       <Container>
@@ -23,8 +25,12 @@ export default async function Page({
           description={c.placeholderBody}
         />
         <FixtureNotice locale={locale} />
-        <SearchBar locale={locale} basePath={`/${locale}/quran`} />
-        <SurahSidebar locale={locale} variant="index" />
+        <SearchBar
+          locale={locale}
+          basePath={`/${locale}/quran`}
+          surahs={surahs}
+        />
+        <SurahSidebar locale={locale} surahs={surahs} variant="index" />
       </Container>
     </Section>
   );

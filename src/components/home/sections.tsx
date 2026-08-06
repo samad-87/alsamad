@@ -4,6 +4,7 @@ import { t } from "@/lib/i18n";
 import { loc } from "@/lib/fixtures";
 import { ArrowIcon, BookIcon, HeartHandsIcon } from "@/components/icons";
 import { Container, ContentCard, Section } from "@/components/ui";
+import { getQuranOverallStatus } from "@/lib/quran/content/reader-data";
 
 /**
  * Homepage sections — Mobile First, Desktop Excellent.
@@ -85,8 +86,21 @@ export function DailyJourney({ locale }: { locale: Locale }) {
   );
 }
 
-export function QuranEntry({ locale }: { locale: Locale }) {
+export async function QuranEntry({ locale }: { locale: Locale }) {
   const c = t(locale);
+  const snapshot = await getQuranOverallStatus();
+  const statusIcon =
+    snapshot.status === "available"
+      ? "✓"
+      : snapshot.status === "pending"
+        ? "◐"
+        : "◌";
+  const statusLabel =
+    snapshot.status === "available"
+      ? c.quranStatusAvailable
+      : snapshot.status === "pending"
+        ? c.quranStatusPending
+        : c.quranStatusEmpty;
   return (
     <Section>
       <Container>
@@ -95,9 +109,14 @@ export function QuranEntry({ locale }: { locale: Locale }) {
             <span className="eyebrow">{c.quranSectionEyebrow}</span>
             <h2 className="title">{c.quran}</h2>
           </div>
-          <Link className="button" href={`/${locale}/quran`}>
-            {c.surahs}
-          </Link>
+          <div className="chip-row">
+            <span className="chip status-chip">
+              {statusIcon} {statusLabel}
+            </span>
+            <Link className="button" href={`/${locale}/quran`}>
+              {c.surahs}
+            </Link>
+          </div>
         </div>
         <div className="quran-entry-grid">
           <div className="quran-entry-main feature-surface home-reveal">

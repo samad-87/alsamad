@@ -140,6 +140,13 @@ const copy = {
     trustAiNote:
       "لا نستخدم الذكاء الاصطناعي لإنشاء نص قرآني أو ديني، ونرحّب بتصحيح المصادر وتتبعها بشفافية.",
     continueReadingPlaceholder: "نموذج جلسة قراءة",
+    quranStatusEmpty: "لم يتم استيراد أي محتوى بعد",
+    quranStatusEmptyBody: "لم تُستورد هذه السورة بعد — لا يوجد نص آيات لعرضه.",
+    quranStatusPending: "الاستيراد بانتظار المراجعة",
+    quranStatusPendingBody:
+      "تم استيراد بيانات هذه السورة وهي بانتظار المراجعة قبل النشر.",
+    quranStatusAvailable: "المحتوى متاح",
+    quranStatusAvailableBody: "تتوفر بيانات مستوردة ومنشورة لهذه السورة.",
   },
   en: {
     brand: "Alsamad",
@@ -277,6 +284,15 @@ const copy = {
     trustAiNote:
       "We do not use AI to generate Quranic or religious text, and we welcome transparent source correction.",
     continueReadingPlaceholder: "Reading session prototype",
+    quranStatusEmpty: "No content imported yet",
+    quranStatusEmptyBody:
+      "This surah has not been imported yet — there is no verse text to show.",
+    quranStatusPending: "Import pending review",
+    quranStatusPendingBody:
+      "This surah's data has been imported and is awaiting review before publication.",
+    quranStatusAvailable: "Content available",
+    quranStatusAvailableBody:
+      "Imported, published content is available for this surah.",
   },
 } as const;
 export const t = (locale: Locale) => copy[locale];

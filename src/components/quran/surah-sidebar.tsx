@@ -6,14 +6,16 @@ import { useMemo, useState } from "react";
 import { ClockIcon, MenuIcon } from "@/components/icons";
 import type { Locale } from "@/lib/i18n";
 import { t } from "@/lib/i18n";
+import type { SurahReaderData } from "@/lib/quran/content/reader-data";
 import { useLastRead } from "@/lib/quran-reader-client";
-import { mockSurahs } from "@/lib/quran-reader-mock";
 
 export function SurahSidebar({
   locale,
+  surahs,
   variant = "sidebar",
 }: {
   locale: Locale;
+  surahs: readonly SurahReaderData[];
   variant?: "sidebar" | "index";
 }) {
   const c = t(locale);
@@ -26,13 +28,23 @@ export function SurahSidebar({
   const filtered = useMemo(() => {
     const trimmed = query.trim();
     if (!trimmed) {
-      return mockSurahs;
+      return surahs;
     }
-    return mockSurahs.filter((surah) => String(surah.number).includes(trimmed));
-  }, [query]);
+    return surahs.filter((surah) => String(surah.number).includes(trimmed));
+  }, [query, surahs]);
 
   const searchLabel =
     variant === "index" ? c.search : `${c.search} — ${c.surahs}`;
+
+  function statusLabel(surah: SurahReaderData): string {
+    if (surah.status === "available") {
+      return `${surah.ayahCount} ${locale === "ar" ? "آية" : "verses"}`;
+    }
+    if (surah.status === "pending") {
+      return c.quranStatusPending;
+    }
+    return c.placeholderNoticeShort;
+  }
 
   function renderList() {
     return (
@@ -63,11 +75,13 @@ export function SurahSidebar({
                       {locale === "ar" ? "سورة" : "Surah"} {surah.number}
                     </strong>
                     <span className="muted">
-                      {isLastRead ? c.lastRead : c.placeholderNoticeShort}
+                      {isLastRead ? c.lastRead : statusLabel(surah)}
                     </span>
                   </div>
                   <small>
-                    {surah.mockAyahCount} {locale === "ar" ? "آية" : "verses"}
+                    {surah.status === "available"
+                      ? `${surah.ayahCount} ${locale === "ar" ? "آية" : "verses"}`
+                      : c.placeholderNoticeShort}
                   </small>
                 </>
               ) : (
@@ -78,7 +92,7 @@ export function SurahSidebar({
                       <span className="sr-only">{c.lastRead}</span>
                     </>
                   )}
-                  {surah.mockAyahCount}
+                  {surah.status === "available" ? surah.ayahCount : null}
                 </span>
               )}
             </Link>

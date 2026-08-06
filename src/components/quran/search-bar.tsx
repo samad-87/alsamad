@@ -3,16 +3,19 @@
 import { useEffect, useRef, useState } from "react";
 import type { Locale } from "@/lib/i18n";
 import { t } from "@/lib/i18n";
-import { searchMockIndex } from "@/lib/quran-reader-mock";
+import type { SurahReaderData } from "@/lib/quran/content/reader-data";
+import { searchSurahIndex } from "@/lib/quran/content/search";
 import { EmptyReaderState } from "./empty-reader-state";
 import { SearchResultCard } from "./search-result-card";
 
 export function SearchBar({
   locale,
   basePath,
+  surahs,
 }: {
   locale: Locale;
   basePath: string;
+  surahs: readonly SurahReaderData[];
 }) {
   const c = t(locale);
   const [query, setQuery] = useState("");
@@ -36,7 +39,7 @@ export function SearchBar({
   }, []);
 
   const trimmed = query.trim();
-  const results = searchMockIndex(trimmed);
+  const results = searchSurahIndex(surahs, trimmed);
 
   return (
     <div>

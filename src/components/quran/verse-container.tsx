@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import type { Locale } from "@/lib/i18n";
 import { t } from "@/lib/i18n";
-import type { MockVerseSlot } from "@/lib/quran-reader-mock";
+import type { VerseSlot } from "@/lib/quran/content/reader-data";
 import {
   useBookmarks,
   useLastRead,
@@ -34,7 +34,7 @@ export function VerseContainer({
   containerId,
 }: {
   locale: Locale;
-  slots: readonly MockVerseSlot[];
+  slots: readonly VerseSlot[];
   containerId: string;
 }) {
   const c = t(locale);

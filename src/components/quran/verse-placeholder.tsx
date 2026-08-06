@@ -1,6 +1,6 @@
 import type { Locale } from "@/lib/i18n";
 import { t } from "@/lib/i18n";
-import { PLACEHOLDER_NOTICE } from "@/lib/quran-reader-mock";
+import { PLACEHOLDER_NOTICE } from "@/lib/quran/content/types";
 import { BookmarkButton } from "./bookmark-button";
 import { ReferenceBadge } from "./reference-badge";
 
