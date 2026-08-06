@@ -5,6 +5,7 @@ import { loc } from "@/lib/fixtures";
 import { ArrowIcon, BookIcon, HeartHandsIcon } from "@/components/icons";
 import { Container, ContentCard, Section } from "@/components/ui";
 import { getQuranOverallStatus } from "@/lib/quran/content/reader-data";
+import { getAdhkarOverallStatus } from "@/lib/adhkar/content/reader-data";
 
 /**
  * Homepage sections — Mobile First, Desktop Excellent.
@@ -153,8 +154,21 @@ export async function QuranEntry({ locale }: { locale: Locale }) {
   );
 }
 
-export function AdhkarDuas({ locale }: { locale: Locale }) {
+export async function AdhkarDuas({ locale }: { locale: Locale }) {
   const c = t(locale);
+  const snapshot = await getAdhkarOverallStatus();
+  const statusIcon =
+    snapshot.status === "available"
+      ? "✓"
+      : snapshot.status === "pending"
+        ? "◐"
+        : "◌";
+  const statusLabel =
+    snapshot.status === "available"
+      ? c.adhkarStatusAvailable
+      : snapshot.status === "pending"
+        ? c.adhkarStatusPending
+        : c.adhkarStatusEmpty;
   return (
     <Section soft>
       <Container>
@@ -167,6 +181,9 @@ export function AdhkarDuas({ locale }: { locale: Locale }) {
                 : "Two quiet moments, and dua"}
             </h2>
           </div>
+          <span className="chip status-chip">
+            {statusIcon} {statusLabel}
+          </span>
         </div>
         <div className="grid-3">
           <ContentCard
