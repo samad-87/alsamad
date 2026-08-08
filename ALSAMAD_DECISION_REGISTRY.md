@@ -38,10 +38,10 @@ If resolving a decision requires changing already-approved architecture, the aff
 
 # 3. Decision treatment rules
 
-| Decision kind | Treatment |
-| --- | --- |
-| Local, reversible implementation detail | No decision record. |
-| Architecturally relevant but reversible decision | Decision Registry entry only. |
+| Decision kind                                                                                | Treatment                               |
+| -------------------------------------------------------------------------------------------- | --------------------------------------- |
+| Local, reversible implementation detail                                                      | No decision record.                     |
+| Architecturally relevant but reversible decision                                             | Decision Registry entry only.           |
 | Major architectural decision that is expensive, unsafe, or structurally difficult to reverse | Decision Registry entry **and** an ADR. |
 
 Whether a decision needs a record at all is judged against §7 (ADR threshold) for the ADR tier, and against ordinary architectural relevance — does the decision affect a physical representation, a cross-module boundary, or a closed vocabulary another document depends on — for the Registry-only tier. An index choice, a library selection with no architectural coupling, or an ordinary reversible query optimization needs neither.
@@ -112,22 +112,22 @@ An ADR, when required, is a separate document referenced by its Registry entry. 
 
 Each entry in §12 uses these fields:
 
-| Field | Meaning |
-| --- | --- |
-| ID | `REG-NNNN`, sequential, never reused. |
-| Title | Short name of the open question. |
-| Category | One or more tags from §5. |
-| Status | `OPEN` / `DECIDED` / `IMPLEMENTED` / `REJECTED` / `SUPERSEDED`. |
-| Tier | `Registry only` or `Registry + ADR` (per §7); may be marked "ADR likely" while still `OPEN` if the threshold is expected to be met once decided. |
-| Opened | Date the question was recorded. |
-| Summary | The precise unresolved question, stated neutrally. |
-| Committed evidence | Exact document/section citations establishing the behavioral requirement and the gap — never a restatement of unrelated architecture. |
-| Affected architecture | The document/section that will carry the eventual outcome. |
-| Affected roadmap gate | The Roadmap phase/unit blocked on this decision, if any. |
-| ADR reference | `ADR-NNNN` once one exists, or "None". |
-| Decision outcome | Blank until `DECIDED`; then the settled answer and the date/authority that approved it. |
-| Implementation evidence | Blank until `IMPLEMENTED`; then a citation to the passed Roadmap gate only. |
-| Supersedes / Superseded by | Blank, or the related `REG-NNNN`. |
+| Field                      | Meaning                                                                                                                                          |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| ID                         | `REG-NNNN`, sequential, never reused.                                                                                                            |
+| Title                      | Short name of the open question.                                                                                                                 |
+| Category                   | One or more tags from §5.                                                                                                                        |
+| Status                     | `OPEN` / `DECIDED` / `IMPLEMENTED` / `REJECTED` / `SUPERSEDED`.                                                                                  |
+| Tier                       | `Registry only` or `Registry + ADR` (per §7); may be marked "ADR likely" while still `OPEN` if the threshold is expected to be met once decided. |
+| Opened                     | Date the question was recorded.                                                                                                                  |
+| Summary                    | The precise unresolved question, stated neutrally.                                                                                               |
+| Committed evidence         | Exact document/section citations establishing the behavioral requirement and the gap — never a restatement of unrelated architecture.            |
+| Affected architecture      | The document/section that will carry the eventual outcome.                                                                                       |
+| Affected roadmap gate      | The Roadmap phase/unit blocked on this decision, if any.                                                                                         |
+| ADR reference              | `ADR-NNNN` once one exists, or "None".                                                                                                           |
+| Decision outcome           | Blank until `DECIDED`; then the settled answer and the date/authority that approved it.                                                          |
+| Implementation evidence    | Blank until `IMPLEMENTED`; then a citation to the passed Roadmap gate only.                                                                      |
+| Supersedes / Superseded by | Blank, or the related `REG-NNNN`.                                                                                                                |
 
 # 9. Relationship to architecture documents
 
@@ -147,16 +147,16 @@ Seeded only with decisions that are currently necessary and supported by committ
 
 As of 2026-08-08, the M6 architecture decision analysis covering REG-0001–REG-0008 has been reviewed and approved by the reviewing authority. REG-0001 and REG-0006 required an ADR under the §7 threshold; both `ADR-0001` and `ADR-0002` now exist with **Status: Accepted**, satisfying the §6 precondition for those two entries to move to `DECIDED`. The remaining six entries required no ADR and move to `DECIDED` directly on the same approval. **`DECIDED` here, as throughout this Registry, authorizes no implementation.** No entry is marked `IMPLEMENTED`: no schema exists yet, `ALSAMAD_DATABASE_ARCHITECTURE.md` §5.4.1–§5.4.4 have not been authored, and the independent M5 production-activation dependency blocking M6 implementation remains unresolved regardless of this Registry's status.
 
-| ID | Title | Category | Status | Tier |
-| --- | --- | --- | --- | --- |
-| REG-0001 | Editorial General Dua placement in the devotional physical model | Database, Admin | DECIDED | Registry + ADR (`ADR-0001`, Accepted) |
-| REG-0002 | `devotional_items` specialization depth and independent lifecycle | Database | DECIDED | Registry only |
-| REG-0003 | `devotional_collections` ↔ content-item relationship cardinality and independent lifecycle | Database | DECIDED | Registry only |
-| REG-0004 | `devotional_collections.collection_kind` closed-vocabulary source of truth | Database, Admin | DECIDED | Registry only |
-| REG-0005 | Repetition-guidance storage locus and its source-evidence representation | Database | DECIDED | Registry only |
-| REG-0006 | `content_translations` text-storage representation | Database | DECIDED | Registry + ADR (`ADR-0002`, Accepted) |
-| REG-0007 | `content_translations` review/publication lifecycle column count | Database | DECIDED | Registry only (decided alongside `ADR-0002`, which covers the same table) |
-| REG-0008 | `devotional_collection_items` membership deletion semantics | Database | DECIDED | Registry only |
+| ID       | Title                                                                                      | Category        | Status  | Tier                                                                      |
+| -------- | ------------------------------------------------------------------------------------------ | --------------- | ------- | ------------------------------------------------------------------------- |
+| REG-0001 | Editorial General Dua placement in the devotional physical model                           | Database, Admin | DECIDED | Registry + ADR (`ADR-0001`, Accepted)                                     |
+| REG-0002 | `devotional_items` specialization depth and independent lifecycle                          | Database        | DECIDED | Registry only                                                             |
+| REG-0003 | `devotional_collections` ↔ content-item relationship cardinality and independent lifecycle | Database        | DECIDED | Registry only                                                             |
+| REG-0004 | `devotional_collections.collection_kind` closed-vocabulary source of truth                 | Database, Admin | DECIDED | Registry only                                                             |
+| REG-0005 | Repetition-guidance storage locus and its source-evidence representation                   | Database        | DECIDED | Registry only                                                             |
+| REG-0006 | `content_translations` text-storage representation                                         | Database        | DECIDED | Registry + ADR (`ADR-0002`, Accepted)                                     |
+| REG-0007 | `content_translations` review/publication lifecycle column count                           | Database        | DECIDED | Registry only (decided alongside `ADR-0002`, which covers the same table) |
+| REG-0008 | `devotional_collection_items` membership deletion semantics                                | Database        | DECIDED | Registry only                                                             |
 
 ### REG-0001 — Editorial General Dua placement in the devotional physical model
 

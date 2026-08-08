@@ -576,37 +576,37 @@ Provider or rights withdrawal first disables fetching and public serving, record
 
 M5.2 defines the exact fields of the immutable import manifest introduced narratively in 5.3.8. The manifest remains a version-controlled JSON artifact, never a physical table.
 
-| Field | Type/form | Contract |
-| --- | --- | --- |
-| `manifest_id` | UUIDv7 string | Immutable identity of one manifest version; never reused across a content or version change. |
-| `provider_code` | lowercase string | External provider namespace matching the `editions.provider_code`/`licenses.provider_code` vocabulary; never canonical identity. |
-| `provider_environment` | closed enum `sandbox`, `staging`, `production` | Declares controlled-vs-production origin; M5.2 authorizes only `sandbox`/`staging` manifests. |
-| `resource_type` | closed enum `surah`, `ayah`, `ayah_text`, `structural_marker`, `translation_edition`, `translation_text` | Matches the M5 table it targets; never a seventh resource kind. |
-| `provider_resource_id` | opaque string | Provider-scoped external alias; never a primary or canonical key. |
-| `provider_resource_version` | opaque string | Provider snapshot/resource version; a changed value forces a new manifest. |
-| `requested_at` | `timestamptz` UTC | Instant the fetch was requested. |
-| `fetched_at` | `timestamptz` UTC, nullable | Instant the resource was retrieved; null while pending. |
-| `source_endpoint` | string (URL or documented endpoint identity) | HTTPS endpoint or internal endpoint identity; never embeds credentials. |
-| `http_status`, `http_content_type`, `http_etag`, `http_last_modified` | safe HTTP metadata | Recorded only when non-secret; no header containing a token or cookie is persisted. |
-| `source_checksum` | lowercase SHA-256 hex | Exact transport/file bytes before parsing. |
-| `normalized_checksum` | lowercase SHA-256 hex, nullable | Present only for resources with a normalized-text counterpart (ayah/translation text); computed under the existing M4 NFC contract. |
-| `license_decision_ref` | reference identifier | Points to the recorded license/attribution/retention decision; never embeds contract text. |
-| `retention_decision` | closed enum matching `licenses.retention_policy` | `permanent`, `time_limited`, or `no_storage`; defaults to the seven-day `time_limited` boundary absent written permission. |
-| `attribution_decision` | reference to approved attribution text | Nonblank pointer; never invented at import time. |
-| `commercial_use_decision` | explicit boolean/decision reference | Unknown is treated as denied. |
-| `redistribution_decision` | explicit boolean/decision reference | Unknown is treated as denied. |
-| `selected_edition_or_translation_ref` | reference identifier | Points to the target `editions.id` or `quran_translation_editions.id` candidate; never invents a new canonical identity from provider data. |
-| `expected_counts`, `actual_counts` | bounded JSON count map | Per-resource and per-surah expected vs. observed row/byte counts, used only for reconciliation; never persisted as canonical rows. |
-| `import_mode` | closed enum `full`, `incremental`, `correction` | Declares the scope of the attempt. |
-| `dry_run` | boolean | `true` for every M5.2 manifest; `false` is out of scope until the production activation gate. |
-| `status` | closed enum matching the M5.2 import state machine | See `ALSAMAD_IMPLEMENTATION_ROADMAP.md`'s M5.2 import state machine. |
-| `failure_reason` | bounded text, nullable | Present only when `status` denotes failure; never contains secrets or full payload. |
-| `created_by_process` | service/process identity string | Identifies the server-side job/service account; never a personal credential. |
-| `software_version` | semantic version string | Adapter/import-harness release identifier. |
-| `schema_version` | positive integer | Manifest schema-contract version; a changed value requires a compatible reader. |
-| `retry_metadata` | bounded JSON (`attempt_count`, `last_checkpoint_token`, `last_checkpoint_at`) | See the idempotency contract in 5.3.11. |
-| `withdrawal_deletion_status` | closed enum `none`, `withdrawn`, `deleted` | Mirrors provider withdrawal/deletion signals for the resource. |
-| `evidence_refs` | bounded array of identifiers | Points to the reconciliation report ID, quarantine object ID, and audit/correlation IDs; never the payload itself. |
+| Field                                                                 | Type/form                                                                                                | Contract                                                                                                                                    |
+| --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `manifest_id`                                                         | UUIDv7 string                                                                                            | Immutable identity of one manifest version; never reused across a content or version change.                                                |
+| `provider_code`                                                       | lowercase string                                                                                         | External provider namespace matching the `editions.provider_code`/`licenses.provider_code` vocabulary; never canonical identity.            |
+| `provider_environment`                                                | closed enum `sandbox`, `staging`, `production`                                                           | Declares controlled-vs-production origin; M5.2 authorizes only `sandbox`/`staging` manifests.                                               |
+| `resource_type`                                                       | closed enum `surah`, `ayah`, `ayah_text`, `structural_marker`, `translation_edition`, `translation_text` | Matches the M5 table it targets; never a seventh resource kind.                                                                             |
+| `provider_resource_id`                                                | opaque string                                                                                            | Provider-scoped external alias; never a primary or canonical key.                                                                           |
+| `provider_resource_version`                                           | opaque string                                                                                            | Provider snapshot/resource version; a changed value forces a new manifest.                                                                  |
+| `requested_at`                                                        | `timestamptz` UTC                                                                                        | Instant the fetch was requested.                                                                                                            |
+| `fetched_at`                                                          | `timestamptz` UTC, nullable                                                                              | Instant the resource was retrieved; null while pending.                                                                                     |
+| `source_endpoint`                                                     | string (URL or documented endpoint identity)                                                             | HTTPS endpoint or internal endpoint identity; never embeds credentials.                                                                     |
+| `http_status`, `http_content_type`, `http_etag`, `http_last_modified` | safe HTTP metadata                                                                                       | Recorded only when non-secret; no header containing a token or cookie is persisted.                                                         |
+| `source_checksum`                                                     | lowercase SHA-256 hex                                                                                    | Exact transport/file bytes before parsing.                                                                                                  |
+| `normalized_checksum`                                                 | lowercase SHA-256 hex, nullable                                                                          | Present only for resources with a normalized-text counterpart (ayah/translation text); computed under the existing M4 NFC contract.         |
+| `license_decision_ref`                                                | reference identifier                                                                                     | Points to the recorded license/attribution/retention decision; never embeds contract text.                                                  |
+| `retention_decision`                                                  | closed enum matching `licenses.retention_policy`                                                         | `permanent`, `time_limited`, or `no_storage`; defaults to the seven-day `time_limited` boundary absent written permission.                  |
+| `attribution_decision`                                                | reference to approved attribution text                                                                   | Nonblank pointer; never invented at import time.                                                                                            |
+| `commercial_use_decision`                                             | explicit boolean/decision reference                                                                      | Unknown is treated as denied.                                                                                                               |
+| `redistribution_decision`                                             | explicit boolean/decision reference                                                                      | Unknown is treated as denied.                                                                                                               |
+| `selected_edition_or_translation_ref`                                 | reference identifier                                                                                     | Points to the target `editions.id` or `quran_translation_editions.id` candidate; never invents a new canonical identity from provider data. |
+| `expected_counts`, `actual_counts`                                    | bounded JSON count map                                                                                   | Per-resource and per-surah expected vs. observed row/byte counts, used only for reconciliation; never persisted as canonical rows.          |
+| `import_mode`                                                         | closed enum `full`, `incremental`, `correction`                                                          | Declares the scope of the attempt.                                                                                                          |
+| `dry_run`                                                             | boolean                                                                                                  | `true` for every M5.2 manifest; `false` is out of scope until the production activation gate.                                               |
+| `status`                                                              | closed enum matching the M5.2 import state machine                                                       | See `ALSAMAD_IMPLEMENTATION_ROADMAP.md`'s M5.2 import state machine.                                                                        |
+| `failure_reason`                                                      | bounded text, nullable                                                                                   | Present only when `status` denotes failure; never contains secrets or full payload.                                                         |
+| `created_by_process`                                                  | service/process identity string                                                                          | Identifies the server-side job/service account; never a personal credential.                                                                |
+| `software_version`                                                    | semantic version string                                                                                  | Adapter/import-harness release identifier.                                                                                                  |
+| `schema_version`                                                      | positive integer                                                                                         | Manifest schema-contract version; a changed value requires a compatible reader.                                                             |
+| `retry_metadata`                                                      | bounded JSON (`attempt_count`, `last_checkpoint_token`, `last_checkpoint_at`)                            | See the idempotency contract in 5.3.11.                                                                                                     |
+| `withdrawal_deletion_status`                                          | closed enum `none`, `withdrawn`, `deleted`                                                               | Mirrors provider withdrawal/deletion signals for the resource.                                                                              |
+| `evidence_refs`                                                       | bounded array of identifiers                                                                             | Points to the reconciliation report ID, quarantine object ID, and audit/correlation IDs; never the payload itself.                          |
 
 ### 5.3.11 Quarantine, idempotency, and reconciliation contract (M5.2)
 
@@ -631,13 +631,13 @@ M6 authorizes exactly these four Release 1 devotional tables, in this dependency
 
 ### 5.4.1 `devotional_items`
 
-| Column | PostgreSQL type | Nullability and default | Contract |
-| --- | --- | --- | --- |
-| `id` | `uuid` | Required; no database default | Application-generated UUIDv7 primary key; immutable. |
-| `content_item_id` | `uuid` | Required | Unique FK to `content_items.id`; `ON UPDATE RESTRICT ON DELETE RESTRICT`; immutable. |
-| `canonical_key` | `varchar(160)` | Required | Unique lowercase provider-independent identity; immutable. |
-| `created_at` | `timestamptz` | Required; default `current_timestamp` | UTC creation time. |
-| `updated_at` | `timestamptz` | Required; default `current_timestamp` | UTC last administrative update. |
+| Column            | PostgreSQL type | Nullability and default               | Contract                                                                             |
+| ----------------- | --------------- | ------------------------------------- | ------------------------------------------------------------------------------------ |
+| `id`              | `uuid`          | Required; no database default         | Application-generated UUIDv7 primary key; immutable.                                 |
+| `content_item_id` | `uuid`          | Required                              | Unique FK to `content_items.id`; `ON UPDATE RESTRICT ON DELETE RESTRICT`; immutable. |
+| `canonical_key`   | `varchar(160)`  | Required                              | Unique lowercase provider-independent identity; immutable.                           |
+| `created_at`      | `timestamptz`   | Required; default `current_timestamp` | UTC creation time.                                                                   |
+| `updated_at`      | `timestamptz`   | Required; default `current_timestamp` | UTC last administrative update.                                                      |
 
 Constraints are `UNIQUE (content_item_id)`, `UNIQUE (canonical_key)`, and lowercase canonical-key form. A trigger requires the referenced `content_items` row to have `content_type IN ('dua', 'dhikr')` and `owning_module = 'devotional'`. Under the existing `ck_content_items__editorial_general_dua` check constraint (§5.2.7), a row with `content_type = 'editorial_general_dua'` always has `owning_module = 'editorial'` and can therefore never satisfy this trigger; Editorial General Dua never receives a `devotional_items` row (`ALSAMAD_DECISION_REGISTRY.md` REG-0001; `ADR-0001`). Indexes are `content_item_id` and `canonical_key`, both already required by their unique constraints; no further index is authorized absent a demonstrated query need.
 
@@ -647,14 +647,14 @@ Constraints are `UNIQUE (content_item_id)`, `UNIQUE (canonical_key)`, and lowerc
 
 ### 5.4.2 `devotional_collections`
 
-| Column | PostgreSQL type | Nullability and default | Contract |
-| --- | --- | --- | --- |
-| `id` | `uuid` | Required; no database default | Application-generated UUIDv7 primary key; immutable. |
-| `content_item_id` | `uuid` | Required | Unique FK to `content_items.id`; `ON UPDATE RESTRICT ON DELETE RESTRICT`; immutable. |
-| `canonical_key` | `varchar(160)` | Required | Unique lowercase provider-independent identity; immutable. |
-| `collection_kind` | `varchar(16)` | Required | Closed values `morning`, `evening`, or `contextual`; immutable after insert. |
-| `created_at` | `timestamptz` | Required; default `current_timestamp` | UTC creation time. |
-| `updated_at` | `timestamptz` | Required; default `current_timestamp` | UTC last administrative update. |
+| Column            | PostgreSQL type | Nullability and default               | Contract                                                                             |
+| ----------------- | --------------- | ------------------------------------- | ------------------------------------------------------------------------------------ |
+| `id`              | `uuid`          | Required; no database default         | Application-generated UUIDv7 primary key; immutable.                                 |
+| `content_item_id` | `uuid`          | Required                              | Unique FK to `content_items.id`; `ON UPDATE RESTRICT ON DELETE RESTRICT`; immutable. |
+| `canonical_key`   | `varchar(160)`  | Required                              | Unique lowercase provider-independent identity; immutable.                           |
+| `collection_kind` | `varchar(16)`   | Required                              | Closed values `morning`, `evening`, or `contextual`; immutable after insert.         |
+| `created_at`      | `timestamptz`   | Required; default `current_timestamp` | UTC creation time.                                                                   |
+| `updated_at`      | `timestamptz`   | Required; default `current_timestamp` | UTC last administrative update.                                                      |
 
 Constraints are `UNIQUE (content_item_id)` — a one-to-one relationship to canonical content identity, matching `devotional_items` — `UNIQUE (canonical_key)`, lowercase canonical-key form, and the closed `collection_kind` vocabulary (`ALSAMAD_DECISION_REGISTRY.md` REG-0003, REG-0004). A trigger requires the referenced `content_items` row to have `content_type = 'collection'` and `owning_module = 'devotional'`. Indexes are `content_item_id` and `canonical_key`, both already required by their unique constraints.
 
@@ -664,16 +664,16 @@ Constraints are `UNIQUE (content_item_id)` — a one-to-one relationship to cano
 
 ### 5.4.3 `devotional_collection_items`
 
-| Column | PostgreSQL type | Nullability and default | Contract |
-| --- | --- | --- | --- |
-| `id` | `uuid` | Required; no database default | Application-generated UUIDv7 primary key; immutable. |
-| `devotional_collection_id` | `uuid` | Required | FK to `devotional_collections.id`; `ON UPDATE RESTRICT ON DELETE RESTRICT`. |
-| `devotional_item_id` | `uuid` | Required | FK to `devotional_items.id`; `ON UPDATE RESTRICT ON DELETE RESTRICT`. |
-| `position` | `integer` | Required | Positive deterministic order within the collection. |
-| `repetition_count` | `integer` | Nullable | When present, positive sourced repetition guidance; never a persisted worship count. |
-| `source_reference_id` | `uuid` | Nullable | Optional FK to `source_references.id`; `ON UPDATE RESTRICT ON DELETE RESTRICT`; evidences the repetition guidance. |
-| `created_at` | `timestamptz` | Required; default `current_timestamp` | UTC creation time. |
-| `updated_at` | `timestamptz` | Required; default `current_timestamp` | UTC last administrative update. |
+| Column                     | PostgreSQL type | Nullability and default               | Contract                                                                                                           |
+| -------------------------- | --------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `id`                       | `uuid`          | Required; no database default         | Application-generated UUIDv7 primary key; immutable.                                                               |
+| `devotional_collection_id` | `uuid`          | Required                              | FK to `devotional_collections.id`; `ON UPDATE RESTRICT ON DELETE RESTRICT`.                                        |
+| `devotional_item_id`       | `uuid`          | Required                              | FK to `devotional_items.id`; `ON UPDATE RESTRICT ON DELETE RESTRICT`.                                              |
+| `position`                 | `integer`       | Required                              | Positive deterministic order within the collection.                                                                |
+| `repetition_count`         | `integer`       | Nullable                              | When present, positive sourced repetition guidance; never a persisted worship count.                               |
+| `source_reference_id`      | `uuid`          | Nullable                              | Optional FK to `source_references.id`; `ON UPDATE RESTRICT ON DELETE RESTRICT`; evidences the repetition guidance. |
+| `created_at`               | `timestamptz`   | Required; default `current_timestamp` | UTC creation time.                                                                                                 |
+| `updated_at`               | `timestamptz`   | Required; default `current_timestamp` | UTC last administrative update.                                                                                    |
 
 Constraints are `UNIQUE (devotional_collection_id, devotional_item_id)`, `UNIQUE (devotional_collection_id, position)`, positive `position`, and `repetition_count IS NULL OR repetition_count > 0`. No cross-table trigger is required: both referenced tables already restrict their own referential scope to `owning_module = 'devotional'` content (§5.4.1, §5.4.2), so ordinary FK/unique/check enforcement is sufficient. Indexes are `devotional_item_id` and `source_reference_id`, neither of which is the leading column of an existing unique constraint; `devotional_collection_id` needs no separate index, since it already leads both unique constraints above.
 
@@ -683,19 +683,19 @@ This table carries no reward, streak, or completion-count field (`ALSAMAD_DECISI
 
 ### 5.4.4 `content_translations`
 
-| Column | PostgreSQL type | Nullability and default | Contract |
-| --- | --- | --- | --- |
-| `id` | `uuid` | Required; no database default | Application-generated UUIDv7 primary key; immutable. |
-| `content_revision_id` | `uuid` | Required | FK to `content_revisions.id`; `ON UPDATE RESTRICT ON DELETE RESTRICT`; immutable. |
-| `locale_id` | `uuid` | Required | FK to `locales.id`; `ON UPDATE RESTRICT ON DELETE RESTRICT`; immutable. |
-| `rendering_kind` | `varchar(16)` | Required | Closed values `translation` or `transliteration`; immutable. |
-| `rendering_version` | `integer` | Required; default `1` | Positive version of this revision/locale/kind rendering; immutable. |
-| `text_content` | `text` | Required | Exact UTF-8 rendered text; nonblank; immutable once first eligible. |
-| `content_checksum` | `varchar(64)` | Required | Lowercase SHA-256 hex of the normalized `text_content`, under the existing §5.2.10 normalization contract; immutable once first eligible. |
-| `review_status` | `varchar(16)` | Required; default `pending` | One of `pending`, `approved`, `rejected`, `withdrawn`, matching the vocabulary already used by `quran_translation_editions.review_status` (§5.3.6). |
-| `reviewed_at` | `timestamptz` | Nullable | Required exactly for `approved`, `rejected`, or `withdrawn`; null for `pending`. |
-| `created_at` | `timestamptz` | Required; default `current_timestamp` | UTC creation time. |
-| `updated_at` | `timestamptz` | Required; default `current_timestamp` | UTC last pre-eligibility update. |
+| Column                | PostgreSQL type | Nullability and default               | Contract                                                                                                                                            |
+| --------------------- | --------------- | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                  | `uuid`          | Required; no database default         | Application-generated UUIDv7 primary key; immutable.                                                                                                |
+| `content_revision_id` | `uuid`          | Required                              | FK to `content_revisions.id`; `ON UPDATE RESTRICT ON DELETE RESTRICT`; immutable.                                                                   |
+| `locale_id`           | `uuid`          | Required                              | FK to `locales.id`; `ON UPDATE RESTRICT ON DELETE RESTRICT`; immutable.                                                                             |
+| `rendering_kind`      | `varchar(16)`   | Required                              | Closed values `translation` or `transliteration`; immutable.                                                                                        |
+| `rendering_version`   | `integer`       | Required; default `1`                 | Positive version of this revision/locale/kind rendering; immutable.                                                                                 |
+| `text_content`        | `text`          | Required                              | Exact UTF-8 rendered text; nonblank; immutable once first eligible.                                                                                 |
+| `content_checksum`    | `varchar(64)`   | Required                              | Lowercase SHA-256 hex of the normalized `text_content`, under the existing §5.2.10 normalization contract; immutable once first eligible.           |
+| `review_status`       | `varchar(16)`   | Required; default `pending`           | One of `pending`, `approved`, `rejected`, `withdrawn`, matching the vocabulary already used by `quran_translation_editions.review_status` (§5.3.6). |
+| `reviewed_at`         | `timestamptz`   | Nullable                              | Required exactly for `approved`, `rejected`, or `withdrawn`; null for `pending`.                                                                    |
+| `created_at`          | `timestamptz`   | Required; default `current_timestamp` | UTC creation time.                                                                                                                                  |
+| `updated_at`          | `timestamptz`   | Required; default `current_timestamp` | UTC last pre-eligibility update.                                                                                                                    |
 
 Constraints are `UNIQUE (content_revision_id, locale_id, rendering_kind, rendering_version)`, nonblank `text_content`, a valid lowercase SHA-256 `content_checksum`, closed `rendering_kind`/`review_status`, positive `rendering_version`, and coherent `reviewed_at`. No cross-table trigger is required; rendering eligibility is a read-time derivation, not a write-time constraint (see below). Indexes are `locale_id`, which is not the leading column of the unique constraint above; `content_revision_id` needs no separate index, since it already leads that constraint.
 
