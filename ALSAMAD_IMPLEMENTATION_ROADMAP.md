@@ -890,22 +890,197 @@ Architecture contract complete; implementation not started by this documentation
 
 ## Phase 6: Devotional content and Editorial General Dua
 
-- Objective
-- Included scope
-- Explicitly excluded scope
-- Dependencies
-- Artifacts
-- Database changes allowed
-- Application capabilities
-- Admin capabilities
-- Security requirements
-- QA requirements
-- Observability requirements
-- Analytics requirements
-- Acceptance criteria
-- Completion evidence
-- Rollback/recovery
-- Release status
+### Objective
+
+Implement the provider-independent Devotional Content and Translation foundation by activating exactly the four Release 1 tables in `ALSAMAD_DATABASE_ARCHITECTURE.md` section 5.4, and deliver the mobile-first Duas reading experience on top of them, matching the mobile-first Adhkar precedent already shipped in `7cd72ee`, while keeping Editorial General Dua structurally and visibly separated from authenticated devotional content. Designed Mobile First. Desktop Expanded. This phase completes journeys J4, J5, J6, and J7 without opening editorial administration workflows, public REST activation, or any table beyond the frozen 30-table catalog.
+
+### Included scope
+
+- Drizzle mappings and one reviewed forward-only migration for exactly `devotional_items`, `devotional_collections`, `devotional_collection_items`, and `content_translations`, in that dependency order, as scoped in database architecture section 5.4.
+- The mobile-first Duas reading experience (category browsing, collection reading, UI-only bookmarking, source-trust presentation, honest empty/pending/available states), matching the shape already committed for Adhkar in `7cd72ee`.
+- Retiring the pre-architecture `duaFixtures` rendering path in `src/app/[locale]/duas/` in favor of the same provider-independent content-source abstraction pattern already used by Quran (`src/lib/quran/content/`) and Adhkar (`src/lib/adhkar/content/`).
+- Preserving the already-shipped, already-published Editorial General Dua library (`src/lib/general-duas.ts`) exactly as it exists at HEAD, as the one real, non-empty devotional entry point.
+- A database-backed content source mirroring `src/lib/quran/content/db-source.ts`'s honest-empty/pending/available pattern, once the M6.1 schema exists.
+- Real PostgreSQL verification of the four new tables' persistence, constraints, and cumulative table count.
+
+### Explicitly excluded scope
+
+- `editorial_users`, `editorial_role_grants`, `review_records`, and every other Editorial (5.5), Prayer/calendar (5.6), Audit/publication-history (5.7), Prepared, Approved Later, or Future/Research table. Editorial administration workflow — assignment, review queues, staff authentication, publication-event recording — is Phase 7 scope and is not authorized here.
+- Activation of `GET /api/v1/devotional-items/{id}` or any other public REST route from `ALSAMAD_API_ARCHITECTURE.md` section 4.1. M6 database and read-abstraction work remains server-side and non-public, exactly as M5 kept Quran import server-side pending its own activation gate.
+- Any admin UI or staff-facing devotional/Editorial General Dua workflow screen described in `ALSAMAD_ADMIN_ARCHITECTURE.md` sections 8 and 9. Those require the Phase 7 Editorial tables first.
+- Deterministic search indexing (Phase 8), AI retrieval, embeddings, semantic search, or Knowledge Graph work of any kind. `ALSAMAD_KNOWLEDGE_ENGINE_ARCHITECTURE.md` and any Knowledge Engine implementation are M7.0-track and are explicitly not authorized by this contract.
+- Repetition counters, streaks, or any worship measurement, consistent with the No Worship Scoring Principle; a repetition *display* sourced from `devotional_collection_items` guidance is permitted, a logged or persisted count is not.
+- Selection, drafting, or seeding of new Editorial General Dua entries, new adhkar collections, or new dua content beyond what is already committed at HEAD in `src/lib/general-duas.ts`. M6 authorizes zero new religious or editorial seed rows.
+- Authentication, bookmarking persistence, or any Prepared five-table identity package.
+
+### Dependencies
+
+- M1 exact 30-table Release 1 catalog: PASS.
+- M2 Database Foundation, M3 Global Locales and Regional Configuration, and M4 Content Integrity Foundation: PASS.
+- M6 builds directly on M4's `content_items` and `content_revisions` (`content_type` already includes `dua`, `dhikr`, `collection`, and `editorial_general_dua`; `owning_module` already includes `devotional`; `verification_state` already includes `editorial_only`) — no M4 column change is authorized or required.
+- **M5, complete through its production activation gate (`M5 Quran Import Activated`): required.** This document's own Phase 5 "Next-phase handoff" (line 776) states verbatim: *"M6 receives only a separately activated, licensed, verified Quran foundation; this contract does not authorize M5.2, production import, or M6 implementation."* Per committed history, only Quran schema (`3cfecd0`) and import-harness-adjacent work (`839b16e`) exist; no dry-run pass, license/source approval, scholarly approval, or production activation is evidenced anywhere in committed history. This M6 contract defines the executable units below; it does not itself clear any of them for implementation while `M5 Quran Import Activated` remains unmet. Note: commit `7cd72ee` (Adhkar mobile-first foundation) already implemented devotional-domain UI scope before this dependency was satisfied, without a recorded exception; this contract does not retroactively resolve that inconsistency, it only prevents repeating it for the remaining M6 units.
+- Database architecture section 5.4 is authoritative for the four M6 tables' names, purpose, and essential constraints. Unlike sections 5.1.1–5.1.3, 5.2.2–5.2.9, and 5.3.2–5.3.7, section 5.4 does not yet carry per-table column, type, nullability, default, index, and trigger subsections. **M6.1 implementation may not begin until database architecture section 5.4 is expanded with that same level of detail (for example as 5.4.1–5.4.4) through a separately approved database-architecture documentation change.** This contract authorizes that expansion as a documentation prerequisite; it does not itself author the column-level specification.
+- The Roadmap's mobile-first UI milestone requirement (this document, lines 24–26) governs M6.0 and M6.2; this Objective and this phase's acceptance criteria record the required "Designed Mobile First. Desktop Expanded." status.
+
+### Artifacts
+
+- `src/db/schema.ts`
+- `drizzle/0005_devotional_content_foundation.sql`
+- `drizzle/meta/_journal.json`
+- `scripts/db-verify.mjs`
+- `tests/devotional-content-database.test.mjs`
+- `src/lib/duas/` (content abstraction and client)
+- `src/components/duas/` (presentation)
+- `src/app/[locale]/duas/page.tsx` and its category/collection routes
+- `tests/duas-content.test.mjs`, `tests/duas-routing.test.mjs`
+- Schema diff; constraint, trigger, and index inventories; and real PostgreSQL evidence
+
+### Database changes allowed
+
+M6 authorizes exactly four new Release 1 physical domain tables: `devotional_items`, `devotional_collections`, `devotional_collection_items`, and `content_translations`. Together with M3, M4, and M5, the cumulative Release 1 domain count becomes exactly **20 of 30** (2 + 8 + 6 + 4). Migration filename is exactly `drizzle/0005_devotional_content_foundation.sql`, the next forward-only migration after committed `0004`. No infrastructure bookkeeping table may consume or exceed the approved 30-table boundary, and no fifth devotional table (for example a separate repetition, source, or Editorial General Dua detail table) is authorized — database architecture §5.4 scopes exactly these four tables, and §11 explicitly rejects "separate devotional source, translation, transliteration, repetition, and Editorial General Dua detail tables" as Release 1 fragmentation.
+
+All primary keys are application-generated UUIDv7 with no database default. FKs use `ON UPDATE RESTRICT ON DELETE RESTRICT`. Per the section 5.4 summary: `devotional_items` carries a one-to-one FK to `content_items`, a unique canonical key, and a checked type; `devotional_collections` carries a FK to a versioned content item for title/description and a unique canonical key; `devotional_collection_items` carries FKs to collection and item with a unique pair/position and no reward field; `content_translations` carries FKs to `content_revisions` and `locales` with a checked rendering kind and immutable published text. Exact column-level types, defaults, and constraint/trigger names follow the section 5.4 expansion required under Dependencies above.
+
+### Seed authorization
+
+M6 authorizes **zero religious or editorial seed rows**. No sample dua, dhikr, collection, or translation may be seeded or migrated as data. Tests may create synthetic, clearly non-religious fixtures only inside transactions guaranteed to roll back. The already-published `src/lib/general-duas.ts` library remains an in-repository editorial module, not a database seed, exactly as it exists at HEAD; M6 does not migrate it into the schema.
+
+### Application capabilities
+
+Typed database access, a provider-independent read abstraction, and the mobile-first guest-facing Duas presentation layer only, consistent with the already-shipped Adhkar precedent (`7cd72ee`). No public REST route from `ALSAMAD_API_ARCHITECTURE.md` §4.1 is activated; no authentication, bookmarking persistence, or write path is authorized. The reading experience must report the same three honest states (`empty`, `pending`, `available`) already established for Quran and Adhkar, and must never fabricate content.
+
+### Admin capabilities
+
+None. Devotional Content Administration and Editorial General Dua Administration (`ALSAMAD_ADMIN_ARCHITECTURE.md` §§8–9) require the Phase 7 Editorial tables and staff authentication; M6 defers them entirely.
+
+### Security requirements
+
+- PostgreSQL, not application code, enforces the one-to-one item/content-item link, unique canonical keys, checked devotional type, checked collection kind, unique collection membership/position, and checked translation rendering kind.
+- Editorial General Dua remains distinguishable at the data layer purely through the already-approved `content_items.content_type = 'editorial_general_dua'` / `owning_module = 'editorial'` combination and `content_revisions.verification_state = 'editorial_only'`; M6 adds no new classification column and introduces no path for AI-generated or unverified content to publish as either authenticated or editorial devotional content.
+- No worship behavior, repetition count, bookmark, or user-identifying data is persisted; `devotional_collection_items` carries no reward field, consistent with the No Worship Scoring Principle.
+- Deletion remains `RESTRICT`; a published `content_translations` row is immutable, and only withdrawal/supersession through a new `content_revisions` row may change it.
+- No secret, credential, or personal data is introduced by this phase.
+
+### QA requirements
+
+- `npm run format:check`
+- `npm run lint`
+- `npm run typecheck`
+- `npm run build`
+- `npm run db:up`
+- `npm run db:safety`
+- `npm run db:migrate`
+- `npm run db:seed` twice
+- `npm run test:db`
+- `npm run db:check`
+- `npm test`
+- Real PostgreSQL constraint, trigger, schema, and cumulative table-count verification
+- `git diff --check`
+- `npm run db:down` while preserving the named volume
+
+All M2, M3, M4, and M5 checks remain green. Consistent with `ALSAMAD_QUALITY_ASSURANCE_TESTING_ARCHITECTURE.md` §13, religious accuracy has the highest priority where applicable, real PostgreSQL verification is required whenever PostgreSQL behavior is under test, and human review remains authoritative for religious publication — M6 itself publishes nothing.
+
+### Observability requirements
+
+Database verification must emit actionable pass/fail evidence — table/constraint/trigger/index counts, cumulative table count, rejection cases — without secrets or religious payloads. UI-layer observability is limited to the same honest empty/pending/available status reporting already used by Quran and Adhkar. M6 adds no production analytics or product instrumentation.
+
+### Analytics requirements
+
+None beyond what `ALSAMAD_ANALYTICS_PRODUCT_INTELLIGENCE_ARCHITECTURE.md` §9 already scopes for Duas and Adhkar Intelligence: any future measurement must be evidence-based, provider-independent, and subordinate to religious authority, privacy, and safety. M6 itself ships no telemetry; streak, worship-score, leaderboard, or engagement-pressure instrumentation is permanently out of scope per the No Worship Scoring Principle.
+
+### M6 acceptance and separated gates
+
+1. **UI foundation gate — `M6.0 Duas Mobile-First Foundation Verified`:** the mobile-first Duas reading experience exists, reports honest empty/pending/available states, keeps Editorial General Dua visibly and structurally distinct, retires the `duaFixtures` rendering path, and passes its own focused tests. This gate requires no database schema.
+2. **Schema completion gate — `M6.1 Devotional Schema Foundation Verified`:** exact four new and 20 cumulative domain tables; all columns/types/defaults per the expanded section 5.4; UUIDv7; FK `RESTRICT`; unique/check/index/trigger inventories; zero unauthorized table/seed row; transaction rollback; all M2/M3/M4/M5 checks green.
+3. **Integration gate — `M6.2 Devotional Content Integration Verified`:** a database-backed content source reads the M6.1 schema honestly (mirroring `src/lib/quran/content/db-source.ts`), proven against real PostgreSQL fixtures created and rolled back in a transaction, and the already-published Editorial General Dua library remains correctly classified end to end. Integration publishes nothing, activates no public API route, and does not itself require the M6.0 composition root to switch its default source.
+
+If only gate 1 passes, report exactly `M6.0 Duas Mobile-First Foundation Verified`. If only gate 2 also passes, add `M6.1 Devotional Schema Foundation Verified`. Do not call the milestone operational or fully PASS until gate 3 also passes. No gate authorizes Phase 7, public API activation, or admin capability, and no gate relaxes the M5 production-activation dependency above.
+
+### Completion evidence
+
+Return the exact changed-file list; migration and schema diff; constraint/trigger/index/table-count inventories; representative accepted/rejected PostgreSQL cases; UI honest-state evidence for every devotional category defined by M6.0; regression results for M2–M5; repository checks; and any remaining blockers, most importantly the section 5.4 column-level documentation prerequisite and the M5 production-activation dependency.
+
+### Rollback/recovery
+
+Production migrations remain forward-only. Before release, failure recovery uses a disposable local/test database or restoration of the preserved named volume from a known-good backup. A corrective forward migration requires explicit review and must preserve canonical identifiers. UI-layer rollback is a normal reversible code change; no religious or editorial content is destructively edited in place.
+
+### Next-phase handoff
+
+After every M6 acceptance criterion passes, hand the stable devotional schema and mobile-first reading experience to **M7 — Editorial administration workflows**, which adds `editorial_users`, `editorial_role_grants`, and `review_records` and opens the actual Devotional Content Administration and Editorial General Dua Administration workflows (`ALSAMAD_ADMIN_ARCHITECTURE.md` §§8–9). This contract does not authorize M7 implementation, and does not authorize any Knowledge Engine (M7.0-track) implementation.
+
+### M6.0 — Duas Mobile-First Foundation
+
+**Dependency position.** Independent of M6.1; requires no database schema. May proceed in parallel with, before, or after M6.1. Required, together with M6.1, before M6.2. Still subject to the phase-level M5 production-activation dependency above.
+
+**Objective.** Designed Mobile First. Desktop Expanded. Deliver the same honest, static-content-source mobile-first reading experience for Duas that is already committed for Adhkar (`7cd72ee`) and for Quran (`22a1466`), replacing the pre-architecture `duaFixtures` rendering path while preserving the already-shipped Editorial General Dua library exactly as published.
+
+**Included scope.**
+
+- A provider-independent Duas content-source abstraction (types, category/collection structure, a static/honest-empty source, reader-data projection, search) under `src/lib/duas/`, mirroring the shape already committed under `src/lib/adhkar/content/`.
+- Presentation components under `src/components/duas/` for category browsing, collection reading, UI-only bookmarking, and source-trust presentation.
+- A structural, mandatory Editorial General Dua label/disclosure in the UI, satisfying journey J6 and `ALSAMAD_SECURITY_ARCHITECTURE.md` line 130's "mandatory label" and "prohibited authenticated badges" requirements.
+- Reporting the already-published `src/lib/general-duas.ts` entries as `available` with a real, sourced item count, and every other, not-yet-approved devotional entry point as honestly `empty`.
+- Updated `src/app/[locale]/duas/page.tsx` and its category routes; removal or replacement of the `duaFixtures`-based rendering is in scope.
+- Focused tests: `tests/duas-content.test.mjs`, `tests/duas-routing.test.mjs`.
+
+**Prohibited work.** Any database migration, schema change, or new physical table; any public REST route; any admin surface; any new Editorial General Dua entry beyond what is already committed; any repetition counter that persists or logs state; any change to `src/lib/adhkar/`, `src/lib/quran/`, or any Quran/Adhkar route; any change outside `src/lib/duas/`, `src/components/duas/`, the Duas app routes, `tests/duas-*.test.mjs`, and the minimum shared-file touches (`src/lib/i18n.ts`, `src/app/globals.css`, `src/components/home/sections.tsx`) strictly required to wire in the new category presentation, mirroring exactly how commit `7cd72ee` touched those same three shared files for Adhkar.
+
+**Acceptance gates.** Format, lint, typecheck, build, and `npm test` pass; honest empty/pending/available states are proven for every Duas entry point; Editorial General Dua is visibly and structurally distinguished in the rendered UI; no fabricated religious or editorial text is rendered; the mobile-first objective wording is recorded per the Roadmap's mobile-first UI milestone requirement.
+
+**PASS criteria.** `M6.0 Duas Mobile-First Foundation Verified` — all acceptance gates above pass and `npm test` is fully green including the new Duas test files.
+
+**Handoff.** Hands a stable, provider-independent Duas read-abstraction interface to M6.2. Does not authorize M6.1 or M6.2 implementation by itself.
+
+### M6.1 — Devotional Content Database Foundation
+
+**Dependency position.** Independent of M6.0; depends only on M4 (`content_items`, `content_revisions`) and the section 5.4 column-level documentation prerequisite under Dependencies above. Required, together with M6.0, before M6.2. Still subject to the phase-level M5 production-activation dependency above.
+
+**Objective.** Implement exactly the four Release 1 devotional tables — `devotional_items`, `devotional_collections`, `devotional_collection_items`, `content_translations` — in dependency order, register forward migration `0005`, and prove the Schema completion gate on real PostgreSQL.
+
+**Included scope.**
+
+1. create `devotional_items` (one-to-one FK to `content_items`);
+2. create `devotional_collections` (FK to a versioned content item);
+3. create `devotional_collection_items` (FKs to collection and item);
+4. create `content_translations` (FKs to `content_revisions` and `locales`);
+5. cross-table validation, uniqueness, and immutability triggers only after all referenced tables exist.
+
+Real PostgreSQL verification of persistence, constraints, cumulative table count (20 of 30), and all M2/M3/M4/M5 regression checks.
+
+**Prohibited work.** Any table beyond the four listed; any seed row; any provider adapter, import harness, or manifest logic (that pattern is M5-specific to an external provider and is not reused here); any UI, route, or admin change; any change to `src/db/ids.ts` except to fix a proven UUIDv7 defect; any change to `scripts/db-seed.mjs`.
+
+**Acceptance gates.** Exact four new / 20 cumulative domain tables exist and no unauthorized table exists; every column/type/default/FK/constraint/index/trigger matches the expanded section 5.4; duplicate canonical keys, invalid devotional/collection/rendering types, and invalid collection membership are rejected; published `content_translations` rows are immutable; migration rerun is safe; existing M3 seeds and the M4/M5 zero-seed boundary are undisturbed; all M2–M5 checks remain green.
+
+**PASS criteria.** `M6.1 Devotional Schema Foundation Verified` — all acceptance gates above pass on real PostgreSQL.
+
+**Handoff.** Hands a stable, empty devotional schema to M6.2. Does not authorize M6.2 implementation by itself, and does not authorize any seed or import.
+
+### M6.2 — Verified Devotional Content Integration
+
+**Dependency position.** Requires both `M6.0 Duas Mobile-First Foundation Verified` and `M6.1 Devotional Schema Foundation Verified` to PASS first, in addition to the phase-level M5 production-activation dependency above.
+
+**Objective.** Connect the M6.0 read abstraction to the M6.1 schema through a database-backed content source, mirroring `src/lib/quran/content/db-source.ts`'s honest-empty/pending/available pattern, without seeding, importing, publishing, or activating any public API route.
+
+**Included scope.**
+
+- A `db-source.ts`-equivalent module per devotional table set that queries `devotional_items`, `devotional_collections`, `devotional_collection_items`, and `content_translations` and resolves to `empty`/`pending`/`available` exactly as `src/lib/quran/content/db-source.ts` does for Quran, failing closed (never throwing) on a missing or unreachable database.
+- Verification, against real PostgreSQL fixtures created and rolled back in a transaction, that the module resolves every state correctly.
+- Verification that the already-published Editorial General Dua entries remain correctly and visibly classified through the full read path.
+- Regression proof that Quran's and Adhkar's existing integration and honest-state behavior are unaffected.
+
+Consistent with `src/lib/quran/content/db-source.ts`'s own documented precedent ("not wired into any page as of M5.4"), M6.2 delivers a proven, standalone database-backed module; it does not itself require switching the M6.0 composition root's default source to it. That switch, if wanted, is a separate, later, minimal change and is not part of this unit's PASS criteria.
+
+**Prohibited work.** Any seed row, import, or publication; any admin workflow; any REST route activation from `ALSAMAD_API_ARCHITECTURE.md` §4.1; any schema change (M6.1 is closed by this point); any repetition-count persistence.
+
+**Acceptance gates.** The database source resolves every state correctly against real PostgreSQL fixtures; no credential or connection failure surfaces as anything other than the honest `empty` state; the already-published Editorial General Dua entries remain correctly classified; `npm test` remains fully green.
+
+**PASS criteria.** `M6.2 Devotional Content Integration Verified` — all acceptance gates above pass, completing overall M6 PASS.
+
+**Handoff.** After `M6.2 Devotional Content Integration Verified`, hand the complete, verified devotional foundation to **M7 — Editorial administration workflows**. This contract does not authorize M7 implementation.
+
+### M6 release status
+
+Architecture contract complete; implementation not started by this documentation task.
 
 ## Phase 7: Editorial administration workflows
 
