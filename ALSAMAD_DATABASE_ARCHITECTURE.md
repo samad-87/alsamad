@@ -627,6 +627,82 @@ M5.2 defines the exact fields of the immutable import manifest introduced narrat
 
 Editorial General Dua is separated by a checked devotional type, required editorial and religious-appropriateness reviews, source-claim constraints, and mandatory public labeling. A one-to-one detail table would add symmetry but no additional durable state. Repetition guidance belongs to collection membership or the reviewed item revision; it is never a worship ledger.
 
+M6 authorizes exactly these four Release 1 devotional tables, in this dependency order: `devotional_items`; `devotional_collections`; `devotional_collection_items`; `content_translations` (`ALSAMAD_IMPLEMENTATION_ROADMAP.md` Phase 6, M6.1 Included scope). Together with the two M3, eight M4, and six M5 tables, M6 makes the cumulative Release 1 domain count exactly **20 of 30**. It adds no editorial, prayer/calendar, audit/publication-history, Prepared, Later, or Future table, and it neither replaces nor adds a column to `content_items` or `content_revisions`. Every M6 primary key is an application-generated UUIDv7 with no database default. All foreign keys use `ON UPDATE RESTRICT ON DELETE RESTRICT`. All timestamps are UTC `timestamptz`; `created_at` defaults to `current_timestamp`, and `updated_at` defaults to `current_timestamp` and changes only through an authorized mutation. These physical decisions are recorded in `ALSAMAD_DECISION_REGISTRY.md` REG-0001–REG-0008, with canonical-ownership and text-storage rationale in `ADR-0001` and `ADR-0002`.
+
+### 5.4.1 `devotional_items`
+
+| Column | PostgreSQL type | Nullability and default | Contract |
+| --- | --- | --- | --- |
+| `id` | `uuid` | Required; no database default | Application-generated UUIDv7 primary key; immutable. |
+| `content_item_id` | `uuid` | Required | Unique FK to `content_items.id`; `ON UPDATE RESTRICT ON DELETE RESTRICT`; immutable. |
+| `canonical_key` | `varchar(160)` | Required | Unique lowercase provider-independent identity; immutable. |
+| `created_at` | `timestamptz` | Required; default `current_timestamp` | UTC creation time. |
+| `updated_at` | `timestamptz` | Required; default `current_timestamp` | UTC last administrative update. |
+
+Constraints are `UNIQUE (content_item_id)`, `UNIQUE (canonical_key)`, and lowercase canonical-key form. A trigger requires the referenced `content_items` row to have `content_type IN ('dua', 'dhikr')` and `owning_module = 'devotional'`. Under the existing `ck_content_items__editorial_general_dua` check constraint (§5.2.7), a row with `content_type = 'editorial_general_dua'` always has `owning_module = 'editorial'` and can therefore never satisfy this trigger; Editorial General Dua never receives a `devotional_items` row (`ALSAMAD_DECISION_REGISTRY.md` REG-0001; `ADR-0001`). Indexes are `content_item_id` and `canonical_key`, both already required by their unique constraints; no further index is authorized absent a demonstrated query need.
+
+`id`, `content_item_id`, and `canonical_key` are immutable after insert. This table stores no `content_type`, `owning_module`, verification state, publication state, or repetition guidance of its own; classification and publication eligibility remain governed entirely by the existing `content_items`/`content_revisions` mechanisms in §5.2.7–§5.2.8, and publication of the referenced revision still requires `verification_state = 'source_verified'` under the unchanged §5.2.8 trigger (REG-0002). Deletion is restricted while referenced by any `devotional_collection_items` row.
+
+**Release 1 exclusions:** no independent type/classification column; no independent `publication_state` or `verification_state`; no repetition or count field; no provider alias or import-reconciliation checksum, since no provider-import concept applies to this table.
+
+### 5.4.2 `devotional_collections`
+
+| Column | PostgreSQL type | Nullability and default | Contract |
+| --- | --- | --- | --- |
+| `id` | `uuid` | Required; no database default | Application-generated UUIDv7 primary key; immutable. |
+| `content_item_id` | `uuid` | Required | Unique FK to `content_items.id`; `ON UPDATE RESTRICT ON DELETE RESTRICT`; immutable. |
+| `canonical_key` | `varchar(160)` | Required | Unique lowercase provider-independent identity; immutable. |
+| `collection_kind` | `varchar(16)` | Required | Closed values `morning`, `evening`, or `contextual`; immutable after insert. |
+| `created_at` | `timestamptz` | Required; default `current_timestamp` | UTC creation time. |
+| `updated_at` | `timestamptz` | Required; default `current_timestamp` | UTC last administrative update. |
+
+Constraints are `UNIQUE (content_item_id)` — a one-to-one relationship to canonical content identity, matching `devotional_items` — `UNIQUE (canonical_key)`, lowercase canonical-key form, and the closed `collection_kind` vocabulary (`ALSAMAD_DECISION_REGISTRY.md` REG-0003, REG-0004). A trigger requires the referenced `content_items` row to have `content_type = 'collection'` and `owning_module = 'devotional'`. Indexes are `content_item_id` and `canonical_key`, both already required by their unique constraints.
+
+`id`, `content_item_id`, `canonical_key`, and `collection_kind` are immutable after insert. The collection's title and description are not stored here; they are the source text of the referenced content item's published revision, matching the `content_items`/`content_revisions` relationship already normative in §5.2.7–§5.2.8. This table carries no independent publication lifecycle. Deletion is restricted while referenced by any `devotional_collection_items` row.
+
+**Release 1 exclusions:** no title/description column; no contextual sub-taxonomy within `collection_kind`; no independent publication or verification state.
+
+### 5.4.3 `devotional_collection_items`
+
+| Column | PostgreSQL type | Nullability and default | Contract |
+| --- | --- | --- | --- |
+| `id` | `uuid` | Required; no database default | Application-generated UUIDv7 primary key; immutable. |
+| `devotional_collection_id` | `uuid` | Required | FK to `devotional_collections.id`; `ON UPDATE RESTRICT ON DELETE RESTRICT`. |
+| `devotional_item_id` | `uuid` | Required | FK to `devotional_items.id`; `ON UPDATE RESTRICT ON DELETE RESTRICT`. |
+| `position` | `integer` | Required | Positive deterministic order within the collection. |
+| `repetition_count` | `integer` | Nullable | When present, positive sourced repetition guidance; never a persisted worship count. |
+| `source_reference_id` | `uuid` | Nullable | Optional FK to `source_references.id`; `ON UPDATE RESTRICT ON DELETE RESTRICT`; evidences the repetition guidance. |
+| `created_at` | `timestamptz` | Required; default `current_timestamp` | UTC creation time. |
+| `updated_at` | `timestamptz` | Required; default `current_timestamp` | UTC last administrative update. |
+
+Constraints are `UNIQUE (devotional_collection_id, devotional_item_id)`, `UNIQUE (devotional_collection_id, position)`, positive `position`, and `repetition_count IS NULL OR repetition_count > 0`. No cross-table trigger is required: both referenced tables already restrict their own referential scope to `owning_module = 'devotional'` content (§5.4.1, §5.4.2), so ordinary FK/unique/check enforcement is sufficient. Indexes are `devotional_item_id` and `source_reference_id`, neither of which is the leading column of an existing unique constraint; `devotional_collection_id` needs no separate index, since it already leads both unique constraints above.
+
+This table carries no reward, streak, or completion-count field (`ALSAMAD_DECISION_REGISTRY.md` REG-0005). Membership rows are not append-only: `position`, `repetition_count`, `source_reference_id`, and row presence may be administratively inserted, reordered, or removed. Ordinary physical deletion is permitted for membership changes; no soft-delete column and no membership-history table is introduced, since nothing in the schema references a `devotional_collection_items` row by foreign key (REG-0008).
+
+**Release 1 exclusions:** no reward, streak, or worship-ledger field; no free-text second provenance system; no soft-delete or history infrastructure.
+
+### 5.4.4 `content_translations`
+
+| Column | PostgreSQL type | Nullability and default | Contract |
+| --- | --- | --- | --- |
+| `id` | `uuid` | Required; no database default | Application-generated UUIDv7 primary key; immutable. |
+| `content_revision_id` | `uuid` | Required | FK to `content_revisions.id`; `ON UPDATE RESTRICT ON DELETE RESTRICT`; immutable. |
+| `locale_id` | `uuid` | Required | FK to `locales.id`; `ON UPDATE RESTRICT ON DELETE RESTRICT`; immutable. |
+| `rendering_kind` | `varchar(16)` | Required | Closed values `translation` or `transliteration`; immutable. |
+| `rendering_version` | `integer` | Required; default `1` | Positive version of this revision/locale/kind rendering; immutable. |
+| `text_content` | `text` | Required | Exact UTF-8 rendered text; nonblank; immutable once first eligible. |
+| `content_checksum` | `varchar(64)` | Required | Lowercase SHA-256 hex of the normalized `text_content`, under the existing §5.2.10 normalization contract; immutable once first eligible. |
+| `review_status` | `varchar(16)` | Required; default `pending` | One of `pending`, `approved`, `rejected`, `withdrawn`, matching the vocabulary already used by `quran_translation_editions.review_status` (§5.3.6). |
+| `reviewed_at` | `timestamptz` | Nullable | Required exactly for `approved`, `rejected`, or `withdrawn`; null for `pending`. |
+| `created_at` | `timestamptz` | Required; default `current_timestamp` | UTC creation time. |
+| `updated_at` | `timestamptz` | Required; default `current_timestamp` | UTC last pre-eligibility update. |
+
+Constraints are `UNIQUE (content_revision_id, locale_id, rendering_kind, rendering_version)`, nonblank `text_content`, a valid lowercase SHA-256 `content_checksum`, closed `rendering_kind`/`review_status`, positive `rendering_version`, and coherent `reviewed_at`. No cross-table trigger is required; rendering eligibility is a read-time derivation, not a write-time constraint (see below). Indexes are `locale_id`, which is not the leading column of the unique constraint above; `content_revision_id` needs no separate index, since it already leads that constraint.
+
+There is no independent `publication_state` column (`ADR-0002`). Rendering/public eligibility is derived, never stored: `review_status = 'approved'` **and** the referenced `content_revisions.publication_state = 'published'` **and** the referenced `locales.is_enabled = true`. Once first eligible, every column except `review_status` (one-way toward `withdrawn`) and `updated_at` is immutable; a correction inserts a new `rendering_version` row rather than editing the eligible one, matching the correction pattern already normative for `content_revisions` (§5.2.8). No fifth M6 table is introduced, and `passage_texts` is not reused (`ADR-0002`).
+
+**Release 1 exclusions:** no independent `publication_state` column; no shared/fifth text-specialization table; no rendering kind beyond `translation`/`transliteration`; no provider or import concept.
+
 ## 5.5 Editorial — 3 tables
 
 | Table                   | Purpose and exact journey                                             | Essential constraints                                                                                          | Why it cannot wait                                                              |
