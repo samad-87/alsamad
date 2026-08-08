@@ -763,6 +763,37 @@ If only gate 1 passes, report exactly `M5 Schema Foundation Verified`; do not ca
 
 Implementation verification must run `npm run db:up`, database safety, migrations twice, exact schema/catalog inspection, focused schema/import tests, seeds twice, `npm run test:db`, controlled adapter dry run when its gates permit, `npm run db:check`, full `npm run verify`, Prettier, `git diff --check`, and `npm run db:down` while preserving the named volume. Acceptance evidence must include exact table/FK/constraint/index/trigger inventories; expected/observed counts; accepted and rejected SQL cases; aliases and locators; manifest/provider/checksum/license/retention evidence; byte-exact synthetic Arabic round trip; idempotent reruns; rollback/recovery/version-transition/withdrawal results; regression output; changed-file list; and all blockers. Secrets and full Quran payloads are prohibited from reports.
 
+#### M5.1 verification record — 2026-08-09
+
+- **Gate:** `M5 Schema Foundation Verified`.
+- **Status:** `PASS`.
+- **Authoritative commit:** `e05adc78605802fe3311edcfc860f2792d486cb9`.
+- **Verified date:** 2026-08-09. Exact wall-clock execution time was not captured.
+- **Verifier:** Independent Codex clean-checkout verification.
+- **Environment:** Windows / PowerShell; Docker Desktop 4.84.0; Docker Engine 29.6.2; Docker Compose v5.3.1; PostgreSQL 17.10; committed `postgres:17-alpine` image.
+- **Command chain:**
+
+  ```text
+  npm.cmd run db:up
+  npm.cmd run db:safety
+  npm.cmd run db:migrate
+  npm.cmd run db:migrate
+  npm.cmd run db:seed
+  npm.cmd run db:seed
+  npm.cmd run test:db
+  npm.cmd run db:check
+  npm.cmd run verify
+  git diff --check
+  npm.cmd run db:down
+  ```
+
+- **Lifecycle and database results:** exact normal-port `db:up` PASS; database safety PASS; initial migration PASS; migration rerun PASS; initial seed PASS; seed idempotency PASS; real PostgreSQL database verifier PASS; `db:check` PASS; exactly six M5.1 Quran tables and exactly sixteen cumulative Release 1 domain tables; M2/M3/M4 regressions PASS; required invalid cases rejected; synthetic fixture rollback PASS.
+- **Repository results:** TypeScript PASS; lint PASS; Prettier PASS; repository tests PASS (158/158); production build PASS; full `npm run verify` PASS; `git diff --check` PASS.
+- **Shutdown and repository state:** exact `db:down` PASS; the ALSAMAD named PostgreSQL volume was preserved; the verification checkout remained clean.
+- **Seeds:** `ar = 1`; `en = 1`; geographic areas `= 0`; zero religious production seed rows.
+- **Environment caveat:** Port `127.0.0.1:55432` was initially owned by the unrelated `ilixion-r5-postgres` container. For the authoritative final verification, that specific container was temporarily stopped; no container was removed and no Docker volume or data was deleted. ALSAMAD ran the exact normal-port lifecycle and verification passed. The ILIXION container was then restarted with its original container, volume, image, and port ownership intact.
+- **Strict scope:** This PASS records only `M5 Schema Foundation Verified`. It does **not** establish or authorize `M5 Provider Import Dry Run Verified`, `M5 Quran Import Activated`, a real Quran provider fetch, provider credential activation, production manifest creation, Quran publication, M6 implementation, migration `0005`, or M7 / Knowledge Engine work. The independent M5 production-activation dependency remains unresolved.
+
 ### Rollback and recovery
 
 Migration history is forward-only. Before activation, rollback discards the transaction and retention-bound staging/quarantine. After activation, withdraw the affected release, stop serving/fetching, preserve lawful checksums/attribution/audit evidence, and use a reviewed forward correction with a new manifest/version. Never edit published Quran text, reuse an import key for changed bytes, rewrite a committed migration, or fall back to an unapproved source. Restore service only from a checksum-verified approved release or legally independent approved fallback.
