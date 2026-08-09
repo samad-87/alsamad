@@ -158,6 +158,7 @@ As of 2026-08-08, the M6 architecture decision analysis covering REG-0001–REG-
 | REG-0007 | `content_translations` review/publication lifecycle column count                           | Database        | DECIDED | Registry only (decided alongside `ADR-0002`, which covers the same table) |
 | REG-0008 | `devotional_collection_items` membership deletion semantics                                | Database        | DECIDED | Registry only                                                             |
 | REG-0010 | In-application display and standalone redistribution rights separation                     | Database        | DECIDED | Registry + ADR (`ADR-0003`, Accepted)                                     |
+| REG-0011 | Immutable source import manifest and execution evidence separation                         | Database        | DECIDED | Registry + ADR (`ADR-0004`, Accepted)                                     |
 
 ### REG-0001 — Editorial General Dua placement in the devotional physical model
 
@@ -322,5 +323,33 @@ This decision explicitly does **not** approve ALSAMAD's future broader-platform 
 The existing redistribution right retains its original standalone-redistribution meaning and is never reinterpreted as application-display permission. Application-display permission defaults fail-closed and is never inferred from a historical redistribution value. Historical manifest schema/checksum semantics remain unchanged; corrected manifests require a new schema version. REG-0009 remains the controlling non-commercial/no-standalone-redistribution intended-use decision and is not superseded or modified by this entry.
 
 **Implementation evidence:** None. The decision and ADR authorize no migration, provider access, fetch, dry run, publication, M5 gate PASS, M6, or M7 work.
+
+**Supersedes / Superseded by:** None.
+
+### REG-0011 — Immutable source import manifest and execution evidence separation
+
+**Category:** `Database`.
+
+**Summary:** Whether the immutable M5 source/import-authorization manifest may contain mutable or append-only execution state, checkpoints, observed results, reconciliation, rollback, or generated evidence references.
+
+**Committed evidence:** `ALSAMAD_DATABASE_ARCHITECTURE.md` §§5.3.10–5.3.11 call the manifest immutable while assigning it execution-time fields including fetch timestamps, actual counts, status, failure, retry/checkpoint metadata, withdrawal state, and generated evidence references. `ALSAMAD_IMPLEMENTATION_ROADMAP.md` Phase 5 requires a source decision and manifest before fetch while separately defining run state, checkpoints, reconciliation, rollback, and dry-run evidence. The committed M5.2 implementation hashes every v2 manifest field and also emits separate execution evidence.
+
+**Affected architecture:** `ALSAMAD_DATABASE_ARCHITECTURE.md` §§5.3.10–5.3.11; `ALSAMAD_IMPLEMENTATION_ROADMAP.md` Phase 5 M5.2/M5.2A.
+
+**Affected roadmap gates:** The ARC-002 credential-free implementation authorization and later `M5 Provider Import Dry Run Verified` and `M5 Quran Import Activated` gates. Neither M5 gate passes through this decision.
+
+**Opened:** 2026-08-09.
+
+**Tier rationale:** This changes the immutable source-evidence identity, checksum boundary, retry linkage, and historical-reader contract used to authorize religious-content imports. Reversal after real provider runs exist would make source authorization and execution evidence ambiguous, meeting the §7 ADR threshold.
+
+**Status:** `DECIDED` (2026-08-09). **ADR reference:** `ADR-0004` (Accepted).
+
+**Decision outcome:** Manifest schema v3 defines an immutable `SourceImportManifest` containing only source/import-authorization facts independently known and approved for the intended operation. Its identity is `manifestId` plus `manifestChecksum`; the checksum covers only canonical immutable v3 source-manifest fields. Mutable or append-only execution evidence is owned by `ImportRunEvidence`, which binds to both values. One source manifest may have multiple runs and attempts without changing manifest identity.
+
+Checkpoints, state transitions, retry/backoff state, observed counts and checksums, HTTP observations, timestamps, process/run/attempt identity, mutable status and errors, reconciliation, rollback/purge outcomes, audit events, generated evidence references, and final run/review disposition remain outside v3. Operational retry with unchanged authorization reuses the manifest. A source, resource, version, intended operation, legal decision, approved target, expected assertion, or authorized adapter/normalization-contract change requires a new manifest identity and checksum. Completed-run replay suppression and checkpoint monotonicity, conflict, staleness, and supersession protections remain fail-closed.
+
+Historical v1 and v2 manifests retain their original schemas, canonical bytes, and checksum meanings and are never recomputed or reinterpreted under v3. V2 remains historically verifiable but is not the corrected real-provider manifest contract. No table or migration is added; the Release 1 catalog remains frozen at 30 tables.
+
+**Implementation evidence:** None. This decision authorizes only a later credential-free ARC-002 contract-conformance implementation under the Roadmap. It authorizes no credential use, provider access, fetch, real-resource manifest, provider dry run, publication, `M5 Provider Import Dry Run Verified`, `M5 Quran Import Activated`, ARC-003/004/005/006, M6, or M7.
 
 **Supersedes / Superseded by:** None.
