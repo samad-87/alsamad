@@ -55,11 +55,20 @@ export interface RetentionDecision {
   readonly status: LegalDecisionStatus;
 }
 
+/**
+ * `licenseReference` must identify the exact immutable historical license
+ * evidence relied upon (ARC-004), never a mutable "current policy" concept.
+ */
 export interface LicenseDecision {
   readonly licenseReference: string;
   readonly status: LegalDecisionStatus;
 }
 
+/**
+ * `attributionReference` must identify the exact immutable historical
+ * attribution evidence relied upon (ARC-004), never a mutable "current
+ * policy" concept.
+ */
 export interface AttributionDecision {
   readonly attributionReference: string;
   readonly status: LegalDecisionStatus;

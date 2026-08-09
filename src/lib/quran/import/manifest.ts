@@ -547,6 +547,14 @@ export function buildSourceImportManifest(
     input.normalizationContractVersion,
     "normalizationContractVersion",
   );
+  requireNonBlank(
+    input.decisions.license.licenseReference,
+    "decisions.license.licenseReference",
+  );
+  requireNonBlank(
+    input.decisions.attribution.attributionReference,
+    "decisions.attribution.attributionReference",
+  );
   if (!ALLOWED_IMPORT_MODES.has(input.importMode)) {
     throw new ManifestValidationError("importMode is not recognized");
   }

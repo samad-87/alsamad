@@ -366,6 +366,128 @@ try {
     },
   );
 
+  // ARC-004: license-version immutability and historical license evidence.
+  {
+    const arc004LicenseId = "0198a7b0-6600-7000-8000-000000000001";
+    const arc004LicenseV2Id = "0198a7b0-6600-7000-8000-000000000002";
+    const arc004WorkId = "0198a7b0-6600-7000-8000-000000000003";
+    const arc004EditionId = "0198a7b0-6600-7000-8000-000000000004";
+
+    await queryClient`insert into licenses(id,provider_code,license_key,version,name,rights_scope,attribution_text,retention_policy,retention_days,terms_url,in_application_display_allowed,standalone_redistribution_allowed,derivatives_allowed,effective_from,effective_until,status)
+      values(${arc004LicenseId}::uuid,'arc004','immutability','1','ARC-004 fixture','permission','Original attribution','permanent',null,null,true,true,false,current_timestamp-'1 day'::interval,null,'draft')`;
+
+    // 1. A pre-active (draft) license may still be authored/corrected freely.
+    await queryClient`update licenses set rights_scope='open_license' where id=${arc004LicenseId}::uuid`;
+    assert.equal(
+      (
+        await queryClient`select rights_scope from licenses where id=${arc004LicenseId}::uuid`
+      )[0]?.rights_scope,
+      "open_license",
+    );
+    await queryClient`update licenses set rights_scope='permission' where id=${arc004LicenseId}::uuid`;
+
+    await queryClient`update licenses set status='active' where id=${arc004LicenseId}::uuid`;
+
+    // 2-10. Once first active/relied upon, every rights-bearing field is frozen.
+    await expectDatabaseRejection(
+      "license rights_scope immutable after reliance",
+      async (transaction) => {
+        await transaction`update licenses set rights_scope='open_license' where id=${arc004LicenseId}::uuid`;
+      },
+    );
+    await expectDatabaseRejection(
+      "license attribution_text immutable after reliance",
+      async (transaction) => {
+        await transaction`update licenses set attribution_text='Changed attribution' where id=${arc004LicenseId}::uuid`;
+      },
+    );
+    await expectDatabaseRejection(
+      "license terms_url immutable after reliance",
+      async (transaction) => {
+        await transaction`update licenses set terms_url='https://example.org/updated-terms' where id=${arc004LicenseId}::uuid`;
+      },
+    );
+    await expectDatabaseRejection(
+      "license retention_policy immutable after reliance",
+      async (transaction) => {
+        await transaction`update licenses set retention_policy='time_limited',retention_days=30 where id=${arc004LicenseId}::uuid`;
+      },
+    );
+    await expectDatabaseRejection(
+      "license retention_days immutable after reliance",
+      async (transaction) => {
+        await transaction`update licenses set retention_policy='time_limited',retention_days=30 where id=${arc004LicenseId}::uuid`;
+      },
+    );
+    await expectDatabaseRejection(
+      "license in_application_display_allowed immutable after reliance",
+      async (transaction) => {
+        await transaction`update licenses set in_application_display_allowed=false where id=${arc004LicenseId}::uuid`;
+      },
+    );
+    await expectDatabaseRejection(
+      "license standalone_redistribution_allowed immutable after reliance",
+      async (transaction) => {
+        await transaction`update licenses set standalone_redistribution_allowed=false where id=${arc004LicenseId}::uuid`;
+      },
+    );
+    await expectDatabaseRejection(
+      "license derivatives_allowed immutable after reliance",
+      async (transaction) => {
+        await transaction`update licenses set derivatives_allowed=true where id=${arc004LicenseId}::uuid`;
+      },
+    );
+    await expectDatabaseRejection(
+      "license effective_until immutable after reliance",
+      async (transaction) => {
+        await transaction`update licenses set effective_until=current_timestamp+'30 days'::interval where id=${arc004LicenseId}::uuid`;
+      },
+    );
+
+    // 11. Permitted lifecycle status transitions remain unaffected.
+    await queryClient`update licenses set status='expired' where id=${arc004LicenseId}::uuid`;
+
+    // 13. Historical rights content remains unchanged even after the status transition.
+    const arc004After = (
+      await queryClient`select rights_scope,attribution_text,terms_url,retention_policy,retention_days,in_application_display_allowed,standalone_redistribution_allowed,derivatives_allowed,effective_until,status from licenses where id=${arc004LicenseId}::uuid`
+    )[0];
+    assert.equal(arc004After?.rights_scope, "permission");
+    assert.equal(arc004After?.attribution_text, "Original attribution");
+    assert.equal(arc004After?.terms_url, null);
+    assert.equal(arc004After?.retention_policy, "permanent");
+    assert.equal(arc004After?.retention_days, null);
+    assert.equal(arc004After?.in_application_display_allowed, true);
+    assert.equal(arc004After?.standalone_redistribution_allowed, true);
+    assert.equal(arc004After?.derivatives_allowed, false);
+    assert.equal(arc004After?.effective_until, null);
+    assert.equal(arc004After?.status, "expired");
+
+    // 12. A later legal/provider revision is a new row under a new version.
+    await queryClient`insert into licenses(id,provider_code,license_key,version,name,rights_scope,attribution_text,retention_policy,in_application_display_allowed,standalone_redistribution_allowed,effective_from,status)
+      values(${arc004LicenseV2Id}::uuid,'arc004','immutability','2','ARC-004 fixture v2','open_license','Revised attribution','permanent',true,true,current_timestamp,'active')`;
+
+    // 14. Existing edition/license references to the historical row remain valid.
+    await queryClient
+      .begin(async (transaction) => {
+        await transaction`insert into works(id,canonical_key,work_type,title,original_language_code) values(${arc004WorkId}::uuid,'arc004-fixture-work','reference_work','ARC-004 fixture work','ar')`;
+        await transaction`insert into editions(id,work_id,license_id,edition_key,version,language_code,script_code,display_name,provider_code,provider_edition_id,import_version,source_manifest_checksum)
+          values(${arc004EditionId}::uuid,${arc004WorkId}::uuid,${arc004LicenseId}::uuid,'arc004-edition','1','ar','Arab','ARC-004 fixture edition','arc004','arc004-alias','snapshot-1',repeat('a',64))`;
+        assert.equal(
+          (
+            await transaction`select license_id from editions where id=${arc004EditionId}::uuid`
+          )[0]?.license_id,
+          arc004LicenseId,
+        );
+        throw new Error("ARC-004 edition reference rollback");
+      })
+      .catch((error) =>
+        assert.equal(error.message, "ARC-004 edition reference rollback"),
+      );
+
+    await queryClient`delete from licenses where id in (${arc004LicenseId}::uuid,${arc004LicenseV2Id}::uuid)`;
+    console.log("PASS: ARC-004 license-version immutability enforced");
+  }
+
   const insertM5Foundation = async (
     transaction,
     {

@@ -43,6 +43,13 @@
       "when": 1785796805000,
       "tag": "0005_license_publication_rights_separation",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1785796806000,
+      "tag": "0006_license_version_immutability",
+      "breakpoints": true
     }
   ]
 }
