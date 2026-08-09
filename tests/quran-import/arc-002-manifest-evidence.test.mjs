@@ -15,9 +15,11 @@ import {
   ARC001_MANIFEST_SCHEMA_VERSION,
   ARC002_MANIFEST_SCHEMA_VERSION,
   HISTORICAL_MANIFEST_SCHEMA_VERSION,
+  buildAuditEvent,
   buildImportManifest,
   buildImportRunEvidence,
   buildSourceImportManifest,
+  redactEvidence,
   verifyManifestChecksum,
   verifySourceManifestChecksum,
 } from "../../src/lib/quran/import/manifest.ts";
@@ -363,6 +365,117 @@ test("run evidence rejects secret-shaped data and remains payload-free", () => {
   const evidence = buildImportRunEvidence(manifest, runInput(manifest));
   assert.equal("payload" in evidence, false);
   assert.doesNotMatch(JSON.stringify(evidence), /authorization|bearer|cookie/i);
+});
+
+test("cookie-shaped secret data fails closed across every builder, and existing markers are unchanged", () => {
+  const manifest = buildSourceImportManifest(sourceInput());
+  const cookieValue = "Set-Cookie: session=forbidden";
+
+  assert.throws(
+    () =>
+      buildSourceImportManifest(
+        sourceInput({ sourceProvenanceReferences: [cookieValue] }),
+      ),
+    ManifestSecretFieldRejectedError,
+    "v3 source manifest builder",
+  );
+
+  assert.throws(
+    () =>
+      buildImportRunEvidence(
+        manifest,
+        runInput(manifest, { evidenceReferences: [cookieValue] }),
+      ),
+    ManifestSecretFieldRejectedError,
+    "run evidence builder",
+  );
+
+  assert.throws(
+    () =>
+      buildImportManifest({
+        manifestId: "018f2f2a-0000-7000-8000-000000000098",
+        providerCode: "synthetic-provider",
+        providerEnvironment: "sandbox",
+        resourceType: "ayah",
+        providerResourceId: "SYNTHETIC-RESOURCE",
+        providerResourceVersion: "synthetic-version",
+        requestedAt: at,
+        fetchedAt: at,
+        sourceEndpointIdentity: "internal://synthetic-only",
+        sourceChecksum: sha("synthetic bytes"),
+        decisions,
+        expectedCounts: { records: 1 },
+        actualCounts: { records: 1 },
+        importMode: "full",
+        status: "created",
+        failureReason: cookieValue,
+        processIdentity: "synthetic-test",
+        softwareVersion: "m5.2a-test",
+        schemaVersion: 2,
+      }),
+    ManifestSecretFieldRejectedError,
+    "historical v2 manifest builder",
+  );
+
+  assert.throws(
+    () =>
+      buildAuditEvent({
+        runId: "018f2f2a-0000-7000-8000-000000000299",
+        manifestChecksum: manifest.manifestChecksum,
+        eventCategory: cookieValue,
+        outcome: "blocked",
+        counts: {},
+        durationMs: 1,
+        errorCategory: null,
+      }),
+    ManifestSecretFieldRejectedError,
+    "audit-event builder",
+  );
+
+  // Every previously covered marker must still fail closed identically.
+  for (const stillForbidden of [
+    "Authorization: forbidden",
+    "Bearer forbidden",
+    "client_secret=forbidden",
+    "refreshToken=forbidden",
+    "private_key=forbidden",
+  ]) {
+    assert.throws(
+      () =>
+        buildImportRunEvidence(
+          manifest,
+          runInput(manifest, { evidenceReferences: [stillForbidden] }),
+        ),
+      ManifestSecretFieldRejectedError,
+      stillForbidden,
+    );
+  }
+});
+
+test("cookie-shaped material is redacted rather than silently retained", () => {
+  const redacted = redactEvidence({
+    httpObservations: [{ status: 200, etag: null, lastModified: null }],
+    setCookieHeader: "session=should-not-survive",
+    note: "response included a Cookie value inline",
+  });
+  assert.equal(redacted.setCookieHeader, "[REDACTED]");
+  assert.equal(redacted.note, "[REDACTED]");
+  assert.equal(redacted.httpObservations[0].status, 200);
+});
+
+test("unrelated legitimate metadata is not rejected by the cookie marker", () => {
+  const manifest = buildSourceImportManifest(
+    sourceInput({
+      policyObligations: {
+        synchronize: false,
+        retentionDays: 7,
+        cacheControlNote: "standard cache guidance",
+      },
+    }),
+  );
+  assert.equal(verifySourceManifestChecksum(manifest), true);
+  const evidence = buildImportRunEvidence(manifest, runInput(manifest));
+  assert.equal(evidence.manifestId, manifest.manifestId);
 });
 
 test("historical v1/v2 selectors and v2 checksum behavior remain unchanged", () => {

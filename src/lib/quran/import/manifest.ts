@@ -50,6 +50,7 @@ const SECRET_MARKERS: readonly string[] = [
   "token",
   "authorization",
   "bearer ",
+  "cookie",
   "client_secret",
   "private_key",
 ];
