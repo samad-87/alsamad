@@ -8,6 +8,7 @@
 import { createHash } from "node:crypto";
 
 import {
+  type ApplicationDisplayDecision,
   type AttributionDecision,
   type CheckpointMetadata,
   type CommercialUseDecision,
@@ -24,7 +25,7 @@ import {
   type ProviderCode,
   type ProviderEnvironment,
   type QuranResourceType,
-  type RedistributionDecision,
+  type StandaloneRedistributionDecision,
   type RetentionDecision,
   type SelectedCanonicalTarget,
   type WithdrawalDeletionStatus,
@@ -58,10 +59,13 @@ const ALLOWED_IMPORT_MODES = new Set<ImportMode>([
   "correction",
 ]);
 
+export const HISTORICAL_MANIFEST_SCHEMA_VERSION = 1 as const;
+export const ARC001_MANIFEST_SCHEMA_VERSION = 2 as const;
+
 /**
  * Manifests may only request states at or before the license gate while any
- * legal decision remains unresolved. Every later state requires every
- * decision to be explicitly "approved".
+ * legal decision remains unresolved. Later states require the intended
+ * in-application use to be approved and every optional right to be known.
  */
 const PRE_LEGAL_GATE_STATES: ReadonlySet<ImportState> = new Set([
   "created",
@@ -75,7 +79,22 @@ export interface LegalGateEvaluation {
   readonly reasons: readonly string[];
 }
 
-/** Unknown or denied decisions block; only "approved" clears the gate. */
+function evaluateCapability(
+  name: string,
+  decision:
+    | ApplicationDisplayDecision
+    | CommercialUseDecision
+    | StandaloneRedistributionDecision,
+  reasons: string[],
+): void {
+  if (decision.status === "unknown") {
+    reasons.push(`${name}:unknown`);
+  } else if (decision.intendedUse && !isDecisionApproved(decision.status)) {
+    reasons.push(`${name}:denied_for_intended_use`);
+  }
+}
+
+/** Unknown rights and denied capabilities exercised by the operation block. */
 export function evaluateLegalGate(
   decisions: ManifestDecisionsInput,
 ): LegalGateEvaluation {
@@ -89,12 +108,20 @@ export function evaluateLegalGate(
   if (!isDecisionApproved(decisions.attribution.status)) {
     reasons.push(`attribution:${decisions.attribution.status}`);
   }
-  if (!isDecisionApproved(decisions.commercialUse.status)) {
-    reasons.push(`commercial_use:${decisions.commercialUse.status}`);
+  if (!decisions.applicationDisplay.intendedUse) {
+    reasons.push("application_display:not_declared_for_intended_use");
   }
-  if (!isDecisionApproved(decisions.redistribution.status)) {
-    reasons.push(`redistribution:${decisions.redistribution.status}`);
-  }
+  evaluateCapability(
+    "application_display",
+    decisions.applicationDisplay,
+    reasons,
+  );
+  evaluateCapability("commercial_use", decisions.commercialUse, reasons);
+  evaluateCapability(
+    "standalone_redistribution",
+    decisions.standaloneRedistribution,
+    reasons,
+  );
   return { blocked: reasons.length > 0, reasons };
 }
 
@@ -282,9 +309,9 @@ export function buildImportManifest(
       "normalizedChecksum must be a lowercase 64-character SHA-256 hex value when present",
     );
   }
-  if (!Number.isInteger(input.schemaVersion) || input.schemaVersion < 1) {
+  if (input.schemaVersion !== ARC001_MANIFEST_SCHEMA_VERSION) {
     throw new ManifestValidationError(
-      "schemaVersion must be a positive integer",
+      `schemaVersion must be ${ARC001_MANIFEST_SCHEMA_VERSION}; version ${HISTORICAL_MANIFEST_SCHEMA_VERSION} retains its historical reader and checksum semantics`,
     );
   }
   requireNonBlank(input.processIdentity, "processIdentity");
@@ -339,8 +366,9 @@ export function buildImportManifest(
     licenseDecisionReference: input.decisions.license.licenseReference,
     retentionDecision: input.decisions.retention,
     attributionDecision: input.decisions.attribution,
+    applicationDisplayDecision: input.decisions.applicationDisplay,
     commercialUseDecision: input.decisions.commercialUse,
-    redistributionDecision: input.decisions.redistribution,
+    standaloneRedistributionDecision: input.decisions.standaloneRedistribution,
     selectedCanonicalTarget: input.selectedCanonicalTarget ?? null,
     expectedCounts: input.expectedCounts ?? {},
     actualCounts: input.actualCounts ?? {},
@@ -412,9 +440,10 @@ export function buildAuditEvent(input: ImportAuditEvent): ImportAuditEvent {
 }
 
 export type {
+  ApplicationDisplayDecision,
   AttributionDecision,
   CommercialUseDecision,
   LicenseDecision,
-  RedistributionDecision,
   RetentionDecision,
+  StandaloneRedistributionDecision,
 };

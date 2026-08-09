@@ -166,7 +166,10 @@ export const licenses = pgTable("licenses", {
   termsUrl: text("terms_url"),
   retentionPolicy: varchar("retention_policy", { length: 24 }).notNull(),
   retentionDays: integer("retention_days"),
-  redistributionAllowed: boolean("redistribution_allowed")
+  inApplicationDisplayAllowed: boolean("in_application_display_allowed")
+    .notNull()
+    .default(false),
+  standaloneRedistributionAllowed: boolean("standalone_redistribution_allowed")
     .notNull()
     .default(false),
   derivativesAllowed: boolean("derivatives_allowed").notNull().default(false),

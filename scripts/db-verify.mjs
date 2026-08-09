@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 
 import { sql } from "drizzle-orm";
 import { validate as validateUuid, version as uuidVersion } from "uuid";
@@ -254,6 +255,43 @@ try {
   const extension =
     await queryClient`select extname from pg_extension where extname = 'pgcrypto'`;
   assert.equal(extension.length, 1);
+  const licenseColumns = await queryClient`
+    select column_name, column_default, is_nullable
+    from information_schema.columns
+    where table_schema='public' and table_name='licenses'
+      and column_name in ('redistribution_allowed','standalone_redistribution_allowed','in_application_display_allowed')
+    order by column_name
+  `;
+  assert.deepEqual(
+    licenseColumns.map(({ column_name }) => column_name),
+    ["in_application_display_allowed", "standalone_redistribution_allowed"],
+  );
+  assert.equal(licenseColumns[0]?.is_nullable, "NO");
+  assert.match(licenseColumns[0]?.column_default ?? "", /false/);
+
+  const arc001Migration = await readFile(
+    "drizzle/0005_license_publication_rights_separation.sql",
+    "utf8",
+  );
+  await assert.rejects(
+    () =>
+      queryClient.begin(async (transaction) => {
+        const migrationLicenseId = "0198a7b0-3500-7000-8000-000000000001";
+        await transaction`insert into licenses(id,provider_code,license_key,version,name,rights_scope,attribution_text,retention_policy,standalone_redistribution_allowed,effective_from,status)
+          values(${migrationLicenseId}::uuid,'synthetic','arc001-migration','1','ARC-001 migration fixture','permission','Synthetic attribution','permanent',true,current_timestamp-'1 day'::interval,'active')`;
+        await transaction.unsafe(
+          "alter table licenses rename column standalone_redistribution_allowed to redistribution_allowed",
+        );
+        await transaction.unsafe(arc001Migration);
+        const migrated = (
+          await transaction`select standalone_redistribution_allowed,in_application_display_allowed from licenses where id=${migrationLicenseId}::uuid`
+        )[0];
+        assert.equal(migrated?.standalone_redistribution_allowed, true);
+        assert.equal(migrated?.in_application_display_allowed, false);
+        throw new Error("ARC-001 migration preservation rollback");
+      }),
+    /ARC-001 migration preservation rollback/,
+  );
   const fks = await queryClient`
     select count(*)::int as count from pg_constraint c
     join pg_namespace n on n.oid=c.connamespace
@@ -291,8 +329,8 @@ try {
         await transaction`select alsamad_exact_sha256(${arabic}) exact, alsamad_normalized_sha256(${arabic}) normalized`
       )[0];
       assert.notEqual(sums.exact, sums.normalized);
-      await transaction`insert into licenses(id,provider_code,license_key,version,name,rights_scope,attribution_text,retention_policy,redistribution_allowed,effective_from,status)
-      values(${ids4.license}::uuid,'fixture','rights','1','Fixture rights','permission','Fixture attribution','permanent',true,current_timestamp-'1 day'::interval,'active')`;
+      await transaction`insert into licenses(id,provider_code,license_key,version,name,rights_scope,attribution_text,retention_policy,in_application_display_allowed,standalone_redistribution_allowed,effective_from,status)
+      values(${ids4.license}::uuid,'fixture','rights','1','Fixture rights','permission','Fixture attribution','permanent',true,true,current_timestamp-'1 day'::interval,'active')`;
       await transaction`insert into works(id,canonical_key,work_type,title,original_language_code) values(${ids4.work}::uuid,'fixture-work','reference_work','Fixture work','ar')`;
       await transaction`insert into editions(id,work_id,license_id,edition_key,version,language_code,script_code,display_name,provider_code,provider_edition_id,import_version,source_manifest_checksum)
       values(${ids4.edition}::uuid,${ids4.work}::uuid,${ids4.license}::uuid,'canonical-edition','1','ar','Arab','Fixture edition','fixture','external-alias','snapshot-1',repeat('a',64))`;
@@ -328,7 +366,16 @@ try {
     },
   );
 
-  const insertM5Foundation = async (transaction) => {
+  const insertM5Foundation = async (
+    transaction,
+    {
+      inApplicationDisplayAllowed = true,
+      standaloneRedistributionAllowed = true,
+      status = "active",
+      retentionPolicy = "permanent",
+      futureEffectiveWindow = false,
+    } = {},
+  ) => {
     const fixture = {
       license: "0198a7b0-6000-7000-8000-000000000001",
       work: "0198a7b0-6000-7000-8000-000000000002",
@@ -351,8 +398,8 @@ try {
     const checksums = (
       await transaction`select alsamad_exact_sha256(${exactArabic}) exact_arabic, alsamad_normalized_sha256(${exactArabic}) normalized_arabic, alsamad_exact_sha256(${translated}) exact_translation, alsamad_normalized_sha256(${translated}) normalized_translation`
     )[0];
-    await transaction`insert into licenses(id,provider_code,license_key,version,name,rights_scope,attribution_text,retention_policy,redistribution_allowed,effective_from,status)
-      values(${fixture.license}::uuid,'synthetic','m5-test','1','Synthetic test license','permission','Synthetic attribution','permanent',true,current_timestamp-'1 day'::interval,'active')`;
+    await transaction`insert into licenses(id,provider_code,license_key,version,name,rights_scope,attribution_text,retention_policy,in_application_display_allowed,standalone_redistribution_allowed,effective_from,status)
+      values(${fixture.license}::uuid,'synthetic','m5-test','1','Synthetic test license','permission','Synthetic attribution',${retentionPolicy},${inApplicationDisplayAllowed},${standaloneRedistributionAllowed},current_timestamp + ${futureEffectiveWindow ? "1 day" : "-1 day"}::interval,${status})`;
     await transaction`insert into works(id,canonical_key,work_type,title,original_language_code) values(${fixture.work}::uuid,'synthetic-quran-work','quran','Synthetic Quran-shaped work','ar')`;
     await transaction`insert into editions(id,work_id,license_id,edition_key,version,language_code,script_code,display_name,provider_code,provider_edition_id,import_version,source_manifest_checksum)
       values(${fixture.arabicEdition}::uuid,${fixture.work}::uuid,${fixture.license}::uuid,'synthetic-ar','1','ar','Arab','Synthetic Arabic edition','synthetic','ar-alias','test-v1',repeat('a',64)),
@@ -404,6 +451,51 @@ try {
       )[0]?.count,
       0,
     );
+  }
+
+  await queryClient
+    .begin(async (transaction) => {
+      const fixture = await insertM5Foundation(transaction, {
+        standaloneRedistributionAllowed: false,
+      });
+      await transaction`update editions set publication_state='published',published_at=current_timestamp where id=${fixture.arabicEdition}::uuid`;
+      assert.equal(
+        (
+          await transaction`select publication_state from editions where id=${fixture.arabicEdition}::uuid`
+        )[0]?.publication_state,
+        "published",
+      );
+      throw new Error("ARC-001 publication success rollback");
+    })
+    .catch((error) =>
+      assert.equal(error.message, "ARC-001 publication success rollback"),
+    );
+
+  for (const [label, licenseOptions] of [
+    [
+      "application display denied despite standalone redistribution",
+      {
+        inApplicationDisplayAllowed: false,
+        standaloneRedistributionAllowed: true,
+      },
+    ],
+    [
+      "application display and standalone redistribution both denied",
+      {
+        inApplicationDisplayAllowed: false,
+        standaloneRedistributionAllowed: false,
+      },
+    ],
+    ["inactive license", { status: "draft" }],
+    ["expired license", { status: "expired" }],
+    ["revoked license", { status: "revoked" }],
+    ["no-storage license", { retentionPolicy: "no_storage" }],
+    ["future license window", { futureEffectiveWindow: true }],
+  ]) {
+    await expectDatabaseRejection(label, async (transaction) => {
+      const fixture = await insertM5Foundation(transaction, licenseOptions);
+      await transaction`update editions set publication_state='published',published_at=current_timestamp where id=${fixture.arabicEdition}::uuid`;
+    });
   }
 
   await expectDatabaseRejection("invalid surah number", async (transaction) => {

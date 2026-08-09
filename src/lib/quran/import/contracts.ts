@@ -24,10 +24,7 @@ export type RetentionPolicy = "permanent" | "time_limited" | "no_storage";
 
 export type WithdrawalDeletionStatus = "none" | "withdrawn" | "deleted";
 
-/**
- * Every legal/rights decision is tri-state. "unknown" and "denied" both
- * block progress past the license/rights gate; only "approved" clears it.
- */
+/** Every legal/rights decision is tri-state; unknown always fails closed. */
 export type LegalDecisionStatus = "approved" | "denied" | "unknown";
 
 export const isDecisionApproved = (status: LegalDecisionStatus): boolean =>
@@ -68,20 +65,25 @@ export interface AttributionDecision {
   readonly status: LegalDecisionStatus;
 }
 
-export interface CommercialUseDecision {
+export interface IntendedCapabilityDecision {
   readonly status: LegalDecisionStatus;
+  /** Whether the manifest's intended operation exercises this capability. */
+  readonly intendedUse: boolean;
 }
 
-export interface RedistributionDecision {
-  readonly status: LegalDecisionStatus;
-}
+export type ApplicationDisplayDecision = IntendedCapabilityDecision;
+
+export type CommercialUseDecision = IntendedCapabilityDecision;
+
+export type StandaloneRedistributionDecision = IntendedCapabilityDecision;
 
 export interface ManifestDecisionsInput {
   readonly license: LicenseDecision;
   readonly retention: RetentionDecision;
   readonly attribution: AttributionDecision;
+  readonly applicationDisplay: ApplicationDisplayDecision;
   readonly commercialUse: CommercialUseDecision;
-  readonly redistribution: RedistributionDecision;
+  readonly standaloneRedistribution: StandaloneRedistributionDecision;
 }
 
 export type CountMap = Readonly<Record<string, number>>;
@@ -140,8 +142,9 @@ export interface ImportManifest {
   readonly licenseDecisionReference: string;
   readonly retentionDecision: RetentionDecision;
   readonly attributionDecision: AttributionDecision;
+  readonly applicationDisplayDecision: ApplicationDisplayDecision;
   readonly commercialUseDecision: CommercialUseDecision;
-  readonly redistributionDecision: RedistributionDecision;
+  readonly standaloneRedistributionDecision: StandaloneRedistributionDecision;
   readonly selectedCanonicalTarget: SelectedCanonicalTarget | null;
   readonly expectedCounts: CountMap;
   readonly actualCounts: CountMap;

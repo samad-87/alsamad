@@ -22,8 +22,9 @@ const approvedDecisions = {
     attributionReference: "synthetic-attribution",
     status: "approved",
   },
-  commercialUse: { status: "approved" },
-  redistribution: { status: "approved" },
+  applicationDisplay: { status: "approved", intendedUse: true },
+  commercialUse: { status: "denied", intendedUse: false },
+  standaloneRedistribution: { status: "denied", intendedUse: false },
 };
 
 function baseInput(overrides = {}) {
@@ -43,7 +44,7 @@ function baseInput(overrides = {}) {
     status: "created",
     processIdentity: "quran-import-tests",
     softwareVersion: "0.1.0-m5.2",
-    schemaVersion: 1,
+    schemaVersion: 2,
     ...overrides,
   };
 }
@@ -89,7 +90,7 @@ test("manifest builder rejects secret-like field values", () => {
   );
 });
 
-test("manifest builder blocks progression past the license gate on unknown decisions", () => {
+test("manifest builder blocks progression past the license gate on unknown commercial use", () => {
   assert.throws(
     () =>
       buildImportManifest(
@@ -97,7 +98,7 @@ test("manifest builder blocks progression past the license gate on unknown decis
           status: "ready",
           decisions: {
             ...approvedDecisions,
-            commercialUse: { status: "unknown" },
+            commercialUse: { status: "unknown", intendedUse: false },
           },
         }),
       ),
@@ -105,18 +106,90 @@ test("manifest builder blocks progression past the license gate on unknown decis
   );
 });
 
-test("manifest builder allows pre-gate states even with unresolved decisions", () => {
+test("manifest builder allows pre-gate states with unknown standalone redistribution", () => {
   const manifest = buildImportManifest(
     baseInput({
       status: "awaiting_license_approval",
       decisions: {
         ...approvedDecisions,
-        redistribution: { status: "denied" },
+        standaloneRedistribution: { status: "unknown", intendedUse: false },
       },
     }),
   );
   assert.equal(manifest.status, "awaiting_license_approval");
-  assert.equal(manifest.redistributionDecision.status, "denied");
+  assert.equal(manifest.standaloneRedistributionDecision.status, "unknown");
+});
+
+test("non-commercial in-app use accepts denied optional rights losslessly", () => {
+  const manifest = buildImportManifest(baseInput({ status: "ready" }));
+  assert.deepEqual(manifest.applicationDisplayDecision, {
+    status: "approved",
+    intendedUse: true,
+  });
+  assert.deepEqual(manifest.commercialUseDecision, {
+    status: "denied",
+    intendedUse: false,
+  });
+  assert.deepEqual(manifest.standaloneRedistributionDecision, {
+    status: "denied",
+    intendedUse: false,
+  });
+});
+
+for (const applicationDisplay of [
+  { status: "unknown", intendedUse: true },
+  { status: "denied", intendedUse: true },
+  { status: "approved", intendedUse: false },
+]) {
+  test(`application display fails closed for ${applicationDisplay.status}/${applicationDisplay.intendedUse}`, () => {
+    assert.throws(
+      () =>
+        buildImportManifest(
+          baseInput({
+            status: "ready",
+            decisions: { ...approvedDecisions, applicationDisplay },
+          }),
+        ),
+      LegalDecisionBlockedError,
+    );
+  });
+}
+
+for (const [name, decision] of [
+  ["commercialUse", { status: "unknown", intendedUse: false }],
+  ["standaloneRedistribution", { status: "unknown", intendedUse: false }],
+  ["commercialUse", { status: "denied", intendedUse: true }],
+  ["standaloneRedistribution", { status: "denied", intendedUse: true }],
+]) {
+  test(`${name} ${decision.status}/${decision.intendedUse} fails closed`, () => {
+    assert.throws(
+      () =>
+        buildImportManifest(
+          baseInput({
+            status: "ready",
+            decisions: { ...approvedDecisions, [name]: decision },
+          }),
+        ),
+      LegalDecisionBlockedError,
+    );
+  });
+}
+
+test("manifest schema version 1 remains historical and is not reinterpreted", () => {
+  assert.throws(
+    () => buildImportManifest(baseInput({ schemaVersion: 1 })),
+    (error) =>
+      error instanceof ManifestValidationError &&
+      /version 1 retains its historical reader and checksum semantics/.test(
+        error.message,
+      ),
+  );
+  const versionTwo = buildImportManifest(baseInput());
+  assert.equal(versionTwo.schemaVersion, 2);
+  assert.equal(
+    buildImportManifest(baseInput()).manifestChecksum,
+    versionTwo.manifestChecksum,
+  );
 });
 
 test("manifest builder always sets dryRun to true", () => {

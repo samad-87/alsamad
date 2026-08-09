@@ -34,8 +34,9 @@ const approvedDecisions = {
     attributionReference: "synthetic-attribution-verify",
     status: "approved",
   },
-  commercialUse: { status: "approved" },
-  redistribution: { status: "approved" },
+  applicationDisplay: { status: "approved", intendedUse: true },
+  commercialUse: { status: "denied", intendedUse: false },
+  standaloneRedistribution: { status: "denied", intendedUse: false },
 };
 
 function baseManifestInput(overrides = {}) {
@@ -55,7 +56,7 @@ function baseManifestInput(overrides = {}) {
     status: "created",
     processIdentity: "quran-import-verify",
     softwareVersion: "0.1.0-m5.2",
-    schemaVersion: 1,
+    schemaVersion: 2,
     ...overrides,
   };
 }

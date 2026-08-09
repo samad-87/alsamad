@@ -183,8 +183,9 @@ const manifest = buildImportManifest({
     license: licenseDecision,
     retention: retentionDecision,
     attribution: attributionDecision,
-    commercialUse: { status: "approved" },
-    redistribution: { status: "approved" },
+    applicationDisplay: { status: "approved", intendedUse: true },
+    commercialUse: { status: "denied", intendedUse: false },
+    standaloneRedistribution: { status: "denied", intendedUse: false },
   },
   expectedCounts: expectedCountsMap,
   actualCounts: actualCountsMap,
@@ -192,7 +193,7 @@ const manifest = buildImportManifest({
   status: "created",
   processIdentity: "quran-import-cli",
   softwareVersion: "0.1.0-m5.2",
-  schemaVersion: 1,
+  schemaVersion: 2,
   evidenceReferences: [],
 });
 

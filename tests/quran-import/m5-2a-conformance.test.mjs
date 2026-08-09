@@ -37,8 +37,9 @@ const decisions = {
   license: { licenseReference: "synthetic-license", status: "approved" },
   retention: { policy: "time_limited", retentionDays: 7, status: "approved" },
   attribution: { attributionReference: "synthetic-credit", status: "approved" },
-  commercialUse: { status: "approved" },
-  redistribution: { status: "approved" },
+  applicationDisplay: { status: "approved", intendedUse: true },
+  commercialUse: { status: "denied", intendedUse: false },
+  standaloneRedistribution: { status: "denied", intendedUse: false },
 };
 
 function manifestInput(overrides = {}) {
@@ -60,7 +61,7 @@ function manifestInput(overrides = {}) {
     status: "created",
     processIdentity: "synthetic-test",
     softwareVersion: "m5.2a-test",
-    schemaVersion: 1,
+    schemaVersion: 2,
     ...overrides,
   };
 }
