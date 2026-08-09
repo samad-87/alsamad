@@ -692,7 +692,7 @@ A conditional or unknown license, attribution, commercial-use, redistribution, r
 
 1. **Discovery:** enumerate metadata only; record resource candidates, provider capabilities, risks, and no content payload in canonical storage.
 2. **Provider resource selection:** create a source decision draft identifying exact resource, edition, version, scope, numbering/layout, and intended use; selection remains unapproved.
-3. **License approval:** legal/content owners record attribution, commercial, redistribution, derivative, retention, caching, deletion, and exit decisions; any unknown fails closed.
+3. **License approval:** legal/content owners record in-application-display, attribution, commercial-use, standalone-redistribution, derivative, retention, caching, deletion, and exit decisions. Every capability exercised by the intended operation must be approved. A known denied commercial-use or standalone-redistribution capability is compatible with an operation that exercises neither; any unknown or denied required capability fails closed, and no denied capability may be exercised.
 4. **Manifest creation:** produce immutable canonical JSON with manifest ID/version, provider snapshot, resource list, expected bytes/rows/checksums, adapter/normalization versions, rights evidence, retention deadline, fallback and approvers.
 5. **Download/fetch:** server-side adapter fetches only manifest-listed resources with scoped credentials, quotas, timeouts, checkpoint token, and an import-attempt UUIDv7.
 6. **Raw-response quarantine:** encrypted, access-limited, non-public temporary storage keyed by attempt; never a domain table; no canonical serving; expires at the earlier of the approved retention deadline or seven days by default.
@@ -751,7 +751,7 @@ All acceptance uses real PostgreSQL and controlled provider verification. A sche
 
 1. **Schema completion gate — `M5 Schema Foundation Verified`:** exact six new and 16 cumulative domain tables; all columns/types/defaults; UUIDv7; FK `RESTRICT`; unique/check/index/trigger inventories; immutability; canonical/provider separation; duplicate alias rejection; verse order and locator validation; structural range/layout validation; translation/content-integrity linkage; zero unauthorized table/seed row; synthetic UTF-8 Arabic exact round-trip and normalization-damage rejection; transaction rollback; all M2/M3/M4 checks green.
 2. **Provider credential gate:** controlled server-side Content credentials work with least scope; secrets/redaction, quotas, timeouts, retries, and Content-vs-Search/User separation pass. Failure blocks provider dry run, not schema PASS.
-3. **Legal/license gate:** exact rights for intended commercial use, attribution, redistribution, caching/retention, deletion/exit, and fallback are written and machine-enforceable. Seven-day default is tested. Unknown/expired/revoked/no-storage rights are rejected.
+3. **Legal/license gate:** every capability exercised by the intended operation has affirmative, written, machine-enforceable permission. For the REG-0009 non-commercial Quran use, in-application display, required storage/retention, license, and attribution must be approved; commercial use and standalone redistribution must be explicitly resolved and may be denied because the intended operation exercises neither. Unknown rights, denied required capabilities, expired/revoked rights, and incompatible/no-storage terms are rejected. No operation may exercise a denied capability, and the seven-day default is tested.
 4. **Source-selection gate:** exact edition/resource/version, counts, numbering/layout, checksums, manifest, provider snapshot, quotas, fallback, and correction policy are approved. No source is implied by schema completion.
 5. **Scholarly approval gate:** named reviewers approve exact Arabic bytes, verse mapping/order, structure, attribution, and each translation/tafsir/layout claim. No silent source correction is accepted.
 6. **Import dry-run gate — `M5 Provider Import Dry Run Verified`:** against approved controlled resources and non-public staging, prove schema/checksum validation, exact row-count evidence, deterministic mapping, idempotency, retry/checkpoints, duplicate rejection, partial-failure recovery, transaction rollback, provider-version transition rehearsal, withdrawal/deletion propagation, retention/license rejection, publication rejection, exact UTF-8 round-trip, and reconciliation/audit evidence. Dry run publishes nothing.
@@ -935,6 +935,30 @@ No environment file, database file, migration, package manifest, application rou
 
 **Dependency and handoff:** M5.1 and the M5.2 architecture contract are complete, and REG-0009 records the non-commercial intended-use decision. Credential rotation may remain pending throughout M5.2A because this unit authorizes no access or fetch. Completing M5.2A does not satisfy the provider credential, legal/license, exact source-selection, scholarly, provider dry-run, or production activation gate. The next external dependency remains rotated Quran.Foundation credentials plus confirmed server-side Content API environment, access, and scope; no authenticated action may begin until that dependency is separately satisfied. M6 remains blocked on `M5 Quran Import Activated`.
 
+### ARC-001 — License Publication Rights Separation
+
+**Authorization:** REG-0010 and ADR-0003 approve one narrow implementation unit to bring the existing license schema, edition-publication trigger, M5.2 manifest legal evaluation, synthetic fixtures, and focused tests into conformance with the separate in-application-display and standalone-redistribution rights model. This unit authorizes no provider access, credentials, content fetch, real-resource manifest, real dry run, publication, M5 gate PASS, ARC-002 work, M6, or M7.
+
+**Physical contract:** the forward migration renames the existing `redistribution_allowed` field to `standalone_redistribution_allowed`, preserving its original values and meaning, and adds `in_application_display_allowed boolean NOT NULL DEFAULT false`. Publication requires affirmative in-application-display permission and never infers it from historical redistribution values. Standalone redistribution remains separately recorded and is not a publication prerequisite. All existing license status, effective-window, attribution, retention, derivative, immutability, and withdrawal gates remain enforceable.
+
+**Manifest contract:** add an explicit in-application-display decision and rename the redistribution decision to standalone redistribution under a new manifest schema version. Required capabilities exercised by the intended operation must be approved. Commercial-use and standalone-redistribution decisions must be known but may be denied when the intended operation exercises neither. Unknown remains blocking, and no denied capability may be exercised. Historical manifest versions and checksums retain their original semantics and are never reinterpreted. This unit does not address ARC-002's separate immutable-manifest/run-evidence question.
+
+**Allowed files:**
+
+- `src/db/schema.ts`
+- `drizzle/0005_license_publication_rights_separation.sql`
+- `drizzle/meta/_journal.json`
+- `src/lib/quran/import/contracts.ts`
+- `src/lib/quran/import/manifest.ts`
+- `scripts/db-verify.mjs`
+- `scripts/quran-import.mjs`
+- `scripts/quran-import-verify.mjs`
+- focused tests under `tests/quran-import/`
+
+Migration `0002` is immutable and must not be edited. Migration `0005` is the next forward migration because committed migrations end at `0004`; it adds no table and preserves the 30-table Release 1 freeze. M6's future devotional migration moves to `0006_devotional_content_foundation.sql`, the next available number after ARC-001. This numbering correction does not authorize M6.
+
+**Acceptance:** real PostgreSQL verification proves the renamed standalone-redistribution value is preserved, application-display defaults false, no value is inferred, and publication succeeds with application display allowed plus standalone redistribution denied while failing when application display is denied or unknown. Manifest tests prove the corresponding approved/denied/unknown rules under a new schema version. Run focused Quran-import tests, `npm run quran:import:verify`, synthetic `npm run quran:import:dry-run`, database safety/migrations twice/seeds twice/`npm run test:db`/`npm run db:check`, `npm test`, full `npm run verify`, format check, `git diff --check`, and preserved-volume shutdown. M5.1's historical PASS remains valid; M5.2A's affected legal-gate behavior requires correction and re-verification. Neither later M5 gate passes through this unit.
+
 ### M5.2 acceptance gates
 
 Separated and sequential; passing one does not imply the next passes:
@@ -998,7 +1022,7 @@ Implement the provider-independent Devotional Content and Translation foundation
 ### Artifacts
 
 - `src/db/schema.ts`
-- `drizzle/0005_devotional_content_foundation.sql`
+- `drizzle/0006_devotional_content_foundation.sql`
 - `drizzle/meta/_journal.json`
 - `scripts/db-verify.mjs`
 - `tests/devotional-content-database.test.mjs`
@@ -1010,7 +1034,7 @@ Implement the provider-independent Devotional Content and Translation foundation
 
 ### Database changes allowed
 
-M6 authorizes exactly four new Release 1 physical domain tables: `devotional_items`, `devotional_collections`, `devotional_collection_items`, and `content_translations`. Together with M3, M4, and M5, the cumulative Release 1 domain count becomes exactly **20 of 30** (2 + 8 + 6 + 4). Migration filename is exactly `drizzle/0005_devotional_content_foundation.sql`, the next forward-only migration after committed `0004`. No infrastructure bookkeeping table may consume or exceed the approved 30-table boundary, and no fifth devotional table (for example a separate repetition, source, or Editorial General Dua detail table) is authorized — database architecture §5.4 scopes exactly these four tables, and §11 explicitly rejects "separate devotional source, translation, transliteration, repetition, and Editorial General Dua detail tables" as Release 1 fragmentation.
+M6 authorizes exactly four new Release 1 physical domain tables: `devotional_items`, `devotional_collections`, `devotional_collection_items`, and `content_translations`. Together with M3, M4, and M5, the cumulative Release 1 domain count becomes exactly **20 of 30** (2 + 8 + 6 + 4). Migration filename is exactly `drizzle/0006_devotional_content_foundation.sql`, the next available forward-only migration after the authorized ARC-001 correction at `0005`. This numbering records dependency order only and does not authorize M6 while its gates remain blocked. No infrastructure bookkeeping table may consume or exceed the approved 30-table boundary, and no fifth devotional table (for example a separate repetition, source, or Editorial General Dua detail table) is authorized — database architecture §5.4 scopes exactly these four tables, and §11 explicitly rejects "separate devotional source, translation, transliteration, repetition, and Editorial General Dua detail tables" as Release 1 fragmentation.
 
 All primary keys are application-generated UUIDv7 with no database default. FKs use `ON UPDATE RESTRICT ON DELETE RESTRICT`. Per the section 5.4 summary: `devotional_items` carries a one-to-one FK to `content_items`, a unique canonical key, and a checked type; `devotional_collections` carries a FK to a versioned content item for title/description and a unique canonical key; `devotional_collection_items` carries FKs to collection and item with a unique pair/position and no reward field; `content_translations` carries FKs to `content_revisions` and `locales` with a checked rendering kind and immutable published text. Exact column-level types, defaults, and constraint/trigger names follow the section 5.4 expansion required under Dependencies above.
 
@@ -1108,7 +1132,7 @@ After every M6 acceptance criterion passes, hand the stable devotional schema an
 
 **Dependency position.** Independent of M6.0; depends only on M4 (`content_items`, `content_revisions`) and the section 5.4 column-level documentation prerequisite under Dependencies above. Required, together with M6.0, before M6.2. Still subject to the phase-level M5 production-activation dependency above.
 
-**Objective.** Implement exactly the four Release 1 devotional tables — `devotional_items`, `devotional_collections`, `devotional_collection_items`, `content_translations` — in dependency order, register forward migration `0005`, and prove the Schema completion gate on real PostgreSQL.
+**Objective.** Implement exactly the four Release 1 devotional tables — `devotional_items`, `devotional_collections`, `devotional_collection_items`, `content_translations` — in dependency order, register forward migration `0006`, and prove the Schema completion gate on real PostgreSQL.
 
 **Included scope.**
 

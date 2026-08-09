@@ -157,6 +157,7 @@ As of 2026-08-08, the M6 architecture decision analysis covering REG-0001–REG-
 | REG-0006 | `content_translations` text-storage representation                                         | Database        | DECIDED | Registry + ADR (`ADR-0002`, Accepted)                                     |
 | REG-0007 | `content_translations` review/publication lifecycle column count                           | Database        | DECIDED | Registry only (decided alongside `ADR-0002`, which covers the same table) |
 | REG-0008 | `devotional_collection_items` membership deletion semantics                                | Database        | DECIDED | Registry only                                                             |
+| REG-0010 | In-application display and standalone redistribution rights separation                     | Database        | DECIDED | Registry + ADR (`ADR-0003`, Accepted)                                     |
 
 ### REG-0001 — Editorial General Dua placement in the devotional physical model
 
@@ -295,5 +296,31 @@ As of 2026-08-08, the M6 architecture decision analysis covering REG-0001–REG-
 This decision explicitly does **not** approve ALSAMAD's future broader-platform monetization model, commercial launch using Quran.Foundation content, credentials, exact source/resource selection, manifest creation, provider fetch, dry run, publication, `M5 Provider Import Dry Run Verified`, `M5 Quran Import Activated`, M6, or M7 / Knowledge Engine work. The broader-platform monetization question remains `PENDING` explicit written Quran.Foundation approval.
 
 **Implementation evidence:** None.
+
+**Supersedes / Superseded by:** None.
+
+### REG-0010 — In-application display and standalone redistribution rights separation
+
+**Category:** `Database`.
+
+**Summary:** Whether permission to serve or display licensed content as an integrated part of ALSAMAD is the same right as permission to redistribute that content independently as a dataset, raw dump, download catalog, bulk product, or equivalent.
+
+**Committed evidence:** `ALSAMAD_DATABASE_ARCHITECTURE.md` §5.2.2 defines `redistribution_allowed` as explicit redistribution permission, while the committed `drizzle/0002_content_integrity_foundation.sql` publication trigger requires that field to be true before an edition may be published. REG-0009 permits controlled non-commercial in-application use while prohibiting standalone redistribution. `ALSAMAD_IMPLEMENTATION_ROADMAP.md` Phase 5 requires intended-use, commercial-use, redistribution, retention, and attribution rights to be separately known and machine-enforceable.
+
+**Affected architecture:** `ALSAMAD_DATABASE_ARCHITECTURE.md` §§5.2.2, 5.2.4, 5.3.8–5.3.10; `ALSAMAD_IMPLEMENTATION_ROADMAP.md` Phase 5.
+
+**Affected roadmap gates:** The ARC-001 implementation authorization and the later `M5 Provider Import Dry Run Verified` and `M5 Quran Import Activated` gates. Neither M5 gate passes through this decision.
+
+**Opened:** 2026-08-09.
+
+**Tier rationale:** This changes a frozen Release 1 rights representation and a database-enforced religious-content publication boundary. Reversal after licensed content exists would be data-shaping, legally unsafe, and content-integrity sensitive, meeting the §7 ADR threshold.
+
+**Status:** `DECIDED` (2026-08-09). **ADR reference:** `ADR-0003` (Accepted).
+
+**Decision outcome:** Permission to serve or display content as an integrated part of ALSAMAD and permission to redistribute content independently are separate rights. The license contract records `in_application_display_allowed` and `standalone_redistribution_allowed`. Publication inside ALSAMAD requires affirmative in-application-display permission and does not require standalone-redistribution permission. Commercial-use and standalone-redistribution decisions must be explicitly resolved, but a known `DENIED` decision is compatible with an intended operation that does not exercise that capability. `UNKNOWN` remains fail-closed, and no denied capability may be exercised.
+
+The existing redistribution right retains its original standalone-redistribution meaning and is never reinterpreted as application-display permission. Application-display permission defaults fail-closed and is never inferred from a historical redistribution value. Historical manifest schema/checksum semantics remain unchanged; corrected manifests require a new schema version. REG-0009 remains the controlling non-commercial/no-standalone-redistribution intended-use decision and is not superseded or modified by this entry.
+
+**Implementation evidence:** None. The decision and ADR authorize no migration, provider access, fetch, dry run, publication, M5 gate PASS, M6, or M7 work.
 
 **Supersedes / Superseded by:** None.
