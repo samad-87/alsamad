@@ -681,6 +681,199 @@ try {
     },
   );
 
+  // AUD-001: M5 publication trigger table-branching correction.
+  {
+    const aud001WorkId = "0198a7b0-9000-7000-8000-000000000001";
+    const aud001LicenseId = "0198a7b0-9000-7000-8000-000000000002";
+    const aud001EditionId = "0198a7b0-9000-7000-8000-000000000003";
+    const aud001RootPassageId = "0198a7b0-9000-7000-8000-000000000004";
+
+    const expectPublicationRejection = async (
+      label,
+      operation,
+      messagePattern,
+    ) => {
+      let caught;
+      try {
+        await queryClient.begin(operation);
+      } catch (error) {
+        caught = error;
+      }
+      assert.ok(caught, `expected rejection: ${label}`);
+      assert.match(caught.message, messagePattern, label);
+      assert.doesNotMatch(
+        caught.message,
+        /has no field/,
+        `${label}: must not be the AUD-001 cross-table field-resolution crash`,
+      );
+      assert.equal(caught.code, "23514", `${label} errcode`);
+      console.log(`PASS rejection: ${label}`);
+    };
+
+    // 1. Regression proof: quran_ayahs publication no longer crashes with
+    // SQLSTATE 42703 ("record new has no field work_id"); it fails closed
+    // with its own intended validation message instead.
+    await expectPublicationRejection(
+      "AUD-001 quran_ayahs publication rejected cleanly when surah is not published",
+      async (transaction) => {
+        const fixture = await insertM5Foundation(transaction);
+        await transaction`update quran_ayahs set publication_state='published',published_at=current_timestamp where id=${fixture.ayah}::uuid`;
+      },
+      /Quran ayah publication is not eligible/,
+    );
+    for (const table of m5Tables) {
+      assert.equal(
+        (
+          await queryClient`select count(*)::int as count from ${queryClient(table)}`
+        )[0]?.count,
+        0,
+      );
+    }
+
+    // 2. Regression proof: quran_structural_markers publication no longer
+    // crashes with SQLSTATE 42703; it fails closed with its own message.
+    await expectPublicationRejection(
+      "AUD-001 quran_structural_markers publication rejected cleanly when edition is not published",
+      async (transaction) => {
+        const fixture = await insertM5Foundation(transaction);
+        await transaction`update quran_structural_markers set publication_state='published',published_at=current_timestamp where id=${fixture.marker}::uuid`;
+      },
+      /Quran marker publication is not eligible/,
+    );
+    for (const table of m5Tables) {
+      assert.equal(
+        (
+          await queryClient`select count(*)::int as count from ${queryClient(table)}`
+        )[0]?.count,
+        0,
+      );
+    }
+
+    // 3. quran_surahs invalid-publication behavior is unchanged by the
+    // table-branching correction.
+    await expectPublicationRejection(
+      "AUD-001 quran_surahs publication rejected cleanly when reconciliation fails",
+      async (transaction) => {
+        const fixture = await insertM5Foundation(transaction);
+        await transaction`update quran_surahs set publication_state='published',published_at=current_timestamp where id=${fixture.surah}::uuid`;
+      },
+      /Quran surah publication is not eligible/,
+    );
+    for (const table of m5Tables) {
+      assert.equal(
+        (
+          await queryClient`select count(*)::int as count from ${queryClient(table)}`
+        )[0]?.count,
+        0,
+      );
+    }
+
+    // 4. Valid quran_structural_markers publication still succeeds once its
+    // edition is published.
+    await queryClient
+      .begin(async (transaction) => {
+        const fixture = await insertM5Foundation(transaction);
+        await transaction`update editions set publication_state='published',published_at=current_timestamp where id=${fixture.arabicEdition}::uuid`;
+        await transaction`update quran_structural_markers set publication_state='published',published_at=current_timestamp where id=${fixture.marker}::uuid`;
+        assert.equal(
+          (
+            await transaction`select publication_state from quran_structural_markers where id=${fixture.marker}::uuid`
+          )[0]?.publication_state,
+          "published",
+        );
+        throw new Error("AUD-001 marker publication success rollback");
+      })
+      .catch((error) =>
+        assert.equal(
+          error.message,
+          "AUD-001 marker publication success rollback",
+        ),
+      );
+    for (const table of m5Tables) {
+      assert.equal(
+        (
+          await queryClient`select count(*)::int as count from ${queryClient(table)}`
+        )[0]?.count,
+        0,
+      );
+    }
+
+    // 5-7. Valid quran_surahs publication (full 114-surah reconciliation)
+    // succeeds, and once a surah is published, valid quran_ayahs publication
+    // for an ayah under that surah also succeeds — proving neither branch
+    // leaks a column reference belonging to another table.
+    await queryClient
+      .begin(async (transaction) => {
+        await transaction`insert into licenses(id,provider_code,license_key,version,name,rights_scope,attribution_text,retention_policy,in_application_display_allowed,standalone_redistribution_allowed,effective_from,status)
+          values(${aud001LicenseId}::uuid,'synthetic','aud-001-full-114','1','Synthetic AUD-001 full-114 license','permission','Synthetic attribution','permanent',true,true,current_timestamp-'1 day'::interval,'active')`;
+        await transaction`insert into works(id,canonical_key,work_type,title,original_language_code) values(${aud001WorkId}::uuid,'aud-001-full-114-work','quran','Synthetic AUD-001 full 114-surah work','ar')`;
+        await transaction`insert into editions(id,work_id,license_id,edition_key,version,language_code,script_code,display_name,provider_code,provider_edition_id,import_version,source_manifest_checksum)
+          values(${aud001EditionId}::uuid,${aud001WorkId}::uuid,${aud001LicenseId}::uuid,'aud-001-full-114-ar','1','ar','Arab','Synthetic AUD-001 full Arabic edition','synthetic','aud-001-ar-alias','test-v1',repeat('a',64))`;
+        await transaction`update editions set publication_state='published',published_at=current_timestamp where id=${aud001EditionId}::uuid`;
+        await transaction`insert into passages(id,work_id,parent_passage_id,canonical_locator,passage_type,sequence_number,depth) values (${aud001RootPassageId}::uuid,${aud001WorkId}::uuid,null,'aud-001-quran-114','work',1,0)`;
+
+        const ayahIds = [];
+        for (let n = 1; n <= 114; n += 1) {
+          const suffix = n.toString(16).padStart(12, "0");
+          const surahPassageId = `0198a7b0-9100-7000-8000-${suffix}`;
+          const ayahPassageId = `0198a7b0-9200-7000-8000-${suffix}`;
+          const surahId = `0198a7b0-9300-7000-8000-${suffix}`;
+          const ayahId = `0198a7b0-9400-7000-8000-${suffix}`;
+          await transaction`insert into passages(id,work_id,parent_passage_id,canonical_locator,passage_type,sequence_number,depth) values (${surahPassageId}::uuid,${aud001WorkId}::uuid,${aud001RootPassageId}::uuid,${"surah:" + n},'chapter',${n},1)`;
+          await transaction`insert into quran_surahs(id,work_id,passage_id,canonical_key,surah_number,ayah_count,name_arabic,source_record_checksum) values (${surahId}::uuid,${aud001WorkId}::uuid,${surahPassageId}::uuid,${"quran:surah:" + n},${n},1,'اسم',repeat('c',64))`;
+          await transaction`insert into passages(id,work_id,parent_passage_id,canonical_locator,passage_type,sequence_number,depth) values (${ayahPassageId}::uuid,${aud001WorkId}::uuid,${surahPassageId}::uuid,${n + ":1"},'verse',1,2)`;
+          await transaction`insert into quran_ayahs(id,surah_id,passage_id,canonical_key,ayah_number,global_sequence_number,source_record_checksum) values (${ayahId}::uuid,${surahId}::uuid,${ayahPassageId}::uuid,${"quran:ayah:" + n + ":1"},1,${n},repeat('d',64))`;
+          ayahIds.push(ayahId);
+        }
+
+        await transaction`update quran_surahs set publication_state='published',published_at=current_timestamp where work_id=${aud001WorkId}::uuid`;
+        assert.equal(
+          (
+            await transaction`select count(*)::int as count from quran_surahs where work_id=${aud001WorkId}::uuid and publication_state='published'`
+          )[0]?.count,
+          114,
+        );
+
+        await transaction`update quran_ayahs set publication_state='published',published_at=current_timestamp where id=${ayahIds[0]}::uuid`;
+        assert.equal(
+          (
+            await transaction`select publication_state from quran_ayahs where id=${ayahIds[0]}::uuid`
+          )[0]?.publication_state,
+          "published",
+        );
+
+        throw new Error("AUD-001 full publication success rollback");
+      })
+      .catch((error) =>
+        assert.equal(
+          error.message,
+          "AUD-001 full publication success rollback",
+        ),
+      );
+    assert.equal(
+      (
+        await queryClient`select count(*)::int as count from quran_surahs where work_id=${aud001WorkId}::uuid`
+      )[0]?.count,
+      0,
+    );
+    assert.equal(
+      (
+        await queryClient`select count(*)::int as count from works where id=${aud001WorkId}::uuid`
+      )[0]?.count,
+      0,
+    );
+    assert.equal(
+      (
+        await queryClient`select count(*)::int as count from licenses where id=${aud001LicenseId}::uuid`
+      )[0]?.count,
+      0,
+    );
+
+    console.log(
+      "PASS: AUD-001 M5 publication trigger table-branching corrected for quran_surahs, quran_ayahs, and quran_structural_markers",
+    );
+  }
+
   console.log("PASS schema tables: exactly 16 cumulative Release 1 tables");
   console.log(
     "PASS M4: 8 tables, 12 restrictive foreign keys, pgcrypto checksums, zero seed rows",

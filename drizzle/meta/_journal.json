@@ -50,6 +50,13 @@
       "when": 1785796806000,
       "tag": "0006_license_version_immutability",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1785796807000,
+      "tag": "0007_m5_publication_trigger_table_branching",
+      "breakpoints": true
     }
   ]
 }
