@@ -159,6 +159,7 @@ As of 2026-08-08, the M6 architecture decision analysis covering REG-0001–REG-
 | REG-0008 | `devotional_collection_items` membership deletion semantics                                | Database        | DECIDED | Registry only                                                             |
 | REG-0010 | In-application display and standalone redistribution rights separation                     | Database        | DECIDED | Registry + ADR (`ADR-0003`, Accepted)                                     |
 | REG-0011 | Immutable source import manifest and execution evidence separation                         | Database        | DECIDED | Registry + ADR (`ADR-0004`, Accepted)                                     |
+| REG-0012 | License-version immutability and historical license evidence                               | Database        | DECIDED | Registry + ADR (`ADR-0005`, Accepted)                                     |
 
 ### REG-0001 — Editorial General Dua placement in the devotional physical model
 
@@ -351,5 +352,31 @@ Checkpoints, state transitions, retry/backoff state, observed counts and checksu
 Historical v1 and v2 manifests retain their original schemas, canonical bytes, and checksum meanings and are never recomputed or reinterpreted under v3. V2 remains historically verifiable but is not the corrected real-provider manifest contract. No table or migration is added; the Release 1 catalog remains frozen at 30 tables.
 
 **Implementation evidence:** None. This decision authorizes only a later credential-free ARC-002 contract-conformance implementation under the Roadmap. It authorizes no credential use, provider access, fetch, real-resource manifest, provider dry run, publication, `M5 Provider Import Dry Run Verified`, `M5 Quran Import Activated`, ARC-003/004/005/006, M6, or M7.
+
+**Supersedes / Superseded by:** None.
+
+### REG-0012 — License-version immutability and historical license evidence
+
+**Category:** `Database`.
+
+**Summary:** Whether a `licenses` row's rights-bearing legal content (rights scope, attribution, retention, application-display/standalone-redistribution/derivative permissions, effective window) can be silently rewritten in place after the license has first been relied upon, and whether `SourceImportManifest` v3 sufficiently traces back to the exact immutable license evidence used at authorization time.
+
+**Committed evidence:** `drizzle/0002_content_integrity_foundation.sql` `tr_licenses__identity` freezes only `provider_code`, `license_key`, `version`, and `effective_from`; every other `licenses` column remains updatable in place indefinitely. `ALSAMAD_DATABASE_ARCHITECTURE.md` §5.2.2 documents this same narrow scope. `enforce_publication_rows()` checks license eligibility only once, at the moment an edition first publishes, against the then-current row. `SourceImportManifest` v3 (`ADR-0004`) freezes its embedded decision values but does not require `licenseDecisionReference`/`attributionReference` to be non-blank or to identify a specific license revision.
+
+**Affected architecture:** `ALSAMAD_DATABASE_ARCHITECTURE.md` §5.2.2; `ALSAMAD_IMPLEMENTATION_ROADMAP.md` Phase 5, new ARC-004 authorization.
+
+**Affected roadmap gates:** The ARC-004 credential-free implementation authorization and later `M5 Provider Import Dry Run Verified` and `M5 Quran Import Activated` gates. Neither M5 gate passes through this decision.
+
+**Opened:** 2026-08-09.
+
+**Tier rationale:** This changes a frozen Release 1 database-enforced content-integrity boundary governing the legal terms behind published/imported religious content. Reversal after real licensed content exists would be legally unsafe and content-integrity sensitive, meeting the §7 ADR threshold — the same reasoning already applied to `ADR-0003` and `ADR-0004` for comparable `licenses`/manifest corrections.
+
+**Status:** `DECIDED` (2026-08-09). **ADR reference:** `ADR-0005` (Accepted).
+
+**Decision outcome:** A `licenses` row represents exactly one immutable provider/legal revision once first relied upon; `provider_code` + `license_key` + `version` continues to identify that revision under the existing unique-constraint identity model. Once a license row's `status` first reaches `active`, its rights-bearing fields — `rights_scope`, `attribution_text`, `terms_url`, `retention_policy`, `retention_days`, `in_application_display_allowed`, `standalone_redistribution_allowed`, `derivatives_allowed`, `effective_until` — become immutable alongside the already-frozen identity tuple. Only `status` and `updated_at` may still change, preserving existing expiry/revocation/withdrawal behavior without rewriting historical legal content. A later legal/provider revision requires a new license row under a new `version`, never an edit to an existing active row. `SourceImportManifest` v3's `licenseDecisionReference` and attribution reference must be non-blank and must identify the exact immutable license evidence relied upon; this is a validation tightening only and changes no manifest schema, checksum, or decision-snapshot behavior already established by `ADR-0004`.
+
+No new table is required; the Release 1 catalog remains frozen at 30 tables. Migration `0006` is reserved for this correction's implementation; M6's future devotional migration placeholder correspondingly moves from `0006` to `0007`. This decision does not authorize migration `0006` itself, provider access, credentials, content fetch, a real-resource manifest, a provider dry run, publication, `M5 Provider Import Dry Run Verified`, `M5 Quran Import Activated`, ARC-005/006, M6, or M7.
+
+**Implementation evidence:** None. Implementation is not marked complete by this entry.
 
 **Supersedes / Superseded by:** None.

@@ -955,7 +955,7 @@ No environment file, database file, migration, package manifest, application rou
 - `scripts/quran-import-verify.mjs`
 - focused tests under `tests/quran-import/`
 
-Migration `0002` is immutable and must not be edited. Migration `0005` is the next forward migration because committed migrations end at `0004`; it adds no table and preserves the 30-table Release 1 freeze. M6's future devotional migration moves to `0006_devotional_content_foundation.sql`, the next available number after ARC-001. This numbering correction does not authorize M6.
+Migration `0002` is immutable and must not be edited. Migration `0005` is the next forward migration because committed migrations end at `0004`; it adds no table and preserves the 30-table Release 1 freeze. M6's future devotional migration, originally moved to `0006_devotional_content_foundation.sql` by this correction, now moves to `0007_devotional_content_foundation.sql` following the later ARC-004 correction at `0006` (see ARC-004 below). This numbering correction does not authorize M6.
 
 **Acceptance:** real PostgreSQL verification proves the renamed standalone-redistribution value is preserved, application-display defaults false, no value is inferred, and publication succeeds with application display allowed plus standalone redistribution denied while failing when application display is denied or unknown. Manifest tests prove the corresponding approved/denied/unknown rules under a new schema version. Run focused Quran-import tests, `npm run quran:import:verify`, synthetic `npm run quran:import:dry-run`, database safety/migrations twice/seeds twice/`npm run test:db`/`npm run db:check`, `npm test`, full `npm run verify`, format check, `git diff --check`, and preserved-volume shutdown. M5.1's historical PASS remains valid; M5.2A's affected legal-gate behavior requires correction and re-verification. Neither later M5 gate passes through this unit.
 
@@ -978,6 +978,33 @@ No environment, provider-access, database, migration, Drizzle, package, route, U
 **Status and handoff:** ARC-002 is decided and specified but not implemented. M5.1 remains PASS; ARC-001 remains complete; existing M5.2A implementation/verification remains historical evidence, while affected manifest/run-separation conformance requires correction and reverification. `M5 Provider Import Dry Run Verified` and `M5 Quran Import Activated` remain NOT PASS, and M6 remains blocked. Provider dry-run work cannot begin until ARC-002 implementation acceptance passes.
 
 **Dependency boundaries:** ARC-002 is decided before ARC-003 conformance correction. ARC-004 is architecturally independent. ARC-005 is an independent release concern but downstream for activation. ARC-006 is independent governance/documentation work. None is solved or authorized here.
+
+### ARC-004 — License-Version Immutability and Historical License Evidence
+
+**Authorization:** REG-0012 and ADR-0005 approve one narrow implementation unit to strengthen `licenses` table immutability once a license version is first relied upon, and to tighten `SourceImportManifest` v3's license/attribution reference validation. This unit authorizes no provider access, credentials, content fetch, real-resource manifest, provider dry run, publication, M5 gate PASS, ARC-005/006 work, M6, or M7.
+
+**Physical contract:** the forward migration extends license immutability beyond the existing identity tuple (`provider_code`, `license_key`, `version`, `effective_from`) to also freeze, once a license row's `status` first reaches `active`, its rights-bearing legal content: `rights_scope`, `attribution_text`, `terms_url`, `retention_policy`, `retention_days`, `in_application_display_allowed`, `standalone_redistribution_allowed`, `derivatives_allowed`, and `effective_until`. `status` itself remains changeable exactly as today, so that expiry, revocation, and withdrawal remain representable without rewriting the historical legal content that was relied upon. A later legal or provider revision requires a new license row under a new `version`, never an edit to an existing active row.
+
+**Manifest contract:** `SourceImportManifest` v3's `licenseDecisionReference` and `attributionDecision`'s attribution reference must be non-blank and must identify the exact immutable license evidence relied upon. This unit adds that validation without changing manifest schema version, checksum semantics, or any other v3/v2/v1 field or behavior.
+
+**Allowed files:**
+
+- `src/db/schema.ts`
+- `drizzle/0006_license_version_immutability.sql`
+- `drizzle/meta/_journal.json`
+- `src/lib/quran/import/contracts.ts`
+- `src/lib/quran/import/manifest.ts`
+- `scripts/db-verify.mjs`
+- focused tests under `tests/quran-import/`
+- `tests/database-foundation.test.mjs`
+
+Migration `0005` is immutable and must not be edited. Migration `0006` is the next forward migration because committed migrations end at `0005`; it adds no table and preserves the 30-table Release 1 freeze. M6's future devotional migration moves from `0006_devotional_content_foundation.sql` to `0007_devotional_content_foundation.sql`, the next available number after this correction. This numbering correction does not authorize M6.
+
+**Acceptance:** real PostgreSQL verification proves that once a license row's `status` first reaches `active`, an `UPDATE` changing any of `rights_scope`, `attribution_text`, `terms_url`, `retention_policy`, `retention_days`, `in_application_display_allowed`, `standalone_redistribution_allowed`, `derivatives_allowed`, or `effective_until` is rejected, while a `status` transition alone continues to succeed exactly as today. Manifest tests prove a blank `licenseDecisionReference` or a blank required attribution reference is rejected, and that every existing ARC-001/ARC-002/ARC-003 test continues to pass unmodified. Run focused Quran-import tests, `npm run quran:import:verify`, synthetic `npm run quran:import:dry-run`, database safety/migrations twice/seeds twice/`npm run test:db`/`npm run db:check`, `npm test`, full `npm run verify`, format check, `git diff --check`, and preserved-volume shutdown.
+
+**Status and handoff:** ARC-004 is decided and specified but not implemented. M5.1 remains PASS; ARC-001, ARC-002, and ARC-003 remain complete. `M5 Provider Import Dry Run Verified` and `M5 Quran Import Activated` remain NOT PASS, and M6 remains blocked. Real provider manifest creation and provider dry-run work should not rely on license evidence until ARC-004 implementation acceptance passes.
+
+**Dependency boundaries:** ARC-004 is architecturally independent of ARC-005 (atomic Quran release selector) and ARC-006 (stale M6 prerequisite). Neither is solved or authorized here.
 
 ### M5.2 acceptance gates
 
@@ -1042,7 +1069,7 @@ Implement the provider-independent Devotional Content and Translation foundation
 ### Artifacts
 
 - `src/db/schema.ts`
-- `drizzle/0006_devotional_content_foundation.sql`
+- `drizzle/0007_devotional_content_foundation.sql`
 - `drizzle/meta/_journal.json`
 - `scripts/db-verify.mjs`
 - `tests/devotional-content-database.test.mjs`
@@ -1054,7 +1081,7 @@ Implement the provider-independent Devotional Content and Translation foundation
 
 ### Database changes allowed
 
-M6 authorizes exactly four new Release 1 physical domain tables: `devotional_items`, `devotional_collections`, `devotional_collection_items`, and `content_translations`. Together with M3, M4, and M5, the cumulative Release 1 domain count becomes exactly **20 of 30** (2 + 8 + 6 + 4). Migration filename is exactly `drizzle/0006_devotional_content_foundation.sql`, the next available forward-only migration after the authorized ARC-001 correction at `0005`. This numbering records dependency order only and does not authorize M6 while its gates remain blocked. No infrastructure bookkeeping table may consume or exceed the approved 30-table boundary, and no fifth devotional table (for example a separate repetition, source, or Editorial General Dua detail table) is authorized — database architecture §5.4 scopes exactly these four tables, and §11 explicitly rejects "separate devotional source, translation, transliteration, repetition, and Editorial General Dua detail tables" as Release 1 fragmentation.
+M6 authorizes exactly four new Release 1 physical domain tables: `devotional_items`, `devotional_collections`, `devotional_collection_items`, and `content_translations`. Together with M3, M4, and M5, the cumulative Release 1 domain count becomes exactly **20 of 30** (2 + 8 + 6 + 4). Migration filename is exactly `drizzle/0007_devotional_content_foundation.sql`, the next available forward-only migration after the authorized ARC-004 correction at `0006`. This numbering records dependency order only and does not authorize M6 while its gates remain blocked. No infrastructure bookkeeping table may consume or exceed the approved 30-table boundary, and no fifth devotional table (for example a separate repetition, source, or Editorial General Dua detail table) is authorized — database architecture §5.4 scopes exactly these four tables, and §11 explicitly rejects "separate devotional source, translation, transliteration, repetition, and Editorial General Dua detail tables" as Release 1 fragmentation.
 
 All primary keys are application-generated UUIDv7 with no database default. FKs use `ON UPDATE RESTRICT ON DELETE RESTRICT`. Per the section 5.4 summary: `devotional_items` carries a one-to-one FK to `content_items`, a unique canonical key, and a checked type; `devotional_collections` carries a FK to a versioned content item for title/description and a unique canonical key; `devotional_collection_items` carries FKs to collection and item with a unique pair/position and no reward field; `content_translations` carries FKs to `content_revisions` and `locales` with a checked rendering kind and immutable published text. Exact column-level types, defaults, and constraint/trigger names follow the section 5.4 expansion required under Dependencies above.
 
@@ -1152,7 +1179,7 @@ After every M6 acceptance criterion passes, hand the stable devotional schema an
 
 **Dependency position.** Independent of M6.0; depends only on M4 (`content_items`, `content_revisions`) and the section 5.4 column-level documentation prerequisite under Dependencies above. Required, together with M6.0, before M6.2. Still subject to the phase-level M5 production-activation dependency above.
 
-**Objective.** Implement exactly the four Release 1 devotional tables — `devotional_items`, `devotional_collections`, `devotional_collection_items`, `content_translations` — in dependency order, register forward migration `0006`, and prove the Schema completion gate on real PostgreSQL.
+**Objective.** Implement exactly the four Release 1 devotional tables — `devotional_items`, `devotional_collections`, `devotional_collection_items`, `content_translations` — in dependency order, register forward migration `0007`, and prove the Schema completion gate on real PostgreSQL.
 
 **Included scope.**
 
