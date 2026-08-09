@@ -893,6 +893,48 @@ This is a documentation-only contract; no file below is created by this task. Wh
 
 This list refines, for this specific implementation unit, the general `src/lib/quran/import/` and `src/lib/providers/quran-foundation/` grants already recorded in this phase's "Allowed implementation files" section; it does not add a file class beyond what that section already authorizes.
 
+### M5.2A — Credential-Free Import Contract Conformance
+
+This subsection is the separately authorized implementation unit required by the M5.2 contract above. It may proceed while Quran.Foundation credential rotation is pending. It authorizes only provider-independent, synthetic, non-networked audit and hardening of the already committed import harness; it creates no new milestone or gate and changes no existing M5 acceptance requirement.
+
+**Authorized scope:** audit and harden the existing provider-independent import contracts; manifest schema and validation with synthetic metadata; import-state transitions; checkpoints; reconciliation; checksum utilities; exact Arabic UTF-8, tashkeel, and normalization-damage verification with synthetic non-religious fixtures; canonical/provider identity separation; secret-shaped field rejection and evidence redaction; generic bounded retry, backoff, timeout, circuit-breaker, and HTTP 429 classification through injected synthetic responses; update, withdrawal, deletion, expiry, cancellation, and supersession transitions; lossless attribution and provenance metadata handling as opaque values; generic transaction-rollback and disposable-staging abstractions that persist no provider content; audit-event structures limited to identifiers, hashes, counts, timings, outcomes, and redacted error categories; and focused provider-independent tests. Every network-capable adapter method must remain fail-closed.
+
+**Explicit exclusions:** no credential use, inspection, validation, loading, or storage; authentication; Quran.Foundation API call; endpoint or base-URL activation; authenticated metadata discovery; guessed or frozen provider resource ID; guessed Arabic edition, script, riwayah, version, numbering, response-shape, or provider-metadata semantic; real provider response mapping; real Quran payload or religious fixture; real-resource manifest; provider-content quarantine; canonical import; real PostgreSQL provider dry run; scholarly approval based on guessed content; publication; any PASS claim for `M5 Provider Import Dry Run Verified` or `M5 Quran Import Activated`; M6; migration `0005`; or M7 / Knowledge Engine work.
+
+**Allowed files:**
+
+- `src/lib/quran/import/contracts.ts`
+- `src/lib/quran/import/manifest.ts`
+- `src/lib/quran/import/state-machine.ts`
+- `src/lib/quran/import/reconciliation.ts`
+- `src/lib/quran/import/checkpoints.ts`
+- `src/lib/providers/quran-foundation/adapter.ts`
+- `src/lib/providers/quran-foundation/types.ts`
+- `scripts/quran-import.mjs`
+- `scripts/quran-import-verify.mjs`
+- focused tests under `tests/quran-import/`
+
+No environment file, database file, migration, package manifest, application route, UI, architecture document, or other repository file is authorized by this unit.
+
+**Acceptance criteria:**
+
+- manifest validation is deterministic, immutable, provider-independent, and rejects missing, malformed, inconsistent, production-only, or secret-shaped synthetic fields;
+- canonical identities remain ALSAMAD-owned and no provider identifier becomes or deterministically defines a canonical UUID;
+- evidence and errors redact secret-shaped values and contain no credential, token, full payload, or religious text;
+- SHA-256 generation and verification are deterministic, and malformed values, mismatches, changed bytes, and changed manifest inputs fail closed;
+- synthetic non-religious Arabic UTF-8 and tashkeel round-trip byte-exactly, while normalization, whitespace, punctuation, diacritic, or character damage is detected and rejected under the existing checksum policy;
+- only legal state-machine transitions succeed; blocked, withdrawal, deletion, expiry, cancellation, and supersession paths cannot silently re-enter an earlier active state;
+- checkpoint sequences are monotonic and idempotent; completed replay is suppressed; checksum-conflicting, stale, regressive, or superseded runs fail closed;
+- reconciliation reports missing, extra, duplicate, orphaned, withdrawn, count, locator, checksum, attribution, provenance, retention, and license mismatches without making publication eligible;
+- synthetic rollback and disposable-staging behavior leaves no canonical row, provider payload, or mixed-version state;
+- attribution and provenance metadata pass through losslessly as opaque values without invented wording or provider semantics;
+- injected transient, timeout, sustained-failure, and HTTP 429 responses prove bounded retry/backoff and terminal blocking without any network access;
+- no endpoint, credential field, real resource identifier, provider response shape, real Quran content, or religious fixture is added or frozen;
+- `npm run quran:import:verify`, the synthetic `npm run quran:import:dry-run`, focused tests, `npm test`, full `npm run verify`, Prettier, and `git diff --check` pass; and
+- the changed-file list is contained exactly within this unit's allowed files.
+
+**Dependency and handoff:** M5.1 and the M5.2 architecture contract are complete, and REG-0009 records the non-commercial intended-use decision. Credential rotation may remain pending throughout M5.2A because this unit authorizes no access or fetch. Completing M5.2A does not satisfy the provider credential, legal/license, exact source-selection, scholarly, provider dry-run, or production activation gate. The next external dependency remains rotated Quran.Foundation credentials plus confirmed server-side Content API environment, access, and scope; no authenticated action may begin until that dependency is separately satisfied. M6 remains blocked on `M5 Quran Import Activated`.
+
 ### M5.2 acceptance gates
 
 Separated and sequential; passing one does not imply the next passes:
