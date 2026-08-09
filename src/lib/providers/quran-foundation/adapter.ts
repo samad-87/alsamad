@@ -19,10 +19,67 @@ import {
   type QuranResourceType,
   type ValidationResult,
   type WithdrawalOrDeletionSignal,
+  RetryExhaustedError,
 } from "../../quran/import/contracts";
 import type { QuranFoundationAdapterConfig } from "./types";
 
 const PROVIDER_CODE = "quran-foundation";
+
+export type SyntheticFailureCategory =
+  "timeout" | "rate_limited" | "transient" | "sustained_failure";
+
+export interface RetryPolicy {
+  readonly maxAttempts: number;
+  readonly baseDelayMs: number;
+  readonly maxDelayMs: number;
+}
+
+export interface RetryEvidence<T> {
+  readonly value: T;
+  readonly attempts: number;
+  readonly delaysMs: readonly number[];
+}
+
+/** Executes only an injected operation. This helper owns no URL or network client. */
+export async function executeInjectedWithRetry<T>(
+  operation: (attempt: number) => Promise<T>,
+  classify: (error: unknown) => SyntheticFailureCategory,
+  policy: RetryPolicy,
+  wait: (delayMs: number) => Promise<void> = async () => undefined,
+): Promise<RetryEvidence<T>> {
+  if (
+    !Number.isSafeInteger(policy.maxAttempts) ||
+    policy.maxAttempts < 1 ||
+    policy.maxAttempts > 10 ||
+    !Number.isFinite(policy.baseDelayMs) ||
+    policy.baseDelayMs < 0 ||
+    !Number.isFinite(policy.maxDelayMs) ||
+    policy.maxDelayMs < policy.baseDelayMs
+  ) {
+    throw new Error("retry policy must be finite, non-negative, and bounded");
+  }
+  const delaysMs: number[] = [];
+  let lastCategory: SyntheticFailureCategory = "sustained_failure";
+  for (let attempt = 1; attempt <= policy.maxAttempts; attempt += 1) {
+    try {
+      return { value: await operation(attempt), attempts: attempt, delaysMs };
+    } catch (error) {
+      lastCategory = classify(error);
+      if (
+        attempt === policy.maxAttempts ||
+        lastCategory === "sustained_failure"
+      )
+        break;
+      const delay = Math.min(
+        policy.baseDelayMs * 2 ** (attempt - 1),
+        policy.maxDelayMs,
+      );
+      delaysMs.push(delay);
+      await wait(delay);
+    }
+  }
+  throw new RetryExhaustedError(lastCategory);
+}
 
 function isNonBlank(value: unknown): value is string {
   return typeof value === "string" && value.trim().length > 0;

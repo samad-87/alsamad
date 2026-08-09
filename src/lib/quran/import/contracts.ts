@@ -252,7 +252,37 @@ export interface ReconciliationResult {
   readonly unmatchedRecords: readonly string[];
   readonly duplicateRecords: readonly string[];
   readonly checksumDrift: readonly ChecksumDriftEntry[];
+  readonly mismatchCategories: readonly ReconciliationMismatchCategory[];
   readonly publicationEligible: false;
+}
+
+export type ReconciliationMismatchCategory =
+  | "missing"
+  | "extra"
+  | "duplicate"
+  | "orphaned"
+  | "withdrawn"
+  | "count"
+  | "locator"
+  | "checksum"
+  | "attribution"
+  | "provenance"
+  | "retention"
+  | "license";
+
+export interface OpaqueResourceMetadata {
+  readonly attribution: unknown;
+  readonly provenance: unknown;
+}
+
+export interface ImportAuditEvent {
+  readonly runId: string;
+  readonly manifestChecksum: string;
+  readonly eventCategory: string;
+  readonly outcome: "succeeded" | "blocked" | "failed";
+  readonly counts: Readonly<Record<string, number>>;
+  readonly durationMs: number;
+  readonly errorCategory: string | null;
 }
 
 export interface WithdrawalOrDeletionSignal {
@@ -440,6 +470,38 @@ export class CanonicalIdentityViolationError extends ImportHarnessError {
     super(
       "a provider identity must never be converted directly into an ALSAMAD canonical UUID",
       "canonical_identity_violation",
+    );
+  }
+}
+
+export class ChecksumVerificationError extends ImportHarnessError {
+  constructor(category: "malformed" | "mismatch") {
+    super(
+      `checksum verification failed: ${category}`,
+      "checksum_verification_error",
+    );
+  }
+}
+
+export class ImportRunTerminalError extends ImportHarnessError {
+  constructor(
+    runKey: string,
+    category: "cancelled" | "completed" | "superseded",
+  ) {
+    super(
+      `import run "${runKey}" is terminal: ${category}`,
+      "import_run_terminal",
+    );
+  }
+}
+
+export class RetryExhaustedError extends ImportHarnessError {
+  constructor(
+    category: "timeout" | "rate_limited" | "transient" | "sustained_failure",
+  ) {
+    super(
+      `synthetic operation blocked after bounded retries: ${category}`,
+      "retry_exhausted",
     );
   }
 }

@@ -15,6 +15,7 @@ import {
   type ImportManifest,
   type ImportMode,
   type ImportState,
+  type ImportAuditEvent,
   type LicenseDecision,
   LegalDecisionBlockedError,
   type ManifestDecisionsInput,
@@ -27,6 +28,7 @@ import {
   type RetentionDecision,
   type SelectedCanonicalTarget,
   type WithdrawalDeletionStatus,
+  ChecksumVerificationError,
   isDecisionApproved,
 } from "./contracts";
 
@@ -44,6 +46,17 @@ const SECRET_MARKERS: readonly string[] = [
   "client_secret",
   "private_key",
 ];
+const CONTRACT_TOKEN_FIELDS = new Set(["lastCheckpointToken"]);
+
+const ALLOWED_ENVIRONMENTS = new Set<ProviderEnvironment>([
+  "sandbox",
+  "staging",
+]);
+const ALLOWED_IMPORT_MODES = new Set<ImportMode>([
+  "full",
+  "incremental",
+  "correction",
+]);
 
 /**
  * Manifests may only request states at or before the license gate while any
@@ -109,6 +122,23 @@ function sha256Hex(value: string): string {
   return createHash("sha256").update(value, "utf8").digest("hex");
 }
 
+/** SHA-256 over exact bytes; no Unicode normalization or text transformation. */
+export function sha256Bytes(value: Uint8Array): string {
+  return createHash("sha256").update(value).digest("hex");
+}
+
+export function verifyExactBytes(
+  value: Uint8Array,
+  expectedChecksum: string,
+): void {
+  if (!SHA256_HEX_PATTERN.test(expectedChecksum)) {
+    throw new ChecksumVerificationError("malformed");
+  }
+  if (sha256Bytes(value) !== expectedChecksum) {
+    throw new ChecksumVerificationError("mismatch");
+  }
+}
+
 function findSecretField(value: unknown, path = ""): string | null {
   if (typeof value === "string") {
     const lower = value.toLowerCase();
@@ -128,6 +158,13 @@ function findSecretField(value: unknown, path = ""): string | null {
   }
   if (value !== null && typeof value === "object") {
     for (const [key, nested] of Object.entries(value)) {
+      const lowerKey = key.toLowerCase();
+      if (
+        !CONTRACT_TOKEN_FIELDS.has(key) &&
+        SECRET_MARKERS.some((marker) => lowerKey.includes(marker.trim()))
+      ) {
+        return path ? `${path}.${key}` : key;
+      }
       const found = findSecretField(nested, path ? `${path}.${key}` : key);
       if (found) return found;
     }
@@ -197,6 +234,10 @@ function requireNonBlank(value: string, field: string): void {
 export function buildImportManifest(
   input: BuildImportManifestInput,
 ): ImportManifest {
+  const secretInput = findSecretField(input);
+  if (secretInput) {
+    throw new ManifestSecretFieldRejectedError(secretInput);
+  }
   requireNonBlank(input.manifestId, "manifestId");
   if (!UUID_PATTERN.test(input.manifestId)) {
     throw new ManifestValidationError(
@@ -207,9 +248,25 @@ export function buildImportManifest(
   if (input.providerCode !== input.providerCode.toLowerCase()) {
     throw new ManifestValidationError("providerCode must be lowercase");
   }
-  if (input.providerEnvironment === "production") {
+  if (!ALLOWED_ENVIRONMENTS.has(input.providerEnvironment)) {
     throw new ManifestValidationError(
       "M5.2 authorizes only sandbox or staging manifests, never production",
+    );
+  }
+  requireNonBlank(input.providerResourceId, "providerResourceId");
+  requireNonBlank(input.providerResourceVersion, "providerResourceVersion");
+  if (!ALLOWED_IMPORT_MODES.has(input.importMode)) {
+    throw new ManifestValidationError("importMode is not recognized");
+  }
+  if (!Number.isFinite(Date.parse(input.requestedAt))) {
+    throw new ManifestValidationError("requestedAt must be an ISO timestamp");
+  }
+  if (
+    input.fetchedAt != null &&
+    !Number.isFinite(Date.parse(input.fetchedAt))
+  ) {
+    throw new ManifestValidationError(
+      "fetchedAt must be an ISO timestamp when present",
     );
   }
   if (!SHA256_HEX_PATTERN.test(input.sourceChecksum)) {
@@ -233,6 +290,34 @@ export function buildImportManifest(
   requireNonBlank(input.processIdentity, "processIdentity");
   requireNonBlank(input.softwareVersion, "softwareVersion");
   requireNonBlank(input.sourceEndpointIdentity, "sourceEndpointIdentity");
+
+  for (const [name, counts] of [
+    ["expectedCounts", input.expectedCounts],
+    ["actualCounts", input.actualCounts],
+  ] as const) {
+    for (const [key, count] of Object.entries(counts ?? {})) {
+      if (
+        key.trim().length === 0 ||
+        !Number.isSafeInteger(count) ||
+        count < 0
+      ) {
+        throw new ManifestValidationError(
+          `${name} must contain non-negative integer counts with non-blank keys`,
+        );
+      }
+    }
+  }
+  const retention = input.decisions.retention;
+  if (
+    (retention.policy === "time_limited" &&
+      (!Number.isSafeInteger(retention.retentionDays) ||
+        (retention.retentionDays ?? 0) < 1)) ||
+    (retention.policy !== "time_limited" && retention.retentionDays !== null)
+  ) {
+    throw new ManifestValidationError(
+      "retention policy and retentionDays are inconsistent",
+    );
+  }
 
   const legalGate = evaluateLegalGate(input.decisions);
   if (legalGate.blocked && !PRE_LEGAL_GATE_STATES.has(input.status)) {
@@ -292,6 +377,38 @@ export function buildImportManifest(
 export function verifyManifestChecksum(manifest: ImportManifest): boolean {
   const { manifestChecksum: storedChecksum, ...rest } = manifest;
   return computeManifestChecksum(rest) === storedChecksum;
+}
+
+/** Redacts secret-shaped keys/values without retaining their original value. */
+export function redactEvidence(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(redactEvidence);
+  if (value !== null && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([key, nested]) => [
+        key,
+        findSecretField({ [key]: nested })
+          ? "[REDACTED]"
+          : redactEvidence(nested),
+      ]),
+    );
+  }
+  if (typeof value === "string" && findSecretField(value)) return "[REDACTED]";
+  return value;
+}
+
+export function buildAuditEvent(input: ImportAuditEvent): ImportAuditEvent {
+  requireNonBlank(input.runId, "runId");
+  requireNonBlank(input.eventCategory, "eventCategory");
+  if (!SHA256_HEX_PATTERN.test(input.manifestChecksum)) {
+    throw new ManifestValidationError("audit manifestChecksum is malformed");
+  }
+  if (!Number.isFinite(input.durationMs) || input.durationMs < 0) {
+    throw new ManifestValidationError("audit durationMs must be non-negative");
+  }
+  if (findSecretField(input)) {
+    throw new ManifestSecretFieldRejectedError("auditEvent");
+  }
+  return deepFreeze(structuredClone(input));
 }
 
 export type {

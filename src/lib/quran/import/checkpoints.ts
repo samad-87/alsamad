@@ -12,6 +12,7 @@ import {
   type ImportCheckpoint,
   type ImportRunKeyInput,
   UnknownImportRunError,
+  ImportRunTerminalError,
 } from "./contracts";
 import { canonicalJson } from "./manifest";
 
@@ -37,6 +38,7 @@ interface RunRecord {
   latest: ImportCheckpoint;
   cancelledAt: string | null;
   supersededByRunKey: string | null;
+  completed: boolean;
 }
 
 /**
@@ -63,15 +65,36 @@ export class InMemoryCheckpointStore {
         latest: checkpoint,
         cancelledAt: null,
         supersededByRunKey: null,
+        completed:
+          checkpoint.status === "dry_run_passed" ||
+          checkpoint.status === "dry_run_failed",
       });
       return checkpoint;
     }
 
     const { latest } = existing;
     if (checkpoint.sequence === latest.sequence) {
-      if (checkpoint.rollingChecksum === latest.rollingChecksum) {
+      if (canonicalJson(checkpoint) === canonicalJson(latest)) {
         return latest;
       }
+      throw new CheckpointRegressionError(checkpoint.runKey);
+    }
+    if (existing.cancelledAt)
+      throw new ImportRunTerminalError(checkpoint.runKey, "cancelled");
+    if (existing.supersededByRunKey)
+      throw new ImportRunTerminalError(checkpoint.runKey, "superseded");
+    if (existing.completed)
+      throw new ImportRunTerminalError(checkpoint.runKey, "completed");
+    if (
+      checkpoint.manifestChecksum !== latest.manifestChecksum ||
+      checkpoint.attemptId !== latest.attemptId
+    ) {
+      throw new CheckpointRegressionError(checkpoint.runKey);
+    }
+    if (
+      checkpoint.byteCount < latest.byteCount ||
+      checkpoint.rowCount < latest.rowCount
+    ) {
       throw new CheckpointRegressionError(checkpoint.runKey);
     }
     if (checkpoint.sequence < latest.sequence) {
@@ -79,6 +102,9 @@ export class InMemoryCheckpointStore {
     }
 
     existing.latest = checkpoint;
+    existing.completed =
+      checkpoint.status === "dry_run_passed" ||
+      checkpoint.status === "dry_run_failed";
     return checkpoint;
   }
 

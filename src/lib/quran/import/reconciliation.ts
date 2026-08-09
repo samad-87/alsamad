@@ -17,6 +17,8 @@ import {
   type ReconciliationResult,
   type RetentionDecision,
   type WithdrawalOrDeletionSignal,
+  type OpaqueResourceMetadata,
+  type ReconciliationMismatchCategory,
   isDecisionApproved,
 } from "./contracts";
 
@@ -55,6 +57,33 @@ export interface ReconciliationInput {
   readonly attribution: AttributionDecision;
   readonly retention: RetentionDecision;
   readonly retentionCompliance?: RetentionComplianceCheck;
+  readonly expectedMetadata?: OpaqueResourceMetadata;
+  readonly actualMetadata?: OpaqueResourceMetadata;
+}
+
+/** In-memory disposable staging: commit is intentionally impossible in M5.2A. */
+export class DisposableImportStaging<T> {
+  private records: T[] = [];
+  private version: string | null = null;
+
+  stage(version: string, records: readonly T[]): void {
+    if (this.version !== null && this.version !== version) {
+      throw new Error("mixed-version staging is prohibited");
+    }
+    this.version = version;
+    this.records.push(...structuredClone(records));
+  }
+
+  snapshot(): readonly T[] {
+    return structuredClone(this.records);
+  }
+
+  rollback(): { readonly discardedCount: number; readonly canonicalWrites: 0 } {
+    const discardedCount = this.records.length;
+    this.records = [];
+    this.version = null;
+    return { discardedCount, canonicalWrites: 0 };
+  }
 }
 
 function providerAliasKey(alias: ProviderResourceIdentity): string {
@@ -67,6 +96,20 @@ export function reconcile(input: ReconciliationInput): ReconciliationResult {
   const unmatchedRecords: string[] = [];
   const duplicateRecords: string[] = [];
   const checksumDrift: ChecksumDriftEntry[] = [];
+  const mismatchCategories = new Set<ReconciliationMismatchCategory>();
+  const block = (
+    category: ReconciliationMismatchCategory,
+    message: string,
+  ): void => {
+    mismatchCategories.add(category);
+    blockingErrors.push(message);
+  };
+  if (
+    input.actualSurahs.length !== input.expectedSurahs.length ||
+    input.actualAyahs.length !== input.expectedAyahs.length
+  ) {
+    mismatchCategories.add("count");
+  }
 
   const expectedSurahByNumber = new Map(
     input.expectedSurahs.map((surah) => [surah.surahNumber, surah]),
@@ -81,7 +124,7 @@ export function reconcile(input: ReconciliationInput): ReconciliationResult {
   for (const [locator, count] of actualSurahLocatorCounts) {
     if (count > 1) {
       duplicateRecords.push(locator);
-      blockingErrors.push(`duplicate canonical locator: ${locator}`);
+      block("duplicate", `duplicate canonical locator: ${locator}`);
     }
   }
 
@@ -91,7 +134,8 @@ export function reconcile(input: ReconciliationInput): ReconciliationResult {
     const expected = expectedSurahByNumber.get(surah.surahNumber);
     if (!expected) {
       unmatchedRecords.push(providerAliasKey(surah.providerAlias));
-      blockingErrors.push(
+      block(
+        "orphaned",
         `orphan provider surah record: ${surah.canonicalLocator}`,
       );
       continue;
@@ -102,12 +146,13 @@ export function reconcile(input: ReconciliationInput): ReconciliationResult {
         expected: expected.checksum,
         actual: surah.checksum,
       });
-      blockingErrors.push(`checksum mismatch for ${surah.canonicalLocator}`);
+      block("checksum", `checksum mismatch for ${surah.canonicalLocator}`);
     }
   }
   for (const expected of input.expectedSurahs) {
     if (!seenSurahNumbers.has(expected.surahNumber)) {
-      blockingErrors.push(
+      block(
+        "missing",
         `missing canonical locator: surah:${expected.surahNumber}`,
       );
     }
@@ -129,7 +174,7 @@ export function reconcile(input: ReconciliationInput): ReconciliationResult {
   for (const [locator, count] of actualAyahLocatorCounts) {
     if (count > 1) {
       duplicateRecords.push(locator);
-      blockingErrors.push(`duplicate canonical locator: ${locator}`);
+      block("duplicate", `duplicate canonical locator: ${locator}`);
     }
   }
 
@@ -155,7 +200,8 @@ export function reconcile(input: ReconciliationInput): ReconciliationResult {
     const expected = expectedAyahByKey.get(key);
     if (!expected) {
       unmatchedRecords.push(providerAliasKey(ayah.providerAlias));
-      blockingErrors.push(
+      block(
+        "orphaned",
         `orphan provider ayah record: ${ayah.canonicalLocator}`,
       );
       continue;
@@ -166,20 +212,22 @@ export function reconcile(input: ReconciliationInput): ReconciliationResult {
         expected: expected.checksum,
         actual: ayah.checksum,
       });
-      blockingErrors.push(`checksum mismatch for ${ayah.canonicalLocator}`);
+      block("checksum", `checksum mismatch for ${ayah.canonicalLocator}`);
     }
   }
   for (const expected of input.expectedAyahs) {
     const key = `${expected.surahNumber}:${expected.ayahNumber}`;
     if (!seenAyahKeys.has(key)) {
-      blockingErrors.push(
+      block(
+        "missing",
         `missing canonical locator: ayah:${expected.surahNumber}:${expected.ayahNumber}`,
       );
     }
   }
   for (const [surahNumber, bucket] of perSurahCounts) {
     if (bucket.expected !== bucket.actual) {
-      blockingErrors.push(
+      block(
+        "count",
         `per-surah ayah count mismatch for surah ${surahNumber}: expected ${bucket.expected}, actual ${bucket.actual}`,
       );
     }
@@ -191,7 +239,8 @@ export function reconcile(input: ReconciliationInput): ReconciliationResult {
   for (let index = 0; index < sortedSequences.length; index += 1) {
     const expectedSequence = index + 1;
     if (sortedSequences[index] !== expectedSequence) {
-      blockingErrors.push(
+      block(
+        "locator",
         `global sequence gap detected at position ${expectedSequence}`,
       );
       break;
@@ -215,14 +264,16 @@ export function reconcile(input: ReconciliationInput): ReconciliationResult {
     );
     for (const surah of input.actualSurahs) {
       if (withdrawnKeys.has(providerAliasKey(surah.providerAlias))) {
-        blockingErrors.push(
+        block(
+          "withdrawn",
           `withdrawn/deleted provider record still present: ${surah.canonicalLocator}`,
         );
       }
     }
     for (const ayah of input.actualAyahs) {
       if (withdrawnKeys.has(providerAliasKey(ayah.providerAlias))) {
-        blockingErrors.push(
+        block(
+          "withdrawn",
           `withdrawn/deleted provider record still present: ${ayah.canonicalLocator}`,
         );
       }
@@ -230,16 +281,18 @@ export function reconcile(input: ReconciliationInput): ReconciliationResult {
   }
 
   if (!isDecisionApproved(input.license.status)) {
-    blockingErrors.push(`license decision incomplete: ${input.license.status}`);
+    block("license", `license decision incomplete: ${input.license.status}`);
   }
   if (!isDecisionApproved(input.attribution.status)) {
-    blockingErrors.push(
+    block(
+      "attribution",
       `attribution decision incomplete: ${input.attribution.status}`,
     );
   }
 
   if (!isDecisionApproved(input.retention.status)) {
-    blockingErrors.push(
+    block(
+      "retention",
       `retention decision incomplete: ${input.retention.status}`,
     );
   } else if (
@@ -252,10 +305,33 @@ export function reconcile(input: ReconciliationInput): ReconciliationResult {
         Date.parse(input.retentionCompliance.fetchedAt)) /
       (1000 * 60 * 60 * 24);
     if (elapsedDays > input.retention.retentionDays) {
-      blockingErrors.push(
+      block(
+        "retention",
         `retention window exceeded: ${elapsedDays.toFixed(2)} days elapsed against a ${input.retention.retentionDays}-day limit`,
       );
     }
+  }
+
+  if (input.expectedMetadata && input.actualMetadata) {
+    if (
+      JSON.stringify(input.expectedMetadata.attribution) !==
+      JSON.stringify(input.actualMetadata.attribution)
+    ) {
+      block("attribution", "opaque attribution metadata mismatch");
+    }
+    if (
+      JSON.stringify(input.expectedMetadata.provenance) !==
+      JSON.stringify(input.actualMetadata.provenance)
+    ) {
+      block("provenance", "opaque provenance metadata mismatch");
+    }
+  }
+
+  if (
+    input.actualSurahs.length > input.expectedSurahs.length ||
+    input.actualAyahs.length > input.expectedAyahs.length
+  ) {
+    mismatchCategories.add("extra");
   }
 
   const metrics: ReconciliationMetrics = {
@@ -278,6 +354,7 @@ export function reconcile(input: ReconciliationInput): ReconciliationResult {
     unmatchedRecords,
     duplicateRecords,
     checksumDrift,
+    mismatchCategories: [...mismatchCategories].sort(),
     publicationEligible: false,
   };
 }
