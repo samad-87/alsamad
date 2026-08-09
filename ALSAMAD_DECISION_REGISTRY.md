@@ -273,3 +273,27 @@ As of 2026-08-08, the M6 architecture decision analysis covering REG-0001–REG-
 **Status:** `DECIDED` (2026-08-08). **ADR reference:** None (Registry-only tier).
 
 **Decision outcome:** `devotional_collection_items` supports ordinary physical `DELETE` for membership changes; no soft-delete column and no membership-history table is introduced. This differs deliberately from the `geographic_areas.is_active` precedent (§5.1.2), because that pattern exists to protect a widely-referenced parent from orphaning dependents, and nothing in the committed schema references `devotional_collection_items` rows by foreign key — it is a leaf table, so physical deletion carries no integrity risk. No committed text requires a durable deletion-history semantic for membership, so none is invented. This outcome becomes normative only once §5.4.3 is authored.
+
+### REG-0009 — M5 Quran.Foundation non-commercial intended-use classification
+
+**Category:** `Roadmap`.
+
+**Summary:** Whether controlled M5 work may proceed under Quran.Foundation's expressly permitted non-commercial terms while broader-platform monetization remains unresolved.
+
+**Committed evidence:** `ALSAMAD_IMPLEMENTATION_ROADMAP.md` Phase 5 requires intended-use, commercial-use, attribution, redistribution, retention, caching, deletion, exit, fallback, source-selection, and approval decisions to pass before provider content may be fetched or imported. `ALSAMAD_SECURITY_ARCHITECTURE.md` sections 9, 20, 28, and 28.1 require religious imports to preserve source, license, edition, checksum, review, publication, correction, withdrawal, secret-handling, retention, and provider-exit controls. The owner decision is based on external Quran.Foundation written guidance retained outside the repository; no private correspondence or credential is reproduced here.
+
+**Affected architecture:** No architecture change. This decision is evidence for the existing non-commercial intended-use boundary under `ALSAMAD_IMPLEMENTATION_ROADMAP.md` Phase 5 and must be referenced by the future exact M5 source decision and import manifest.
+
+**Affected roadmap gates:** `M5 Provider Import Dry Run Verified` and `M5 Quran Import Activated` (both remain blocked; this decision does not independently pass either gate).
+
+**Opened:** 2026-08-09.
+
+**Status:** `DECIDED` (2026-08-09). **ADR reference:** None (Registry-only tier).
+
+**Decision outcome:** On 2026-08-09, the ALSAMAD project owner approved controlled M5 work strictly on a non-commercial basis. The Quran reader remains free. Quran.Foundation content will not be sold, sublicensed, redistributed as a standalone dataset, exposed as a raw API dump, exposed as a separate download catalog, or exposed as a bulk content product. Provider requirements remain binding, including unmodified-content requirements, attribution, metadata preservation, Content Sync obligations where applicable, updates, and deletion/withdrawal obligations.
+
+This decision explicitly does **not** approve ALSAMAD's future broader-platform monetization model, commercial launch using Quran.Foundation content, credentials, exact source/resource selection, manifest creation, provider fetch, dry run, publication, `M5 Provider Import Dry Run Verified`, `M5 Quran Import Activated`, M6, or M7 / Knowledge Engine work. The broader-platform monetization question remains `PENDING` explicit written Quran.Foundation approval.
+
+**Implementation evidence:** None.
+
+**Supersedes / Superseded by:** None.
