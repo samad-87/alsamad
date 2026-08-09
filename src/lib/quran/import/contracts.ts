@@ -123,10 +123,7 @@ export type ImportState =
   | "expired"
   | "superseded";
 
-/**
- * Exact immutable import manifest fields per
- * ALSAMAD_DATABASE_ARCHITECTURE.md section 5.3.10.
- */
+/** Historical v2 combined-manifest contract. Never reinterpret as v3. */
 export interface ImportManifest {
   readonly manifestId: string;
   readonly providerCode: ProviderCode;
@@ -162,8 +159,48 @@ export interface ImportManifest {
   readonly manifestChecksum: string;
 }
 
+export interface ExpectedChecksumMap {
+  readonly [name: string]: string;
+}
+
+export type PolicyObligationValue = string | number | boolean | null;
+
+/** Immutable ARC-002 source/import-authorization contract. */
+export interface SourceImportManifest {
+  readonly manifestId: string;
+  readonly schemaVersion: 3;
+  readonly providerCode: ProviderCode;
+  readonly providerEnvironment: ProviderEnvironment;
+  readonly resourceType: QuranResourceType;
+  readonly providerResourceId: string;
+  readonly providerResourceVersion: string;
+  readonly sourceEndpointIdentity: string;
+  readonly intendedOperation: string;
+  readonly importMode: ImportMode;
+  readonly dryRun: true;
+  readonly selectedCanonicalTarget: SelectedCanonicalTarget;
+  readonly expectedCounts: CountMap;
+  readonly expectedBytes: CountMap;
+  readonly expectedChecksums: ExpectedChecksumMap;
+  readonly licenseDecisionReference: string;
+  readonly retentionDecision: RetentionDecision;
+  readonly attributionDecision: AttributionDecision;
+  readonly applicationDisplayDecision: ApplicationDisplayDecision;
+  readonly commercialUseDecision: CommercialUseDecision;
+  readonly standaloneRedistributionDecision: StandaloneRedistributionDecision;
+  readonly sourceProvenanceReferences: readonly string[];
+  readonly approvalReferences: readonly string[];
+  readonly fallbackExitReferences: readonly string[];
+  readonly adapterContractVersion: string;
+  readonly normalizationContractVersion: string;
+  readonly policyObligations: Readonly<Record<string, PolicyObligationValue>>;
+  /** SHA-256 over every field above and no execution-evidence field. */
+  readonly manifestChecksum: string;
+}
+
 export interface ImportRunKeyInput {
   readonly manifestId: string;
+  readonly manifestChecksum: string;
   readonly manifestSchemaVersion: number;
   readonly providerCode: ProviderCode;
   readonly providerSnapshotVersion: string;
@@ -174,6 +211,7 @@ export interface ImportRunKeyInput {
 
 export interface ImportCheckpoint {
   readonly runKey: string;
+  readonly manifestId: string;
   readonly attemptId: string;
   readonly manifestChecksum: string;
   readonly resourceType: QuranResourceType;
@@ -288,6 +326,51 @@ export interface ImportAuditEvent {
   readonly errorCategory: string | null;
 }
 
+export interface ImportRunTimestamps {
+  readonly requestedAt: string;
+  readonly startedAt: string | null;
+  readonly fetchedAt: string | null;
+  readonly completedAt: string | null;
+}
+
+export interface ImportRetryEvidence {
+  readonly attempts: number;
+  readonly delaysMs: readonly number[];
+  readonly outcome: "not_required" | "succeeded" | "exhausted";
+  readonly failureCategory: string | null;
+}
+
+export interface SafeHttpObservation {
+  readonly status: number | null;
+  readonly etag: string | null;
+  readonly lastModified: string | null;
+}
+
+/** Mutable/append-only execution evidence, never part of a v3 manifest. */
+export interface ImportRunEvidence {
+  readonly manifestId: string;
+  readonly manifestChecksum: string;
+  readonly runId: string;
+  readonly attemptId: string;
+  readonly runKey: string;
+  readonly processIdentity: string;
+  readonly timestamps: ImportRunTimestamps;
+  readonly retryEvidence: ImportRetryEvidence;
+  readonly checkpoints: readonly ImportCheckpoint[];
+  readonly actualCounts: CountMap;
+  readonly observedChecksums: ExpectedChecksumMap;
+  readonly httpObservations: readonly SafeHttpObservation[];
+  readonly stateHistory: readonly StateTransitionRecord[];
+  readonly status: ImportState;
+  readonly failureCategory: string | null;
+  readonly reconciliation: ReconciliationResult;
+  readonly rollbackEvidence: RollbackEvidence;
+  readonly auditEvents: readonly ImportAuditEvent[];
+  readonly evidenceReferences: readonly string[];
+  readonly finalDisposition: "passed" | "failed" | "blocked";
+  readonly reviewDisposition: ScholarlyReviewStatus;
+}
+
 export interface WithdrawalOrDeletionSignal {
   readonly providerResource: ProviderResourceIdentity;
   readonly signalType: "withdrawn" | "deleted";
@@ -338,6 +421,7 @@ export interface StateTransitionRecord {
 }
 
 export interface EvidenceBundle {
+  readonly manifestId: string;
   readonly runKey: string;
   readonly manifestChecksum: string;
   readonly dryRunReport: DryRunReport;

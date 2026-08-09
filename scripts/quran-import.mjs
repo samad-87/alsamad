@@ -9,7 +9,10 @@ import {
   InMemoryCheckpointStore,
   computeImportRunKey,
 } from "../src/lib/quran/import/checkpoints.ts";
-import { buildImportManifest } from "../src/lib/quran/import/manifest.ts";
+import {
+  buildImportRunEvidence,
+  buildSourceImportManifest,
+} from "../src/lib/quran/import/manifest.ts";
 import { reconcile } from "../src/lib/quran/import/reconciliation.ts";
 import { ImportStateMachine } from "../src/lib/quran/import/state-machine.ts";
 
@@ -168,17 +171,15 @@ const actualCountsMap = {
 const requestedAt = clock().toISOString();
 const fetchedAt = clock().toISOString();
 
-const manifest = buildImportManifest({
+const manifest = buildSourceImportManifest({
   manifestId: createId(),
   providerCode: "quran-foundation",
   providerEnvironment: "sandbox",
   resourceType: "ayah",
   providerResourceId: "SYN-RESOURCE-001",
   providerResourceVersion: "synthetic-v1",
-  requestedAt,
-  fetchedAt,
   sourceEndpointIdentity: "internal://synthetic-fixture/quran-foundation/ayahs",
-  sourceChecksum: syntheticChecksum("source-envelope"),
+  intendedOperation: "non-commercial-in-application-dry-run",
   decisions: {
     license: licenseDecision,
     retention: retentionDecision,
@@ -188,13 +189,20 @@ const manifest = buildImportManifest({
     standaloneRedistribution: { status: "denied", intendedUse: false },
   },
   expectedCounts: expectedCountsMap,
-  actualCounts: actualCountsMap,
+  expectedBytes: { source: 128 * expectedAyahs.length },
+  expectedChecksums: { source: syntheticChecksum("source-envelope") },
   importMode: "full",
-  status: "created",
-  processIdentity: "quran-import-cli",
-  softwareVersion: "0.1.0-m5.2",
-  schemaVersion: 2,
-  evidenceReferences: [],
+  schemaVersion: 3,
+  selectedCanonicalTarget: {
+    kind: "edition",
+    reference: "synthetic-target-candidate",
+  },
+  sourceProvenanceReferences: ["synthetic-provenance"],
+  approvalReferences: ["synthetic-approval"],
+  fallbackExitReferences: ["synthetic-exit-policy"],
+  adapterContractVersion: "0.1.0-m5.2",
+  normalizationContractVersion: "synthetic-normalization-v1",
+  policyObligations: { contentSyncRequired: false },
 });
 
 const machine = new ImportStateMachine("created", { now: clock });
@@ -215,13 +223,15 @@ for (const to of [
 const checkpointStore = new InMemoryCheckpointStore();
 const runKey = computeImportRunKey({
   manifestId: manifest.manifestId,
+  manifestChecksum: manifest.manifestChecksum,
   manifestSchemaVersion: manifest.schemaVersion,
   providerCode: manifest.providerCode,
   providerSnapshotVersion: manifest.providerResourceVersion,
   resourceId: manifest.providerResourceId,
   resourceVersion: manifest.providerResourceVersion,
-  adapterVersion: manifest.softwareVersion,
+  adapterVersion: manifest.adapterContractVersion,
 });
+const runId = createId();
 const attemptId = createId();
 const checkpoints = [];
 let sequence = 0;
@@ -230,6 +240,7 @@ for (const record of [...normalizedSurahs, ...normalizedAyahs]) {
   checkpoints.push(
     checkpointStore.advance({
       runKey,
+      manifestId: manifest.manifestId,
       attemptId,
       manifestChecksum: manifest.manifestChecksum,
       resourceType: record.kind === "surah" ? "surah" : "ayah",
@@ -277,8 +288,8 @@ const dryRunReport = {
   },
   expectedCounts: expectedCountsMap,
   actualCounts: actualCountsMap,
-  sourceChecksum: manifest.sourceChecksum,
-  normalizedChecksum: manifest.normalizedChecksum,
+  sourceChecksum: syntheticChecksum("source-envelope"),
+  normalizedChecksum: syntheticChecksum("normalized-envelope"),
   warnings: reconciliation.warnings,
   blockingErrors: reconciliation.blockingErrors,
   reconciliation,
@@ -294,14 +305,42 @@ const dryRunReport = {
   },
 };
 
-const evidenceBundle = {
-  runKey,
+const runEvidence = buildImportRunEvidence(manifest, {
+  manifestId: manifest.manifestId,
   manifestChecksum: manifest.manifestChecksum,
-  dryRunReport,
+  runId,
+  attemptId,
+  runKey,
+  processIdentity: "quran-import-cli",
+  timestamps: {
+    requestedAt,
+    startedAt: requestedAt,
+    fetchedAt,
+    completedAt: clock().toISOString(),
+  },
+  retryEvidence: {
+    attempts: 1,
+    delaysMs: [],
+    outcome: "not_required",
+    failureCategory: null,
+  },
   checkpoints,
+  actualCounts: actualCountsMap,
+  observedChecksums: {
+    source: syntheticChecksum("source-envelope"),
+    normalized: syntheticChecksum("normalized-envelope"),
+  },
+  httpObservations: [],
   stateHistory: machine.history(),
-  generatedAt: clock().toISOString(),
-};
+  status: machine.current(),
+  failureCategory: dryRunPassed ? null : "reconciliation_blocked",
+  reconciliation,
+  rollbackEvidence: dryRunReport.rollbackEvidence,
+  auditEvents: [],
+  evidenceReferences: [],
+  finalDisposition: dryRunPassed ? "passed" : "failed",
+  reviewDisposition: dryRunPassed ? "pending" : "not_started",
+});
 
 console.log("=== ALSAMAD M5.2 Quran Import - Controlled Dry Run ===");
 console.log(`scenario: ${args.scenario}`);
@@ -334,11 +373,11 @@ if (args.out) {
   // Always resolved under the OS temp directory so no evidence file can
   // ever land inside the repository, regardless of the value passed in.
   const outPath = path.join(tmpdir(), path.basename(args.out));
-  writeFileSync(outPath, JSON.stringify(evidenceBundle, null, 2), "utf8");
+  writeFileSync(outPath, JSON.stringify(runEvidence, null, 2), "utf8");
   console.log(`evidence written to: ${outPath}`);
 } else {
   console.log("--- EVIDENCE JSON ---");
-  console.log(JSON.stringify(evidenceBundle, null, 2));
+  console.log(JSON.stringify(runEvidence, null, 2));
 }
 
 process.exitCode = dryRunPassed ? 0 : 1;

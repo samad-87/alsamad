@@ -11,7 +11,10 @@ import {
   LegalDecisionBlockedError,
   ProviderAccessNotAuthorizedError,
 } from "../src/lib/quran/import/contracts.ts";
-import { buildImportManifest } from "../src/lib/quran/import/manifest.ts";
+import {
+  buildSourceImportManifest,
+  verifySourceManifestChecksum,
+} from "../src/lib/quran/import/manifest.ts";
 import { reconcile } from "../src/lib/quran/import/reconciliation.ts";
 import {
   IMPORT_STATES,
@@ -47,25 +50,34 @@ function baseManifestInput(overrides = {}) {
     resourceType: "ayah",
     providerResourceId: "SYN-VERIFY-001",
     providerResourceVersion: "synthetic-v1",
-    requestedAt: FIXED_CLOCK().toISOString(),
-    fetchedAt: FIXED_CLOCK().toISOString(),
     sourceEndpointIdentity: "internal://synthetic-fixture/verify",
-    sourceChecksum: sha256Hex("synthetic-verify-source"),
+    intendedOperation: "non-commercial-in-application-dry-run",
     decisions: approvedDecisions,
+    selectedCanonicalTarget: {
+      kind: "edition",
+      reference: "synthetic-target-candidate",
+    },
+    expectedCounts: { records: 1 },
+    expectedBytes: { source: 128 },
+    expectedChecksums: { source: sha256Hex("synthetic-verify-source") },
     importMode: "full",
-    status: "created",
-    processIdentity: "quran-import-verify",
-    softwareVersion: "0.1.0-m5.2",
-    schemaVersion: 2,
+    adapterContractVersion: "0.1.0-m5.2",
+    normalizationContractVersion: "synthetic-normalization-v1",
+    sourceProvenanceReferences: ["synthetic-provenance"],
+    approvalReferences: ["synthetic-approval"],
+    fallbackExitReferences: ["synthetic-exit-policy"],
+    policyObligations: { contentSyncRequired: false },
+    schemaVersion: 3,
     ...overrides,
   };
 }
 
 // 1. Deterministic manifest checksum for identical input.
-const manifestA = buildImportManifest(baseManifestInput());
-const manifestB = buildImportManifest(baseManifestInput());
+const manifestA = buildSourceImportManifest(baseManifestInput());
+const manifestB = buildSourceImportManifest(baseManifestInput());
 assert.equal(manifestA.manifestChecksum, manifestB.manifestChecksum);
 assert.equal(manifestA.dryRun, true);
+assert.equal(verifySourceManifestChecksum(manifestA), true);
 console.log(
   "PASS M5.2: manifest checksum is deterministic and dryRun is always true",
 );
@@ -73,7 +85,7 @@ console.log(
 // 2. Secret-field rejection.
 assert.throws(
   () =>
-    buildImportManifest(
+    buildSourceImportManifest(
       baseManifestInput({
         sourceEndpointIdentity:
           "internal://synthetic?api_key=should-not-be-here",
@@ -86,9 +98,8 @@ console.log("PASS M5.2: manifest builder rejects secret-like field values");
 // 3. Unknown legal decision blocks progression past the license gate.
 assert.throws(
   () =>
-    buildImportManifest(
+    buildSourceImportManifest(
       baseManifestInput({
-        status: "ready",
         decisions: {
           ...approvedDecisions,
           retention: {
@@ -123,12 +134,13 @@ console.log(
 // 6. Deterministic import run key.
 const runKeyInput = {
   manifestId: manifestA.manifestId,
+  manifestChecksum: manifestA.manifestChecksum,
   manifestSchemaVersion: manifestA.schemaVersion,
   providerCode: manifestA.providerCode,
   providerSnapshotVersion: manifestA.providerResourceVersion,
   resourceId: manifestA.providerResourceId,
   resourceVersion: manifestA.providerResourceVersion,
-  adapterVersion: manifestA.softwareVersion,
+  adapterVersion: manifestA.adapterContractVersion,
 };
 assert.equal(
   computeImportRunKey(runKeyInput),
@@ -140,6 +152,7 @@ console.log("PASS M5.2: import run key is deterministic");
 const store = new InMemoryCheckpointStore();
 const checkpoint = {
   runKey: computeImportRunKey(runKeyInput),
+  manifestId: manifestA.manifestId,
   attemptId: "018f2f2a-0000-7000-8000-000000000002",
   manifestChecksum: manifestA.manifestChecksum,
   resourceType: "ayah",

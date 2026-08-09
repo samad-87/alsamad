@@ -169,6 +169,7 @@ test("exact synthetic Arabic UTF-8 bytes preserve tashkeel and detect every muta
 function checkpoint(sequence, overrides = {}) {
   const runInput = {
     manifestId: randomUUID(),
+    manifestChecksum: sha("manifest"),
     manifestSchemaVersion: 1,
     providerCode: "synthetic-provider",
     providerSnapshotVersion: "synthetic-version",
@@ -178,6 +179,7 @@ function checkpoint(sequence, overrides = {}) {
   };
   return {
     runKey: computeImportRunKey(runInput),
+    manifestId: runInput.manifestId,
     attemptId: randomUUID(),
     manifestChecksum: sha("manifest"),
     resourceType: "ayah",

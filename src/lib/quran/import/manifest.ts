@@ -13,10 +13,14 @@ import {
   type CheckpointMetadata,
   type CommercialUseDecision,
   type CountMap,
+  type ExpectedChecksumMap,
   type ImportManifest,
   type ImportMode,
   type ImportState,
   type ImportAuditEvent,
+  type ImportRunEvidence,
+  type ImportRetryEvidence,
+  type ImportRunTimestamps,
   type LicenseDecision,
   LegalDecisionBlockedError,
   type ManifestDecisionsInput,
@@ -25,6 +29,8 @@ import {
   type ProviderCode,
   type ProviderEnvironment,
   type QuranResourceType,
+  type SafeHttpObservation,
+  type SourceImportManifest,
   type StandaloneRedistributionDecision,
   type RetentionDecision,
   type SelectedCanonicalTarget,
@@ -61,6 +67,7 @@ const ALLOWED_IMPORT_MODES = new Set<ImportMode>([
 
 export const HISTORICAL_MANIFEST_SCHEMA_VERSION = 1 as const;
 export const ARC001_MANIFEST_SCHEMA_VERSION = 2 as const;
+export const ARC002_MANIFEST_SCHEMA_VERSION = 3 as const;
 
 /**
  * Manifests may only request states at or before the license gate while any
@@ -405,6 +412,359 @@ export function buildImportManifest(
 export function verifyManifestChecksum(manifest: ImportManifest): boolean {
   const { manifestChecksum: storedChecksum, ...rest } = manifest;
   return computeManifestChecksum(rest) === storedChecksum;
+}
+
+type SourceManifestFieldsWithoutChecksum = Omit<
+  SourceImportManifest,
+  "manifestChecksum"
+>;
+
+const V3_INPUT_FIELDS = new Set([
+  "manifestId",
+  "schemaVersion",
+  "providerCode",
+  "providerEnvironment",
+  "resourceType",
+  "providerResourceId",
+  "providerResourceVersion",
+  "sourceEndpointIdentity",
+  "intendedOperation",
+  "importMode",
+  "decisions",
+  "selectedCanonicalTarget",
+  "expectedCounts",
+  "expectedBytes",
+  "expectedChecksums",
+  "sourceProvenanceReferences",
+  "approvalReferences",
+  "fallbackExitReferences",
+  "adapterContractVersion",
+  "normalizationContractVersion",
+  "policyObligations",
+]);
+
+export interface BuildSourceImportManifestInput {
+  readonly manifestId: string;
+  readonly schemaVersion: 3;
+  readonly providerCode: ProviderCode;
+  readonly providerEnvironment: ProviderEnvironment;
+  readonly resourceType: QuranResourceType;
+  readonly providerResourceId: string;
+  readonly providerResourceVersion: string;
+  readonly sourceEndpointIdentity: string;
+  readonly intendedOperation: string;
+  readonly importMode: ImportMode;
+  readonly decisions: ManifestDecisionsInput;
+  readonly selectedCanonicalTarget: SelectedCanonicalTarget;
+  readonly expectedCounts?: CountMap;
+  readonly expectedBytes?: CountMap;
+  readonly expectedChecksums?: ExpectedChecksumMap;
+  readonly sourceProvenanceReferences?: readonly string[];
+  readonly approvalReferences?: readonly string[];
+  readonly fallbackExitReferences?: readonly string[];
+  readonly adapterContractVersion: string;
+  readonly normalizationContractVersion: string;
+  readonly policyObligations?: Readonly<
+    Record<string, string | number | boolean | null>
+  >;
+}
+
+function requireUuidV7(value: string, field: string): void {
+  if (
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+      value,
+    )
+  ) {
+    throw new ManifestValidationError(`${field} must be a UUIDv7 identifier`);
+  }
+}
+
+function validateCountMap(value: CountMap, field: string): void {
+  if (Object.keys(value).length > 256) {
+    throw new ManifestValidationError(`${field} exceeds its bounded size`);
+  }
+  for (const [key, count] of Object.entries(value)) {
+    if (key.trim().length === 0 || !Number.isSafeInteger(count) || count < 0) {
+      throw new ManifestValidationError(
+        `${field} must contain non-negative integer values with non-blank keys`,
+      );
+    }
+  }
+}
+
+function validateReferences(values: readonly string[], field: string): void {
+  if (values.length > 64) {
+    throw new ManifestValidationError(`${field} exceeds its bounded size`);
+  }
+  for (const value of values) requireNonBlank(value, field);
+}
+
+function computeSourceManifestChecksum(
+  fields: SourceManifestFieldsWithoutChecksum,
+): string {
+  return sha256Hex(canonicalJson(fields));
+}
+
+/** Builds the immutable, pre-execution ARC-002 source manifest. */
+export function buildSourceImportManifest(
+  input: BuildSourceImportManifestInput,
+): SourceImportManifest {
+  for (const key of Object.keys(input)) {
+    if (!V3_INPUT_FIELDS.has(key)) {
+      throw new ManifestValidationError(
+        `v3 source manifest field "${key}" is not authorized`,
+      );
+    }
+  }
+  const secretInput = findSecretField(input);
+  if (secretInput) throw new ManifestSecretFieldRejectedError(secretInput);
+  if (input.schemaVersion !== ARC002_MANIFEST_SCHEMA_VERSION) {
+    throw new ManifestValidationError(
+      "v3 source manifest requires schemaVersion 3",
+    );
+  }
+  requireUuidV7(input.manifestId, "manifestId");
+  requireNonBlank(input.providerCode, "providerCode");
+  if (input.providerCode !== input.providerCode.toLowerCase()) {
+    throw new ManifestValidationError("providerCode must be lowercase");
+  }
+  if (!ALLOWED_ENVIRONMENTS.has(input.providerEnvironment)) {
+    throw new ManifestValidationError(
+      "M5.2 authorizes only sandbox or staging manifests, never production",
+    );
+  }
+  requireNonBlank(input.providerResourceId, "providerResourceId");
+  requireNonBlank(input.providerResourceVersion, "providerResourceVersion");
+  requireNonBlank(input.sourceEndpointIdentity, "sourceEndpointIdentity");
+  requireNonBlank(input.intendedOperation, "intendedOperation");
+  requireNonBlank(
+    input.selectedCanonicalTarget.reference,
+    "selectedCanonicalTarget.reference",
+  );
+  requireNonBlank(input.adapterContractVersion, "adapterContractVersion");
+  requireNonBlank(
+    input.normalizationContractVersion,
+    "normalizationContractVersion",
+  );
+  if (!ALLOWED_IMPORT_MODES.has(input.importMode)) {
+    throw new ManifestValidationError("importMode is not recognized");
+  }
+  validateCountMap(input.expectedCounts ?? {}, "expectedCounts");
+  validateCountMap(input.expectedBytes ?? {}, "expectedBytes");
+  for (const [key, checksum] of Object.entries(input.expectedChecksums ?? {})) {
+    if (!key.trim() || !SHA256_HEX_PATTERN.test(checksum)) {
+      throw new ManifestValidationError(
+        "expectedChecksums requires non-blank keys and lowercase SHA-256 values",
+      );
+    }
+  }
+  const retention = input.decisions.retention;
+  if (
+    (retention.policy === "time_limited" &&
+      (!Number.isSafeInteger(retention.retentionDays) ||
+        (retention.retentionDays ?? 0) < 1)) ||
+    (retention.policy !== "time_limited" && retention.retentionDays !== null)
+  ) {
+    throw new ManifestValidationError(
+      "retention policy and retentionDays are inconsistent",
+    );
+  }
+  const legalGate = evaluateLegalGate(input.decisions);
+  if (legalGate.blocked) throw new LegalDecisionBlockedError(legalGate.reasons);
+  for (const [values, field] of [
+    [input.sourceProvenanceReferences ?? [], "sourceProvenanceReferences"],
+    [input.approvalReferences ?? [], "approvalReferences"],
+    [input.fallbackExitReferences ?? [], "fallbackExitReferences"],
+  ] as const) {
+    validateReferences(values, field);
+  }
+  const obligations = input.policyObligations ?? {};
+  if (Object.keys(obligations).length > 64) {
+    throw new ManifestValidationError(
+      "policyObligations exceeds its bounded size",
+    );
+  }
+  for (const key of Object.keys(obligations))
+    requireNonBlank(key, "policyObligations key");
+
+  const fields: SourceManifestFieldsWithoutChecksum = {
+    manifestId: input.manifestId,
+    schemaVersion: ARC002_MANIFEST_SCHEMA_VERSION,
+    providerCode: input.providerCode,
+    providerEnvironment: input.providerEnvironment,
+    resourceType: input.resourceType,
+    providerResourceId: input.providerResourceId,
+    providerResourceVersion: input.providerResourceVersion,
+    sourceEndpointIdentity: input.sourceEndpointIdentity,
+    intendedOperation: input.intendedOperation,
+    importMode: input.importMode,
+    dryRun: true,
+    selectedCanonicalTarget: input.selectedCanonicalTarget,
+    expectedCounts: input.expectedCounts ?? {},
+    expectedBytes: input.expectedBytes ?? {},
+    expectedChecksums: input.expectedChecksums ?? {},
+    licenseDecisionReference: input.decisions.license.licenseReference,
+    retentionDecision: input.decisions.retention,
+    attributionDecision: input.decisions.attribution,
+    applicationDisplayDecision: input.decisions.applicationDisplay,
+    commercialUseDecision: input.decisions.commercialUse,
+    standaloneRedistributionDecision: input.decisions.standaloneRedistribution,
+    sourceProvenanceReferences: input.sourceProvenanceReferences ?? [],
+    approvalReferences: input.approvalReferences ?? [],
+    fallbackExitReferences: input.fallbackExitReferences ?? [],
+    adapterContractVersion: input.adapterContractVersion,
+    normalizationContractVersion: input.normalizationContractVersion,
+    policyObligations: obligations,
+  };
+  return deepFreeze({
+    ...structuredClone(fields),
+    manifestChecksum: computeSourceManifestChecksum(fields),
+  });
+}
+
+export function verifySourceManifestChecksum(
+  manifest: SourceImportManifest,
+): boolean {
+  if (manifest.schemaVersion !== ARC002_MANIFEST_SCHEMA_VERSION) return false;
+  const { manifestChecksum, ...fields } = manifest;
+  return computeSourceManifestChecksum(fields) === manifestChecksum;
+}
+
+export interface BuildImportRunEvidenceInput {
+  readonly manifestId: string;
+  readonly manifestChecksum: string;
+  readonly runId: string;
+  readonly attemptId: string;
+  readonly runKey: string;
+  readonly processIdentity: string;
+  readonly timestamps: ImportRunTimestamps;
+  readonly retryEvidence: ImportRetryEvidence;
+  readonly checkpoints?: ImportRunEvidence["checkpoints"];
+  readonly actualCounts?: CountMap;
+  readonly observedChecksums?: ExpectedChecksumMap;
+  readonly httpObservations?: readonly SafeHttpObservation[];
+  readonly stateHistory?: ImportRunEvidence["stateHistory"];
+  readonly status: ImportState;
+  readonly failureCategory?: string | null;
+  readonly reconciliation: ImportRunEvidence["reconciliation"];
+  readonly rollbackEvidence: ImportRunEvidence["rollbackEvidence"];
+  readonly auditEvents?: readonly ImportAuditEvent[];
+  readonly evidenceReferences?: readonly string[];
+  readonly finalDisposition: ImportRunEvidence["finalDisposition"];
+  readonly reviewDisposition: ImportRunEvidence["reviewDisposition"];
+}
+
+const RUN_EVIDENCE_INPUT_FIELDS = new Set([
+  "manifestId",
+  "manifestChecksum",
+  "runId",
+  "attemptId",
+  "runKey",
+  "processIdentity",
+  "timestamps",
+  "retryEvidence",
+  "checkpoints",
+  "actualCounts",
+  "observedChecksums",
+  "httpObservations",
+  "stateHistory",
+  "status",
+  "failureCategory",
+  "reconciliation",
+  "rollbackEvidence",
+  "auditEvents",
+  "evidenceReferences",
+  "finalDisposition",
+  "reviewDisposition",
+]);
+
+/** Builds payload-free execution evidence linked to one immutable manifest. */
+export function buildImportRunEvidence(
+  manifest: SourceImportManifest,
+  input: BuildImportRunEvidenceInput,
+): ImportRunEvidence {
+  for (const key of Object.keys(input)) {
+    if (!RUN_EVIDENCE_INPUT_FIELDS.has(key)) {
+      throw new ManifestValidationError(
+        `run evidence field "${key}" is not authorized`,
+      );
+    }
+  }
+  if (
+    input.manifestId !== manifest.manifestId ||
+    input.manifestChecksum !== manifest.manifestChecksum
+  ) {
+    throw new ManifestValidationError(
+      "run evidence must bind to the exact manifestId and manifestChecksum",
+    );
+  }
+  for (const field of [
+    "runId",
+    "attemptId",
+    "runKey",
+    "processIdentity",
+  ] as const) {
+    requireNonBlank(input[field], field);
+  }
+  requireUuidV7(input.runId, "runId");
+  requireUuidV7(input.attemptId, "attemptId");
+  if (!SHA256_HEX_PATTERN.test(input.runKey)) {
+    throw new ManifestValidationError("runKey must be a SHA-256 value");
+  }
+  for (const [name, value] of Object.entries(input.timestamps)) {
+    if (value != null && !Number.isFinite(Date.parse(value))) {
+      throw new ManifestValidationError(`${name} must be an ISO timestamp`);
+    }
+  }
+  validateCountMap(input.actualCounts ?? {}, "actualCounts");
+  for (const [key, checksum] of Object.entries(input.observedChecksums ?? {})) {
+    if (!key.trim() || !SHA256_HEX_PATTERN.test(checksum)) {
+      throw new ManifestValidationError(
+        "observedChecksums requires non-blank keys and lowercase SHA-256 values",
+      );
+    }
+  }
+  if (
+    !Number.isSafeInteger(input.retryEvidence.attempts) ||
+    input.retryEvidence.attempts < 0 ||
+    input.retryEvidence.delaysMs.length > 64 ||
+    input.retryEvidence.delaysMs.some(
+      (delay) => !Number.isFinite(delay) || delay < 0,
+    )
+  ) {
+    throw new ManifestValidationError(
+      "retry evidence is not bounded and valid",
+    );
+  }
+  if ((input.checkpoints?.length ?? 0) > 10_000) {
+    throw new ManifestValidationError("checkpoints exceed their bounded size");
+  }
+  for (const checkpoint of input.checkpoints ?? []) {
+    if (
+      checkpoint.runKey !== input.runKey ||
+      checkpoint.manifestId !== manifest.manifestId ||
+      checkpoint.manifestChecksum !== manifest.manifestChecksum ||
+      checkpoint.attemptId !== input.attemptId
+    ) {
+      throw new ManifestValidationError(
+        "checkpoint does not match its run/attempt/manifest linkage",
+      );
+    }
+  }
+  const evidence: ImportRunEvidence = {
+    ...input,
+    checkpoints: input.checkpoints ?? [],
+    actualCounts: input.actualCounts ?? {},
+    observedChecksums: input.observedChecksums ?? {},
+    httpObservations: input.httpObservations ?? [],
+    stateHistory: input.stateHistory ?? [],
+    failureCategory: input.failureCategory ?? null,
+    auditEvents: input.auditEvents ?? [],
+    evidenceReferences: input.evidenceReferences ?? [],
+  };
+  const secretField = findSecretField(evidence);
+  if (secretField) throw new ManifestSecretFieldRejectedError(secretField);
+  return deepFreeze(structuredClone(evidence));
 }
 
 /** Redacts secret-shaped keys/values without retaining their original value. */

@@ -18,12 +18,13 @@ import { canonicalJson } from "./manifest";
 
 /**
  * Deterministic import run key: SHA-256 of
- * (manifestId, manifestSchemaVersion, providerCode, providerSnapshotVersion,
- * resourceId, resourceVersion, adapterVersion).
+ * (manifestId, manifestChecksum, manifestSchemaVersion, providerCode,
+ * providerSnapshotVersion, resourceId, resourceVersion, adapterVersion).
  */
 export function computeImportRunKey(input: ImportRunKeyInput): string {
   const canonical = canonicalJson({
     manifestId: input.manifestId,
+    manifestChecksum: input.manifestChecksum,
     manifestSchemaVersion: input.manifestSchemaVersion,
     providerCode: input.providerCode,
     providerSnapshotVersion: input.providerSnapshotVersion,
@@ -86,6 +87,7 @@ export class InMemoryCheckpointStore {
     if (existing.completed)
       throw new ImportRunTerminalError(checkpoint.runKey, "completed");
     if (
+      checkpoint.manifestId !== latest.manifestId ||
       checkpoint.manifestChecksum !== latest.manifestChecksum ||
       checkpoint.attemptId !== latest.attemptId
     ) {

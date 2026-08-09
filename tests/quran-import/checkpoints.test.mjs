@@ -17,6 +17,7 @@ function sha256Hex(value) {
 
 const runKeyInput = {
   manifestId: "018f2f2a-0000-7000-8000-000000000020",
+  manifestChecksum: sha256Hex("synthetic-manifest"),
   manifestSchemaVersion: 1,
   providerCode: "quran-foundation",
   providerSnapshotVersion: "synthetic-v1",
@@ -28,6 +29,7 @@ const runKeyInput = {
 function checkpointAt(sequence, overrides = {}) {
   return {
     runKey: computeImportRunKey(runKeyInput),
+    manifestId: runKeyInput.manifestId,
     attemptId: "018f2f2a-0000-7000-8000-000000000021",
     manifestChecksum: sha256Hex("synthetic-manifest"),
     resourceType: "ayah",
