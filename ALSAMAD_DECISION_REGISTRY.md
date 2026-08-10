@@ -160,6 +160,7 @@ As of 2026-08-08, the M6 architecture decision analysis covering REG-0001–REG-
 | REG-0010 | In-application display and standalone redistribution rights separation                     | Database        | DECIDED | Registry + ADR (`ADR-0003`, Accepted)                                     |
 | REG-0011 | Immutable source import manifest and execution evidence separation                         | Database        | DECIDED | Registry + ADR (`ADR-0004`, Accepted)                                     |
 | REG-0012 | License-version immutability and historical license evidence                               | Database        | DECIDED | Registry + ADR (`ADR-0005`, Accepted)                                     |
+| REG-0013 | Atomic Quran release selector and publication consistency                                  | Database        | DECIDED | Registry + ADR (`ADR-0006`, Accepted)                                     |
 
 ### REG-0001 — Editorial General Dua placement in the devotional physical model
 
@@ -376,6 +377,36 @@ Historical v1 and v2 manifests retain their original schemas, canonical bytes, a
 **Decision outcome:** A `licenses` row represents exactly one immutable provider/legal revision once first relied upon; `provider_code` + `license_key` + `version` continues to identify that revision under the existing unique-constraint identity model. Once a license row's `status` first reaches `active`, its rights-bearing fields — `rights_scope`, `attribution_text`, `terms_url`, `retention_policy`, `retention_days`, `in_application_display_allowed`, `standalone_redistribution_allowed`, `derivatives_allowed`, `effective_until` — become immutable alongside the already-frozen identity tuple. Only `status` and `updated_at` may still change, preserving existing expiry/revocation/withdrawal behavior without rewriting historical legal content. A later legal/provider revision requires a new license row under a new `version`, never an edit to an existing active row. `SourceImportManifest` v3's `licenseDecisionReference` and attribution reference must be non-blank and must identify the exact immutable license evidence relied upon; this is a validation tightening only and changes no manifest schema, checksum, or decision-snapshot behavior already established by `ADR-0004`.
 
 No new table is required; the Release 1 catalog remains frozen at 30 tables. Migration `0006` is reserved for this correction's implementation; M6's future devotional migration placeholder correspondingly moves from `0006` to `0007`. This decision does not authorize migration `0006` itself, provider access, credentials, content fetch, a real-resource manifest, a provider dry run, publication, `M5 Provider Import Dry Run Verified`, `M5 Quran Import Activated`, ARC-005/006, M6, or M7.
+
+**Implementation evidence:** None. Implementation is not marked complete by this entry.
+
+**Supersedes / Superseded by:** None.
+
+### REG-0013 — Atomic Quran release selector and publication consistency
+
+**Category:** `Database`.
+
+**Summary:** Which already-published `editions` row (Arabic/script rendering) and which already-approved-and-published `quran_translation_editions` row (per locale) are served by default when more than one legitimately exists; whether Arabic edition activation and translation edition activation are one selector domain or two independent ones; and how the selector is added without a new Release 1 table.
+
+**Committed evidence:** `ALSAMAD_DATABASE_ARCHITECTURE.md` §5.3.9 ("M5 activation must use a stable release/version selector outside the canonical table count so readers cannot observe a mixed provider version") states the requirement without specifying its physical shape; §5.2.4 and §5.3.6 carry `publication_state`/`review_status` but no default/active designation; §5.3.3–§5.3.7 establish that canonical `quran_ayahs`/`quran_surahs` identity is edition-independent and singular per the one approved Quran `work_id`, with both `quran_ayah_texts` and `quran_translation_texts` keying off `ayah_id` rather than a specific Arabic edition; `ALSAMAD_IMPLEMENTATION_ROADMAP.md` Phase 1 capability checklist authorizes plural "Approved Quran text and script editions" and "Selected approved translations." `drizzle/0007_m5_publication_trigger_table_branching.sql` (AUD-001, committed at HEAD `5a901ec`) satisfies the AUD-001 precondition recorded in the Roadmap ("must be completed before ARC-005 implementation begins").
+
+**Affected architecture:** `ALSAMAD_DATABASE_ARCHITECTURE.md` §5.2.4, §5.3.6, and new §5.3.12 (release selector and activation).
+
+**Affected roadmap gate:** New `ARC-005` authorization under Phase 5; does not itself pass `M5 Provider Import Dry Run Verified` or `M5 Quran Import Activated`.
+
+**Opened:** 2026-08-10.
+
+**Tier rationale:** A fundamental frozen-data-model addition governing which canonical religious content a guest-first reader is served by default; reversal after real published editions/translations exist and readers depend on a recorded default would be data-shaping and content-integrity sensitive — an ADR-threshold example matching the reasoning already applied in `ADR-0003`, `ADR-0004`, and `ADR-0005`.
+
+**Status:** `DECIDED` (2026-08-10). **ADR reference:** `ADR-0006` (Accepted).
+
+**Decision outcome:** `editions` and `quran_translation_editions` each gain one additive, non-identity `is_active_release boolean NOT NULL DEFAULT false` column. At most one `editions` row per `work_id` may be active while `published`, and at most one `quran_translation_editions` row per `locale_id` may be active while `approved`, each enforced by its own `PostgreSQL` partial unique index — two independent selector domains, never coupled, because canonical Quran structure is edition-independent and translations never need to match a specific Arabic edition. A `CHECK` constraint on each table ties `is_active_release` to the corresponding published/approved state, so withdrawal cannot leave a withdrawn row marked active. Activation and rollback are the same two-statement, single-transaction primitive (clear the prior active row, then set the new one); a failed switch leaves the prior state unchanged. Zero-active is a valid, honestly-reported unavailable state, never silently resolved by an implicit "most recent" fallback.
+
+`is_active_release` is a **default-selection signal, not independent proof of current servability**: it cannot see the backing license's `status`/`effective_until`, a translation's backing generic edition state, or `locales.enabled`, and license time-expiry involves no write at all. Every public read must therefore re-derive the full live eligibility chain at read time, in the same bounded query that resolves the active candidate; an active-but-now-ineligible candidate fails closed exactly like a zero-active selector, with no silent fallback. Governed activation still validates full eligibility at the moment of activation, but that is a point-in-time gate, not a standing guarantee. Upstream safety operations (license revocation/expiry, generic-edition withdrawal, locale disablement) remain unblocked and unchanged; no cross-layer trigger is added to `licenses`/`editions` to block them or to auto-clear `is_active_release` when they occur — read-time revalidation carries that guarantee instead, and the Publisher/governed-activation workflow is responsible for explicit deactivation, rollback, or replacement once a loss is noticed.
+
+`is_active_release` is added to the existing post-publication immutability exemption list alongside `publication_state`/`review_status` and `updated_at`. The Quran module owns the selector's physical state per the existing Roadmap module ownership matrix; the existing Publisher role (`ALSAMAD_ADMIN_ARCHITECTURE.md` §30.1) exercises the existing guarded-publication authority to mutate it — no new table, role, or owning module is introduced. Full rationale, alternatives, and rejected alternatives are recorded in `ADR-0006`.
+
+No new table is required; the Release 1 catalog remains frozen at 30 tables. Migration `0008` is reserved for this decision's future implementation; M6's future devotional migration placeholder correspondingly moves from `0008` to `0009`. This decision does not authorize migration `0008` itself, provider access, credentials, content fetch, a real-resource manifest, a provider dry run, publication, `M5 Provider Import Dry Run Verified`, `M5 Quran Import Activated`, ARC-006, M6, or M7.
 
 **Implementation evidence:** None. Implementation is not marked complete by this entry.
 
