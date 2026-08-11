@@ -1559,10 +1559,27 @@ try {
           ),
         );
 
-      // 30: the read-time query plans against the partial unique indexes
-      // and existing edition_id/ayah_id indexes rather than a sequential
-      // scan of every edition/translation row.
-      const plan = await queryClient`
+      // 30 (AUD-ARC005-002 correction): the read-time query plans against
+      // the partial unique indexes and existing edition_id/ayah_id indexes
+      // rather than a sequential scan of every edition/translation row.
+      //
+      // The prior assertion checked the literal substring
+      // `"Relation Name": "editions", "Node Type": "Seq Scan"` against
+      // `JSON.stringify(plan)`, but `EXPLAIN (FORMAT JSON)` always emits
+      // `"Node Type"` before `"Relation Name"` in each plan node, so that
+      // substring could never match regardless of actual planner behavior
+      // -- it never proved index usage. This walks the already-parsed plan
+      // object structurally (property access, not string matching), so it
+      // cannot depend on JSON key order. It also separates two distinct
+      // questions the old assertion conflated: whether the query is
+      // index-*compatible* (checked with `enable_seqscan` forced off, which
+      // cannot be fooled by a tiny fixture) versus whether the planner
+      // actually *chooses* the index unforced at realistic cardinality
+      // (checked empirically below with a disposable bulk fixture). Neither
+      // check treats a sequential scan on a near-empty table as proof of
+      // anything: PostgreSQL legitimately prefers a sequential scan over an
+      // index scan when a table is tiny, and that is not an index defect.
+      const activeEditionQuery = (sql) => sql`
         explain (format json)
         with active_edition as (
           select e.id from editions e
@@ -1578,15 +1595,213 @@ try {
         left join quran_ayah_texts qat on qat.ayah_id = qa.id and qat.edition_id = ae.id
         group by qs.id, qs.surah_number
       `;
-      const planText = JSON.stringify(plan[0]["QUERY PLAN"]);
-      assert.doesNotMatch(
-        planText,
-        /"Relation Name": "editions", "Node Type": "Seq Scan"/,
-        "active-edition resolution remains index-supported, not a full editions scan",
+
+      const collectPlanNodes = (node, accumulator = []) => {
+        if (!node) return accumulator;
+        accumulator.push(node);
+        for (const child of node.Plans ?? [])
+          collectPlanNodes(child, accumulator);
+        return accumulator;
+      };
+      const editionsNodesOf = (planRow) =>
+        collectPlanNodes(planRow[0]["QUERY PLAN"][0].Plan).filter(
+          (node) => node["Relation Name"] === "editions",
+        );
+      // "Bitmap Heap Scan" is included because a bitmap-index-driven scan
+      // splits across two nodes: the child "Bitmap Index Scan" carries no
+      // "Relation Name" (only "Index Name"), while the relation-tagged
+      // "Bitmap Heap Scan" node's own Node Type string does not literally
+      // contain "Index" even though it is index-driven.
+      const usesIndexPath = (nodes) =>
+        nodes.some((node) =>
+          ["Index Scan", "Index Only Scan", "Bitmap Heap Scan"].includes(
+            node["Node Type"],
+          ),
+        );
+
+      // Natural planner choice against the near-empty verification database
+      // is recorded for visibility only -- it is not asserted either way,
+      // since a sequential scan here is the planner's legitimate, cost-based
+      // choice on so little data, not evidence the index is unusable.
+      const naturalPlan = await activeEditionQuery(queryClient);
+      const naturalEditionsNodes = editionsNodesOf(naturalPlan);
+      assert.ok(
+        naturalEditionsNodes.length > 0,
+        "query plan structurally references the editions relation",
+      );
+      console.log(
+        `INFO: ARC-005 active-edition query planner choice on the near-empty verification database is ${naturalEditionsNodes.map((node) => node["Node Type"]).join("/")} (informational only; not asserted)`,
+      );
+
+      // Index-compatibility: forcing `enable_seqscan off` cannot be fooled
+      // by a tiny fixture the way an unforced plan can. If the planner can
+      // still produce a valid plan and that plan uses an index-family node
+      // against `editions`, the query is structurally index-compatible
+      // regardless of what an unforced planner chooses on this fixture.
+      await queryClient
+        .begin(async (transaction) => {
+          await transaction`set local enable_seqscan = off`;
+          const forcedPlan = await activeEditionQuery(transaction);
+          const forcedEditionsNodes = editionsNodesOf(forcedPlan);
+          assert.ok(
+            usesIndexPath(forcedEditionsNodes),
+            "with enable_seqscan forced off, the active-edition query is index-compatible against editions (structural proof, independent of the unforced fixture-size choice)",
+          );
+          throw new Error("AUD-ARC005-002 index-compatibility rollback");
+        })
+        .catch((error) =>
+          assert.equal(
+            error.message,
+            "AUD-ARC005-002 index-compatibility rollback",
+          ),
+        );
+
+      // Realistic-cardinality empirical proof: a bounded, disposable
+      // synthetic fixture (rolled back, never committed, no production seed
+      // impact) of several thousand published-but-inactive sibling editions
+      // for the same work, alongside the one active row. This proves the
+      // unforced planner actually chooses an index path against `editions`
+      // once there is enough data for a sequential scan to be genuinely
+      // more expensive -- not merely that an index exists.
+      await queryClient
+        .begin(async (transaction) => {
+          const fixture = await publishEligibleFixture(transaction);
+          await transaction`update editions set is_active_release=true where id=${fixture.arabicEdition}::uuid`;
+          const bulkSiblingCount = 3000;
+          await transaction`
+            insert into editions(id,work_id,license_id,edition_key,version,language_code,script_code,display_name,provider_code,provider_edition_id,import_version,source_manifest_checksum,publication_state,published_at,is_active_release)
+            select gen_random_uuid(), ${fixture.work}::uuid, ${fixture.license}::uuid, 'aud-arc005-cardinality-'||gs, '1', 'ar', 'Arab', 'Synthetic bulk cardinality sibling edition '||gs, 'synthetic', 'aud-arc005-cardinality-alias-'||gs, 'test-v1', md5(gs::text)||md5((gs+1)::text), 'published', current_timestamp, false
+            from generate_series(1, ${bulkSiblingCount}) gs
+          `;
+          await transaction`analyze editions`;
+          const bulkPlan = await activeEditionQuery(transaction);
+          const bulkEditionsNodes = editionsNodesOf(bulkPlan);
+          assert.ok(
+            usesIndexPath(bulkEditionsNodes),
+            `at realistic cardinality (${bulkSiblingCount} published-but-inactive sibling editions for the same work), the unforced planner actually selects an index path against editions rather than a full sequential scan`,
+          );
+          throw new Error("AUD-ARC005-002 realistic-cardinality rollback");
+        })
+        .catch((error) =>
+          assert.equal(
+            error.message,
+            "AUD-ARC005-002 realistic-cardinality rollback",
+          ),
+        );
+
+      console.log(
+        "PASS: ARC-005 read-time live-eligibility revalidation (revocation, elapsed effective_until, disabled locale, withdrawn backing edition, no fallback, no mixed-release read, structurally index-compatible and empirically index-used query plan)",
+      );
+    }
+
+    // AUD-ARC005-001: direct INSERT with is_active_release = true must be
+    // subject to the same full activation-eligibility contract as the
+    // false->true UPDATE transition, on both selector domains. Each
+    // rejection case below deliberately sets every other eligibility gate
+    // (publication_state/review_status, backing edition, locale) to the
+    // value that would already satisfy migration 0008's CHECK constraints,
+    // isolating the one gate the INSERT path previously bypassed: live
+    // license eligibility, which only the trigger (not any CHECK) enforces.
+    {
+      await expectDatabaseRejection(
+        "direct INSERT of an ineligible (revoked-license) active Arabic edition is rejected",
+        async (transaction) => {
+          const fixture = await insertM5Foundation(transaction);
+          const revokedLicense = "0198a7b0-c000-7000-8000-000000000001";
+          await transaction`insert into licenses(id,provider_code,license_key,version,name,rights_scope,attribution_text,retention_policy,in_application_display_allowed,standalone_redistribution_allowed,effective_from,status)
+            values(${revokedLicense}::uuid,'synthetic','aud-arc005-insert-ar-revoked','1','Synthetic revoked license','permission','Synthetic attribution','permanent',true,true,current_timestamp-'1 day'::interval,'revoked')`;
+          const insertedEdition = "0198a7b0-c000-7000-8000-000000000002";
+          await transaction`insert into editions(id,work_id,license_id,edition_key,version,language_code,script_code,display_name,provider_code,provider_edition_id,import_version,source_manifest_checksum,publication_state,published_at,is_active_release)
+            values(${insertedEdition}::uuid,${fixture.work}::uuid,${revokedLicense}::uuid,'aud-arc005-insert-ar','1','ar','Arab','Synthetic INSERT-activated Arabic edition','synthetic','aud-arc005-insert-ar-alias','test-v1',repeat('7',64),'published',current_timestamp,true)`;
+        },
+      );
+
+      await queryClient
+        .begin(async (transaction) => {
+          const fixture = await insertM5Foundation(transaction);
+          const insertedEdition = "0198a7b0-c000-7000-8000-000000000003";
+          await transaction`insert into editions(id,work_id,license_id,edition_key,version,language_code,script_code,display_name,provider_code,provider_edition_id,import_version,source_manifest_checksum,publication_state,published_at,is_active_release)
+            values(${insertedEdition}::uuid,${fixture.work}::uuid,${fixture.license}::uuid,'aud-arc005-insert-ar-ok','1','ar','Arab','Synthetic eligible INSERT-activated Arabic edition','synthetic','aud-arc005-insert-ar-ok-alias','test-v1',repeat('8',64),'published',current_timestamp,true)`;
+          assert.equal(
+            (
+              await transaction`select is_active_release from editions where id=${insertedEdition}::uuid`
+            )[0]?.is_active_release,
+            true,
+            "eligible direct INSERT Arabic activation succeeds",
+          );
+          throw new Error("AUD-ARC005-001 eligible Arabic INSERT rollback");
+        })
+        .catch((error) =>
+          assert.equal(
+            error.message,
+            "AUD-ARC005-001 eligible Arabic INSERT rollback",
+          ),
+        );
+
+      // Each translation test creates its own fresh backing edition rather
+      // than reusing `fixture.translationEdition`, which `insertM5Foundation`
+      // already bound to `fixture.translation` via the
+      // uq_quran_translation_editions__edition unique(edition_id) constraint.
+      await expectDatabaseRejection(
+        "direct INSERT of an ineligible (revoked-license) active translation edition is rejected",
+        async (transaction) => {
+          const fixture = await insertM5Foundation(transaction);
+          const backingEdition = "0198a7b0-c000-7000-8000-000000000007";
+          await transaction`insert into editions(id,work_id,license_id,edition_key,version,language_code,script_code,display_name,provider_code,provider_edition_id,import_version,source_manifest_checksum,publication_state,published_at)
+            values(${backingEdition}::uuid,${fixture.work}::uuid,${fixture.license}::uuid,'aud-arc005-insert-tr-backing-ineligible','1','en','Latn','Synthetic INSERT-test backing edition','synthetic','aud-arc005-insert-tr-backing-ineligible-alias','test-v1',repeat('9',64),'published',current_timestamp)`;
+          const revokedLicense = "0198a7b0-c000-7000-8000-000000000004";
+          await transaction`insert into licenses(id,provider_code,license_key,version,name,rights_scope,attribution_text,retention_policy,in_application_display_allowed,standalone_redistribution_allowed,effective_from,status)
+            values(${revokedLicense}::uuid,'synthetic','aud-arc005-insert-tr-revoked','1','Synthetic revoked translation license','permission','Synthetic attribution','permanent',true,true,current_timestamp-'1 day'::interval,'revoked')`;
+          const insertedTranslation = "0198a7b0-c000-7000-8000-000000000005";
+          await transaction`insert into quran_translation_editions(id,edition_id,locale_id,license_id,translator_name,methodology,review_status,reviewed_at,is_active_release)
+            select ${insertedTranslation}::uuid,${backingEdition}::uuid,id,${revokedLicense}::uuid,'AUD-ARC005 Translator','AUD-ARC005 methodology','approved',current_timestamp,true from locales where code='en'`;
+        },
+      );
+
+      await queryClient
+        .begin(async (transaction) => {
+          const fixture = await insertM5Foundation(transaction);
+          const backingEdition = "0198a7b0-c000-7000-8000-000000000008";
+          await transaction`insert into editions(id,work_id,license_id,edition_key,version,language_code,script_code,display_name,provider_code,provider_edition_id,import_version,source_manifest_checksum,publication_state,published_at)
+            values(${backingEdition}::uuid,${fixture.work}::uuid,${fixture.license}::uuid,'aud-arc005-insert-tr-backing-eligible','1','en','Latn','Synthetic eligible INSERT-test backing edition','synthetic','aud-arc005-insert-tr-backing-eligible-alias','test-v1',repeat('e',64),'published',current_timestamp)`;
+          const insertedTranslation = "0198a7b0-c000-7000-8000-000000000006";
+          await transaction`insert into quran_translation_editions(id,edition_id,locale_id,license_id,translator_name,methodology,review_status,reviewed_at,is_active_release)
+            select ${insertedTranslation}::uuid,${backingEdition}::uuid,id,${fixture.license}::uuid,'AUD-ARC005 Translator','AUD-ARC005 methodology','approved',current_timestamp,true from locales where code='en'`;
+          assert.equal(
+            (
+              await transaction`select is_active_release from quran_translation_editions where id=${insertedTranslation}::uuid`
+            )[0]?.is_active_release,
+            true,
+            "eligible direct INSERT translation activation succeeds",
+          );
+          throw new Error(
+            "AUD-ARC005-001 eligible translation INSERT rollback",
+          );
+        })
+        .catch((error) =>
+          assert.equal(
+            error.message,
+            "AUD-ARC005-001 eligible translation INSERT rollback",
+          ),
+        );
+
+      // Regression: the false->true UPDATE activation path corrected by
+      // migration 0008 and verified above (tests 1-29) must remain exactly
+      // as strict after this correction as before it -- the fix only adds
+      // INSERT coverage, it does not alter or re-scope UPDATE-path
+      // eligibility, uniqueness, withdrawal, rollback, or concurrency
+      // behavior. A representative UPDATE-path rejection is re-run here as
+      // a direct regression guard on the redefined trigger function itself.
+      await expectDatabaseRejection(
+        "UPDATE false->true activation of an unpublished Arabic edition remains rejected after the INSERT correction",
+        async (transaction) => {
+          const fixture = await insertM5Foundation(transaction);
+          await transaction`update editions set is_active_release=true where id=${fixture.arabicEdition}::uuid`;
+        },
       );
 
       console.log(
-        "PASS: ARC-005 read-time live-eligibility revalidation (revocation, elapsed effective_until, disabled locale, withdrawn backing edition, no fallback, no mixed-release read, index-supported query)",
+        "PASS: AUD-ARC005-001 direct INSERT with is_active_release = true is subject to full activation eligibility on both selector domains, matching the existing UPDATE path",
       );
     }
 

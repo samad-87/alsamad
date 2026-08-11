@@ -64,6 +64,13 @@
       "when": 1785796808000,
       "tag": "0008_atomic_quran_release_selector",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1785796809000,
+      "tag": "0009_arc005_insert_activation_validation",
+      "breakpoints": true
     }
   ]
 }
