@@ -1107,6 +1107,84 @@ Left unresolved until Quran.Foundation replies: permanent storage rights beyond 
 
 Architecture contract complete; implementation not started by this documentation task. No M5.2 PASS label is authorized until a separately approved implementation contract executes this unit and its dry-run gate passes on real PostgreSQL and a controlled sandbox provider.
 
+### M5.2B — Quran.Foundation Credential-Gate Contract (Pre-Production/Production Configuration and Server-Side Token Acquisition)
+
+This subsection is the separately authorized implementation unit M5.2A's own "Dependency and handoff" pointed to: "the next external dependency remains rotated Quran.Foundation credentials plus confirmed server-side Content API environment, access, and scope; no authenticated action may begin until that dependency is separately satisfied." Quran.Foundation credentials are now externally rotated; this unit authorizes exactly the credential configuration and server-side Content API token-acquisition boundary needed to satisfy that dependency — nothing more. It creates no new milestone, weakens no existing M5 acceptance requirement, and does not itself satisfy `M5 Provider Import Dry Run Verified` or `M5 Quran Import Activated`.
+
+**Environment terminology mapping.** Quran.Foundation externally names its non-production environment "Pre-Production." The repository's `ProviderEnvironment` type (`src/lib/quran/import/contracts.ts`) is the closed vocabulary `"sandbox" | "staging" | "production"`, and `manifest.ts`'s `ALLOWED_ENVIRONMENTS` already restricts any constructible manifest to `{"sandbox", "staging"}` — `"production"` cannot be targeted by a manifest today, unchanged by this unit. This contract resolves the mapping explicitly and singularly: **Quran.Foundation "Pre-Production" maps to the repository's `"sandbox"` value.** `"sandbox"` is chosen, not `"staging"`, because every existing credential-specific reference in this Roadmap already pairs "sandbox" with credentials and configuration (M5.2 acceptance gate 2: "controlled sandbox credentials provisioned server-side"; M5.2 Explicitly excluded scope: "only placeholder/synthetic sandbox configuration is authorized"), and `"sandbox"` is the first-listed, primary non-production value in both `ProviderEnvironment` and `ALLOWED_ENVIRONMENTS`. `"staging"` remains a reserved, unmapped value in the type system; this unit does not assign it to any external environment and does not remove it from the type. "Production" remains the repository's `"production"` value, unchanged, and remains excluded from `ALLOWED_ENVIRONMENTS` until a separately authorized later gate changes that.
+
+**Client API scope clarification.** "OAuth" in `ALSAMAD_IMPLEMENTATION_ROADMAP.md` line 670 ("M5 authorizes Content adapter work only; it authorizes no OAuth or user feature") and `ALSAMAD_SECURITY_ARCHITECTURE.md` line 439 ("Authorization Code + PKCE/OIDC account linking is Prepared only") refers exclusively to the user-facing Quran.Foundation User API / account-linking flow, which remains Prepared-only and out of scope here, unchanged. The server-to-server Content API token acquisition this unit authorizes is "Content adapter work" under the same line 670's own framing ("Content API credentials are server-only secrets... Content access... [is] separately capability-gated" from user/OAuth scopes) and is not the excluded "OAuth or user feature." No User API, account linking, or QF `sub` identity work is authorized by this unit.
+
+**Authorized scope:**
+
+- Defining placeholder-only environment-variable names (no values) for Pre-Production and Production Client ID/Client Secret pairs, and an explicit provider-environment selector, as normative repository configuration.
+- Extending `QuranFoundationAdapterConfig` (`src/lib/providers/quran-foundation/types.ts`) with a credential/environment configuration shape.
+- A new server-only environment/config module, following the existing `src/db/env.ts` pattern (one validated schema, one accessor function, no scattered `process.env.X`); its exact path is determined during implementation.
+- Extending `src/lib/providers/quran-foundation/adapter.ts` with server-side Quran.Foundation Content API token acquisition **only** — using the explicitly selected environment's credential pair, retained in memory only, never persisted, logged, or embedded in a manifest/evidence/checkpoint/audit-event/database row.
+- Focused, provider-independent-style tests proving structural credential validation, environment isolation, redaction, and fail-closed behavior using synthetic/injected values only — never a real secret.
+
+**Explicit exclusions:** `discoverResources`, `fetchResourceMetadata`, `fetchBatch`, `getVersionToken`, `getDeletionOrWithdrawalSignals`, `produceAttribution`, or any other resource/content/metadata request; any real HTTP call to a Quran.Foundation endpoint; endpoint/base-URL activation; a real `SourceImportManifest`; provider dry run; publication; any PASS claim for `M5 Provider Import Dry Run Verified` or `M5 Quran Import Activated`; any Production credential use of any kind; any database, schema, or migration change; M6; M7; and any Quran.Foundation User API/OAuth account-linking work. The Roadmap's gate ordering (below) is preserved exactly; this unit does not compress or reorder it.
+
+**Client ID classification:** a sensitive operational identifier, not an authentication secret. It may be read server-side and must not be exposed unnecessarily (no logging, no client bundle, no unredacted evidence), but possessing it is not by itself permission to access the provider.
+
+**Client Secret classification:** a secret, unconditionally. It is server-only and must never enter logs, manifests, `ImportRunEvidence`, checkpoints, database rows, audit evidence, client bundles, URLs/query strings, or any persistence performed by import tooling — matching the existing `SECRET_MARKERS`/`findSecretField` rejection already enforced in `src/lib/quran/import/manifest.ts`.
+
+**Access-token contract:** the later implementation must acquire a Quran.Foundation Content API access token server-side, only for the explicitly selected environment's credential pair; retain the token in memory only, never persisted (no database row, no manifest/evidence/checkpoint/audit-event field); never log the token or the `Authorization` header; treat token lifetime as bounded and reacquire on expiry rather than storing a durable or refresh token; never reuse a Pre-Production token against Production or vice versa; and fail closed on any acquisition or validation failure. No refresh-token persistence is authorized; if Quran.Foundation documentation later proves a refresh mechanism is required, it must be handled within this same server-only, no-persistence boundary unless a new explicit contract is separately authorized.
+
+**Server-only boundary:** the credential/token module and every symbol it exports must be importable only from server-side code. No environment key may use a `NEXT_PUBLIC_` prefix. No secret or token may be serialized through a React Server Component payload, route metadata, static HTML, or build output. No client component or browser-reachable code may import the credential module, the config module, or the adapter's credential-bearing methods.
+
+**Environment isolation:** Pre-Production (`sandbox`) code may read only Pre-Production credentials; Production code may read only Production credentials. No fallback from missing Pre-Production credentials to Production, and no fallback from missing Production credentials to Pre-Production, in either direction. Both credential sets may exist simultaneously in an operator's environment; selection is always explicit via the environment selector, never inferred or defaulted. Production is never the default value of the selector. Missing or incomplete credentials for the selected environment fail closed. Credential availability is explicitly not provider-use authorization — see Network authorization order below.
+
+**Normative environment-variable names (placeholder names only; no value is authorized by this contract):**
+
+- `QURAN_FOUNDATION_SANDBOX_CLIENT_ID`
+- `QURAN_FOUNDATION_SANDBOX_CLIENT_SECRET`
+- `QURAN_FOUNDATION_PRODUCTION_CLIENT_ID`
+- `QURAN_FOUNDATION_PRODUCTION_CLIENT_SECRET`
+- `QURAN_FOUNDATION_ENVIRONMENT` — explicit selector; accepted values are exactly `sandbox` and `production` for this unit (matching the Pre-Production→`sandbox` mapping above); `staging` remains reserved and unmapped and is not an accepted value here. No default value is authorized; a missing or unrecognized selector fails closed.
+
+**Allowed files (future implementation unit; not authorized today):**
+
+- `.env.example` — placeholder names only, never values
+- `src/lib/providers/quran-foundation/types.ts`
+- `src/lib/providers/quran-foundation/adapter.ts` — token-acquisition boundary only, no fetch/metadata methods
+- a new server-only environment/config module under `src/lib/providers/quran-foundation/` (exact filename determined during implementation)
+- focused tests under `tests/quran-import/` or a new `tests/quran-foundation-credentials/` directory
+
+No database file, migration, schema file, UI, application route, admin surface, architecture document, Decision Registry entry, or ADR is authorized by this unit.
+
+**Gate-2 evidence — what counts as Credential Gate PASS** (refines M5.2 acceptance gate 2, "Provider credentials available — controlled sandbox credentials provisioned server-side"; does not replace or relax it):
+
+- the selected provider environment is explicitly known (no default, no inference);
+- the required Client ID for that environment is present;
+- the required Client Secret for that environment is present;
+- the credential pair passes structural validation (non-blank, expected shape) without any network call;
+- the server-only boundary is proven (no client-bundle reachability, no `NEXT_PUBLIC_` key);
+- secret redaction is proven (a secret-shaped value injected into any evidence/log path is rejected or redacted, exactly as `findSecretField`/`redactEvidence` already do for manifest/evidence construction);
+- no persistence is proven (no credential or token value survives outside process memory);
+- environment isolation is proven (Pre-Production code cannot read Production credentials and vice versa, and no fallback occurs when one set is absent);
+- evidence records only safe metadata — selected environment name, structural-validation result, and timestamp/run identity if already governed elsewhere — and never a secret or token value.
+
+Gate 2 can be structurally PASS on the above evidence alone, **before** any first network token validation — structural configuration/isolation/redaction proof does not require contacting the provider. Provider-side token acquisition and validation is a distinct, later step (Network authorization order, step 3 below) and is not required for Gate 2 itself; Gate 2 does not claim provider-side validation occurred, only that the local credential boundary is correctly configured and safe.
+
+**Network authorization order (preserves the existing M5.2 gate sequence exactly; does not reorder it):**
+
+1. Credential configuration implemented (this unit's code, once separately executed).
+2. Credentials available (Gate 2, above).
+3. Provider-side token acquisition/validation authorized — a distinct, later, separately authorized execution step; **not authorized by this contract**.
+4. Legal/license gate (M5.2 acceptance gate 3).
+5. Exact source-selection gate (M5.2 acceptance gate 4).
+6. Controlled Pre-Production (`sandbox`) fetch (M5.2 acceptance gate 5).
+7. Manifest generation, quarantine validation, dry-run import, reconciliation, and scholarly review (M5.2 acceptance gates 6–10), then production activation (M5.2 acceptance gate 11, itself requiring the Phase 5 `M5 Quran Import Activated` gate).
+
+This unit authorizes step 1 only (the code enabling steps 2–3 to later occur safely). It does not itself authorize step 3 or any step after it. A separate execution authorization is required before any real token request, metadata discovery, or content fetch occurs.
+
+**Production block:** Production credentials may exist in secure operator/hosting storage but must not be used by this implementation unit or by anything it authorizes. No Production token request, no Production metadata request, no Production manifest, and no Production fetch are authorized here. Production remains gated by M5.2 acceptance gate 11 and the Phase 5 production-activation gate (`M5 Quran Import Activated`), both `NOT PASS`.
+
+**Governance note:** this unit was evaluated against `ALSAMAD_DECISION_REGISTRY.md` §3 and §7 and does not meet the Registry-entry or ADR threshold — it defines placeholder-only naming and operationalizes secret-handling policy already approved in `ALSAMAD_SECURITY_ARCHITECTURE.md` §13/§28.1 and the existing M5.2/M5.2A provider boundary; it changes no physical representation, no frozen data model, and no cross-module boundary, and creates no irreversible persisted or licensing consequence. Per `ALSAMAD_DECISION_REGISTRY.md` §2 item 4, `ALSAMAD_IMPLEMENTATION_ROADMAP.md`'s own milestone/gate mechanism is the correct and sufficient authority for this "when is implementation authorized" question.
+
+**Dependency and handoff:** M5.1, the M5.2 architecture contract, and M5.2A remain complete/PASS as previously recorded. This unit's own implementation has not yet been executed; no credential env key, config module, or adapter token method exists in the repository as of this contract. Completing this unit later does not itself satisfy the legal/license, source-selection, scholarly, provider dry-run, or production-activation gate, and does not authorize any Production access. `M5 Schema Foundation Verified` remains PASS. `M5 Provider Import Dry Run Verified` and `M5 Quran Import Activated` remain NOT PASS, and M6 remains blocked, independent of this contract.
+
 ## Phase 6: Devotional content and Editorial General Dua
 
 ### Objective
