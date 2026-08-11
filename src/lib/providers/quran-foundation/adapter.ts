@@ -1,11 +1,20 @@
 /**
- * M5.2 Quran.Foundation adapter shell.
+ * M5.2 Quran.Foundation adapter shell, extended by M5.2B
+ * (ALSAMAD_IMPLEMENTATION_ROADMAP.md) with a server-side Content API
+ * token-acquisition boundary only.
  *
- * Every method that would require live provider access throws
- * ProviderAccessNotAuthorizedError. The remaining methods are pure and
+ * Every resource/content/metadata method still throws
+ * ProviderAccessNotAuthorizedError, unchanged by M5.2B — that exclusion is
+ * explicit in the committed contract. The remaining methods are pure and
  * operate only on data the caller already holds (synthetic fixtures during
  * a dry run). This adapter never publishes, persists, or activates content,
  * and never converts a provider identity directly into a canonical UUID.
+ *
+ * `acquireAccessToken` requires an injected `QuranFoundationTokenTransport`
+ * (mirroring `executeInjectedWithRetry` below) — this file owns no URL,
+ * HTTP client, or real network call, and no default transport is wired to
+ * any real Quran.Foundation host. A later, separately authorized unit
+ * supplies a real transport before any actual token request occurs.
  */
 import {
   ProviderAccessNotAuthorizedError,
@@ -21,7 +30,11 @@ import {
   type WithdrawalOrDeletionSignal,
   RetryExhaustedError,
 } from "../../quran/import/contracts";
-import type { QuranFoundationAdapterConfig } from "./types";
+import type {
+  QuranFoundationAdapterConfig,
+  QuranFoundationProviderEnvironment,
+  QuranFoundationTokenTransport,
+} from "./types";
 
 const PROVIDER_CODE = "quran-foundation";
 
@@ -85,8 +98,16 @@ function isNonBlank(value: unknown): value is string {
   return typeof value === "string" && value.trim().length > 0;
 }
 
+interface CachedAccessToken {
+  readonly value: string;
+  readonly environment: QuranFoundationProviderEnvironment;
+  readonly expiresAtMs: number;
+}
+
 export class QuranFoundationAdapter implements QuranContentProviderAdapter {
   private closed = false;
+  private readonly credentials: QuranFoundationAdapterConfig["credentials"];
+  private cachedToken: CachedAccessToken | null = null;
 
   constructor(config: QuranFoundationAdapterConfig) {
     if (
@@ -97,6 +118,63 @@ export class QuranFoundationAdapter implements QuranContentProviderAdapter {
         "QuranFoundationAdapter requires a non-blank processIdentity and softwareVersion",
       );
     }
+    this.credentials = config.credentials;
+  }
+
+  /**
+   * Acquires (or reuses, until expiry) a Content API access token for this
+   * adapter instance's single fixed environment, using an injected
+   * transport. Never logs the token, the credentials, or the Authorization
+   * header. Never persists the token outside this instance's memory; it is
+   * discarded on `close()`. Fails closed if this adapter was constructed
+   * without credentials, if the transport rejects, or if the transport
+   * returns a structurally invalid response. Never reuses a cached token
+   * across environments — this instance's `credentials.environment` is
+   * fixed for its whole lifetime, so cross-environment reuse cannot occur.
+   */
+  async acquireAccessToken(
+    transport: QuranFoundationTokenTransport,
+    now: () => number = Date.now,
+  ): Promise<string> {
+    this.assertNotClosed();
+    if (!this.credentials) {
+      throw new Error(
+        "QuranFoundationAdapter was constructed without credentials; acquireAccessToken is unavailable.",
+      );
+    }
+    const credentials = this.credentials;
+    if (
+      this.cachedToken &&
+      this.cachedToken.environment === credentials.environment &&
+      this.cachedToken.expiresAtMs > now()
+    ) {
+      return this.cachedToken.value;
+    }
+    let response: Awaited<
+      ReturnType<QuranFoundationTokenTransport["requestAccessToken"]>
+    >;
+    try {
+      response = await transport.requestAccessToken(credentials);
+    } catch {
+      // The underlying error is never rethrown verbatim: a transport
+      // implementation could otherwise leak a secret-bearing message.
+      throw new Error("Quran.Foundation token acquisition failed.");
+    }
+    if (
+      !isNonBlank(response?.accessToken) ||
+      !Number.isFinite(response.expiresInSeconds) ||
+      response.expiresInSeconds <= 0
+    ) {
+      throw new Error(
+        "Quran.Foundation token acquisition returned a structurally invalid response.",
+      );
+    }
+    this.cachedToken = {
+      value: response.accessToken,
+      environment: credentials.environment,
+      expiresAtMs: now() + response.expiresInSeconds * 1000,
+    };
+    return this.cachedToken.value;
   }
 
   async discoverResources(): Promise<readonly ProviderResourceIdentity[]> {
@@ -256,6 +334,7 @@ export class QuranFoundationAdapter implements QuranContentProviderAdapter {
 
   async close(): Promise<void> {
     this.closed = true;
+    this.cachedToken = null;
   }
 
   private assertNotClosed(): void {
