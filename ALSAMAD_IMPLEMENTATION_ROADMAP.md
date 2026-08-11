@@ -1183,7 +1183,86 @@ This unit authorizes step 1 only (the code enabling steps 2–3 to later occur s
 
 **Governance note:** this unit was evaluated against `ALSAMAD_DECISION_REGISTRY.md` §3 and §7 and does not meet the Registry-entry or ADR threshold — it defines placeholder-only naming and operationalizes secret-handling policy already approved in `ALSAMAD_SECURITY_ARCHITECTURE.md` §13/§28.1 and the existing M5.2/M5.2A provider boundary; it changes no physical representation, no frozen data model, and no cross-module boundary, and creates no irreversible persisted or licensing consequence. Per `ALSAMAD_DECISION_REGISTRY.md` §2 item 4, `ALSAMAD_IMPLEMENTATION_ROADMAP.md`'s own milestone/gate mechanism is the correct and sufficient authority for this "when is implementation authorized" question.
 
-**Dependency and handoff:** M5.1, the M5.2 architecture contract, and M5.2A remain complete/PASS as previously recorded. This unit's own implementation has not yet been executed; no credential env key, config module, or adapter token method exists in the repository as of this contract. Completing this unit later does not itself satisfy the legal/license, source-selection, scholarly, provider dry-run, or production-activation gate, and does not authorize any Production access. `M5 Schema Foundation Verified` remains PASS. `M5 Provider Import Dry Run Verified` and `M5 Quran Import Activated` remain NOT PASS, and M6 remains blocked, independent of this contract.
+**Dependency and handoff:** M5.1, the M5.2 architecture contract, and M5.2A remain complete/PASS as previously recorded. This unit's own implementation is complete — `src/lib/providers/quran-foundation/env.ts` (the credential/config module), the extended `QuranFoundationAdapterConfig` and `adapter.ts` token-acquisition boundary, and the five normative environment-variable keys are committed (`58782c3`), covered by 23 focused tests. No real credential value has been used and no provider network call has occurred. Completing this unit did not itself satisfy the legal/license, source-selection, scholarly, provider dry-run, or production-activation gate, and did not authorize any Production access. `M5 Schema Foundation Verified` remains PASS. `M5 Provider Import Dry Run Verified` and `M5 Quran Import Activated` remain NOT PASS, and M6 remains blocked, independent of this contract.
+
+### M5.2C — Local Pre-Production Credential Validation Script
+
+This subsection is the separately authorized implementation unit closing M5.2B's own remaining gap: M5.2B implemented the credential/config functions (`readQuranFoundationCredentials`, `buildCredentialGateEvidence` in `src/lib/providers/quran-foundation/env.ts`) but wired no executable entry point to them — no repository command exists that reads an operator's real local `QURAN_FOUNDATION_*` environment and reports whether it is structurally valid. This unit authorizes exactly one narrow, server-only CLI script that does that, and nothing else. It creates no new milestone, weakens no existing M5 acceptance requirement, and does not itself satisfy `M5 Provider Import Dry Run Verified` or `M5 Quran Import Activated`.
+
+**Authorized scope:**
+
+- One new server-only verification script/CLI (exact filename determined during implementation, e.g. `scripts/quran-credential-check.mjs`) that calls the already-implemented `buildCredentialGateEvidence` (and, only as needed for the Pre-Production-only guard below, `readQuranFoundationCredentials`) from `src/lib/providers/quran-foundation/env.ts` against the real `process.env` — no new credential-reading logic is authorized; this script is a thin CLI wrapper around the already-committed M5.2B functions.
+- Exactly one new `package.json` script entry (e.g. `"quran:credential-check": "node --import tsx scripts/quran-credential-check.mjs"`) invoking it, matching the existing convention already used for `quran:import:verify`/`quran:import:dry-run`. No dependency addition, version bump, or other `package.json` change is authorized.
+- Focused tests proving the script's output contract and exit-code behavior using injected/synthetic environment objects — never a real credential value.
+
+**Explicit exclusions:** any Quran.Foundation network call of any kind; any token request; any metadata discovery; any content fetch; any use of the `QURAN_FOUNDATION_PRODUCTION_CLIENT_ID`/`QURAN_FOUNDATION_PRODUCTION_CLIENT_SECRET` values; any claim, label, or exit condition equivalent to Gate 2 provider-side validation, `M5 Provider Import Dry Run Verified`, or `M5 Quran Import Activated`; any change to those gates' recorded status; any credential persistence (file, database, cache); any new credential-reading or validation logic beyond invoking the already-committed M5.2B functions; and any database, schema, or migration change.
+
+**Pre-Production-only guard:** unlike the underlying M5.2B library functions (which are generically environment-aware and already support `sandbox`/`production` symmetrically), this specific script must independently refuse to proceed if `QURAN_FOUNDATION_ENVIRONMENT=production` is set, reporting a safe `environment=production` / `credential_config=refused` / `reason=production_not_authorized_by_this_script` result and a non-zero exit code, without reading or reporting on the Production credential pair at all. This is a narrowing specific to this CLI tool, not a change to the underlying library's already-authorized `sandbox`/`production` symmetry, and it exists so this script cannot become an accidental Production-credential-checking tool merely because the selector is misconfigured.
+
+**Safe output contract:** the script prints only the following key=value lines (or an equivalent structured form using the same field names) and nothing else — no Client ID value, no Client Secret value, no token, no length, prefix, hash, or masked fragment of either, since no committed security contract requires or permits that:
+
+Pre-Production, structurally valid:
+
+```
+environment=sandbox
+credential_config=valid
+client_id_present=true
+client_secret_present=true
+server_only=true
+provider_network_validation=not_performed
+```
+
+Pre-Production, structurally invalid (one `reason` value from a closed set — e.g. `missing_selector`, `invalid_selector`, `missing_client_id`, `missing_client_secret`):
+
+```
+environment=sandbox
+credential_config=invalid
+reason=missing_client_secret
+client_id_present=true
+client_secret_present=false
+server_only=true
+provider_network_validation=not_performed
+```
+
+Selector missing or unrecognized (environment itself unknown):
+
+```
+environment=unknown
+credential_config=invalid
+reason=invalid_selector
+client_id_present=false
+client_secret_present=false
+server_only=true
+provider_network_validation=not_performed
+```
+
+Production selected (refused by this script's own narrower guard, above):
+
+```
+environment=production
+credential_config=refused
+reason=production_not_authorized_by_this_script
+client_id_present=false
+client_secret_present=false
+server_only=true
+provider_network_validation=not_performed
+```
+
+`provider_network_validation` is always exactly the literal `not_performed` in every case this script can produce — this script never performs, and never claims to perform, provider-side validation. `credential_config=valid` exit code is `0`; every other case (`invalid` or `refused`) exits non-zero, matching this repository's existing fail-closed script convention (e.g. `scripts/db-safety.mjs`).
+
+**Server-only requirement:** the script runs only under `node --import tsx` exactly like the existing `quran:import:verify`/`quran:import:dry-run` scripts; it is never imported by application/UI code and never bundled.
+
+**Acceptance criteria:**
+
+- running the script with a structurally valid Pre-Production environment prints exactly the safe `valid` contract above and exits `0`;
+- running it with a missing/invalid selector, missing Client ID, or missing Client Secret prints exactly the corresponding safe `invalid` contract and exits non-zero;
+- running it with `QURAN_FOUNDATION_ENVIRONMENT=production` prints exactly the safe `refused` contract, reads neither Production value, and exits non-zero;
+- no invocation, under any input, ever prints a Client ID value, a Client Secret value, a token, or any partial/derived form of either;
+- no invocation performs, or claims to have performed, any Quran.Foundation network access;
+- `npm run typecheck`, `npm run lint` (zero warnings), the new focused tests, `npm test`, Prettier, and `git diff --check` pass;
+- the changed-file list is contained exactly within this unit's allowed files.
+
+**Dependency and handoff:** depends only on M5.2B's already-committed `env.ts` functions; adds no new credential-handling logic. Completing this unit later still does not satisfy the legal/license, source-selection, scholarly, provider dry-run, or production-activation gate, and does not authorize any Production access or any provider network call. `M5 Provider Import Dry Run Verified` and `M5 Quran Import Activated` remain NOT PASS, and M6 remains blocked, independent of this contract.
 
 ## Phase 6: Devotional content and Editorial General Dua
 
