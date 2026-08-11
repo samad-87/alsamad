@@ -202,40 +202,56 @@ export const works = pgTable("works", {
     .defaultNow(),
 });
 
-export const editions = pgTable("editions", {
-  id: uuid("id").primaryKey(),
-  workId: uuid("work_id")
-    .notNull()
-    .references(() => works.id, { onDelete: "restrict", onUpdate: "restrict" }),
-  licenseId: uuid("license_id")
-    .notNull()
-    .references(() => licenses.id, {
-      onDelete: "restrict",
-      onUpdate: "restrict",
-    }),
-  editionKey: varchar("edition_key", { length: 160 }).notNull(),
-  version: varchar("version", { length: 64 }).notNull(),
-  languageCode: varchar("language_code", { length: 8 }).notNull(),
-  scriptCode: varchar("script_code", { length: 4 }),
-  displayName: varchar("display_name", { length: 300 }).notNull(),
-  providerCode: varchar("provider_code", { length: 64 }).notNull(),
-  providerEditionId: varchar("provider_edition_id", { length: 256 }).notNull(),
-  importVersion: varchar("import_version", { length: 128 }).notNull(),
-  sourceManifestChecksum: varchar("source_manifest_checksum", {
-    length: 64,
-  }).notNull(),
-  providerMetadata: jsonb("provider_metadata").notNull().default({}),
-  publicationState: varchar("publication_state", { length: 16 })
-    .notNull()
-    .default("draft"),
-  publishedAt: timestamp("published_at", { withTimezone: true }),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-});
+export const editions = pgTable(
+  "editions",
+  {
+    id: uuid("id").primaryKey(),
+    workId: uuid("work_id")
+      .notNull()
+      .references(() => works.id, {
+        onDelete: "restrict",
+        onUpdate: "restrict",
+      }),
+    licenseId: uuid("license_id")
+      .notNull()
+      .references(() => licenses.id, {
+        onDelete: "restrict",
+        onUpdate: "restrict",
+      }),
+    editionKey: varchar("edition_key", { length: 160 }).notNull(),
+    version: varchar("version", { length: 64 }).notNull(),
+    languageCode: varchar("language_code", { length: 8 }).notNull(),
+    scriptCode: varchar("script_code", { length: 4 }),
+    displayName: varchar("display_name", { length: 300 }).notNull(),
+    providerCode: varchar("provider_code", { length: 64 }).notNull(),
+    providerEditionId: varchar("provider_edition_id", {
+      length: 256,
+    }).notNull(),
+    importVersion: varchar("import_version", { length: 128 }).notNull(),
+    sourceManifestChecksum: varchar("source_manifest_checksum", {
+      length: 64,
+    }).notNull(),
+    providerMetadata: jsonb("provider_metadata").notNull().default({}),
+    publicationState: varchar("publication_state", { length: 16 })
+      .notNull()
+      .default("draft"),
+    publishedAt: timestamp("published_at", { withTimezone: true }),
+    isActiveRelease: boolean("is_active_release").notNull().default(false),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("uq_editions__active_release_per_work")
+      .on(table.workId)
+      .where(
+        sql`${table.isActiveRelease} and ${table.publicationState} = 'published'`,
+      ),
+  ],
+);
 
 export const passages = pgTable("passages", {
   id: uuid("id").primaryKey(),
@@ -608,6 +624,7 @@ export const quranTranslationEditions = pgTable(
       .notNull()
       .default("pending"),
     reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+    isActiveRelease: boolean("is_active_release").notNull().default(false),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -625,6 +642,11 @@ export const quranTranslationEditions = pgTable(
     index("ix_quran_translation_editions__review_status").on(
       table.reviewStatus,
     ),
+    uniqueIndex("uq_quran_translation_editions__active_release_per_locale")
+      .on(table.localeId)
+      .where(
+        sql`${table.isActiveRelease} and ${table.reviewStatus} = 'approved'`,
+      ),
   ],
 );
 

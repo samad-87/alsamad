@@ -10,6 +10,16 @@
  *   - a surah row is published and has ayah text rows     -> "available",
  *     with a real, sourced ayahCount (never fabricated)
  *
+ * ARC-005 (`ADR-0006`, `ALSAMAD_DATABASE_ARCHITECTURE.md` §5.3.12): ayah text
+ * availability is scoped to the single currently active Arabic edition, and
+ * that candidate's full live eligibility (license currently active, not
+ * expired, and permitted for in-application display) is re-derived in the
+ * same query on every call — `is_active_release` alone is never treated as
+ * proof of servability. A missing or currently ineligible active edition
+ * yields no rows, which the existing classification below already reports
+ * as the same honest "empty"/"pending" states; there is no fallback to any
+ * other published edition.
+ *
  * It is not wired into any page as of M5.4 (see ./source.ts) and requires
  * no credentials to exist in the codebase: every call is guarded so a
  * missing DATABASE_URL, an unreachable database, or any query failure
@@ -66,13 +76,28 @@ async function loadAvailabilityRows(): Promise<
     ]);
     const rows = await withTimeout(
       db.execute(sql`
+        with active_edition as (
+          select e.id
+          from editions e
+          join works w on w.id = e.work_id
+          join licenses lic on lic.id = e.license_id
+          where w.work_type = 'quran'
+            and e.is_active_release
+            and e.publication_state = 'published'
+            and lic.status = 'active'
+            and lic.retention_policy <> 'no_storage'
+            and lic.in_application_display_allowed
+            and current_timestamp >= lic.effective_from
+            and (lic.effective_until is null or current_timestamp < lic.effective_until)
+        )
         select
           qs.surah_number as surah_number,
           qs.publication_state as publication_state,
           count(qat.id) as ayah_text_count
-        from quran_surahs qs
+        from active_edition ae
+        join quran_surahs qs on true
         left join quran_ayahs qa on qa.surah_id = qs.id
-        left join quran_ayah_texts qat on qat.ayah_id = qa.id
+        left join quran_ayah_texts qat on qat.ayah_id = qa.id and qat.edition_id = ae.id
         group by qs.id, qs.surah_number, qs.publication_state
       `),
       QUERY_TIMEOUT_MS,
