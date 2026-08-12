@@ -1458,6 +1458,22 @@ Consistent with `src/lib/quran/content/db-source.ts`'s own documented precedent 
 
 Architecture contract complete; implementation not started by this documentation task.
 
+### Knowledge Engine governance track (M7.0-track)
+
+This section formally opens the governance track already forward-referenced twice in this document (Phase 6's excluded-scope line: _"`ALSAMAD_KNOWLEDGE_ENGINE_ARCHITECTURE.md` and any Knowledge Engine implementation are M7.0-track and are explicitly not authorized by this contract"_; and the M5 acceptance record's exclusion of _"M7 / Knowledge Engine work"_) and in `ALSAMAD_KNOWLEDGE_ENGINE_ARCHITECTURE.md`'s own header (_"Milestone: M7.0 — Knowledge Engine Architecture"_). It records gate structure only. It authorizes no implementation, no migration, no commit, and no code.
+
+**Relationship to Phase 7.** `M7 — Editorial administration workflows` (Phase 7 below) and the Knowledge Engine's `M7.0-track` are two distinct, non-overlapping tracks that happen to share the leading digit "7" for unrelated historical reasons — Phase 7 is simply the next sequential Roadmap phase after Phase 6, while `M7.0` is `ALSAMAD_KNOWLEDGE_ENGINE_ARCHITECTURE.md`'s own self-assigned milestone number, chosen before this Roadmap formally opened this track. To avoid ambiguity, every Knowledge Engine gate is named with the explicit `M7.0-track` qualifier and is never abbreviated to a bare `M7.x`, which is reserved for Editorial administration workflow gates under Phase 7.
+
+**M7.0 — Knowledge Engine Architecture.** Already exists and is already complete as a documentation artifact: `ALSAMAD_KNOWLEDGE_ENGINE_ARCHITECTURE.md`, proposing a relationship/discovery layer over existing content modules (nodes referencing existing canonical identities, typed/weighted relationship edges, a layered topic/entity taxonomy, search as a read-only consumer, and mechanically enforced Authentic/Editorial separation). Per that document's own header, it remains **documentation only; not approved for implementation**. This Roadmap entry does not change that status.
+
+**Prototype/evidence, not authority.** Uncommitted working-tree files under `src/lib/knowledge/` and `tests/knowledge-*.test.mjs` exist as prototype implementation exercising the M7.0 architecture's earlier phased-adoption concepts (that document's own §16 phased adoption path). Their existence, their informal internal self-labeling, and their passing test suite are **evidence only** — they carry no governance authority and do not themselves authorize commit, merge, or any further implementation. No inference of authorization may be drawn from their existence, quality, or test-pass status.
+
+**Implementation requires Governance Unit 2.** No Knowledge Engine implementation — including committing any existing prototype file under `src/lib/knowledge/` or `tests/knowledge-*.test.mjs` as-is — is authorized until a separate, later Decision Registry entry (`M7.0-track` Governance Unit 2) explicitly records: (a) which phase of the architecture document's §16 phased adoption path is being authorized; (b) the exact scope and file boundary of that implementation unit; and (c) confirmation of whether that scope stays Registry-only or crosses `ALSAMAD_DECISION_REGISTRY.md` §7's ADR threshold (for example, by introducing a physical table). This entry does not itself constitute that authorization.
+
+**Independence from Quran/M5 and Duas/M6.** The `M7.0-track` is governance-independent of Phase 5's Quran provider-credential/legal gates and Phase 6's Duas/devotional gates. `M5 Gate 3` being `PARTIAL`, `M5 Quran Import Activated` being `NOT PASS`, and `M6` being `BLOCKED` neither block nor are affected by this documentation-only track. This entry changes no M5, M6, Quran, Duas, or provider status recorded elsewhere in this document.
+
+**Status.** `M7.0-track` gate structure recorded. `M7.0` remains documentation-only and not approved for implementation. Governance Unit 2 is not started. No Knowledge Engine implementation is authorized.
+
 ## Phase 7: Editorial administration workflows
 
 - Objective
