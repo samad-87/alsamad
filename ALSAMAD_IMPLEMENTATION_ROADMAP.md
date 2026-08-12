@@ -1472,7 +1472,7 @@ This section formally opens the governance track already forward-referenced twic
 
 **Independence from Quran/M5 and Duas/M6.** The `M7.0-track` is governance-independent of Phase 5's Quran provider-credential/legal gates and Phase 6's Duas/devotional gates. `M5 Gate 3` being `PARTIAL`, `M5 Quran Import Activated` being `NOT PASS`, and `M6` being `BLOCKED` neither block nor are affected by this documentation-only track. This entry changes no M5, M6, Quran, Duas, or provider status recorded elsewhere in this document.
 
-**Status.** `M7.0-track` gate structure recorded. `M7.0` remains documentation-only and not approved for implementation. Governance Unit 2 is not started. No Knowledge Engine implementation is authorized.
+**Status.** `M7.0-track` gate structure recorded. `M7.0` remains documentation-only and not approved for implementation. `REG-0014` (`ALSAMAD_DECISION_REGISTRY.md`) approves implementation of exactly `KE-1` — the schema-free, runtime-inert Phase-1 entity/relationship/search-matching file boundary it records — and nothing else: the Duas adapter, `topics`/`collections`/`references`, every later Knowledge Engine phase, and all database/schema/migration/UI/route/AI work remain documentation-only and NOT AUTHORIZED, and no prototype file outside KE-1's exact boundary carries any authority merely by existing. This authorization takes effect once this governance documentation is committed; it does not itself mark KE-1 implementation complete, and no KE-1 code has been staged or committed by this entry. `M5 Gate 3` remains `PARTIAL`, `M5 Quran Import Activated` remains `NOT PASS`, `M6` remains `BLOCKED`, and Duas' independently-governed status is unchanged.
 
 ## Phase 7: Editorial administration workflows
 

@@ -161,6 +161,7 @@ As of 2026-08-08, the M6 architecture decision analysis covering REG-0001–REG-
 | REG-0011 | Immutable source import manifest and execution evidence separation                         | Database        | DECIDED | Registry + ADR (`ADR-0004`, Accepted)                                     |
 | REG-0012 | License-version immutability and historical license evidence                               | Database        | DECIDED | Registry + ADR (`ADR-0005`, Accepted)                                     |
 | REG-0013 | Atomic Quran release selector and publication consistency                                  | Database        | DECIDED | Registry + ADR (`ADR-0006`, Accepted)                                     |
+| REG-0014 | Knowledge Engine Phase 1 (KE-1): entity/relationship/search unification                    | Roadmap         | DECIDED | Registry only                                                             |
 
 ### REG-0001 — Editorial General Dua placement in the devotional physical model
 
@@ -409,5 +410,60 @@ No new table is required; the Release 1 catalog remains frozen at 30 tables. Mig
 No new table is required; the Release 1 catalog remains frozen at 30 tables. Migration `0008` is reserved for this decision's future implementation; M6's future devotional migration placeholder correspondingly moves from `0008` to `0009`. This decision does not authorize migration `0008` itself, provider access, credentials, content fetch, a real-resource manifest, a provider dry run, publication, `M5 Provider Import Dry Run Verified`, `M5 Quran Import Activated`, ARC-006, M6, or M7.
 
 **Implementation evidence:** None. Implementation is not marked complete by this entry.
+
+**Supersedes / Superseded by:** None.
+
+### REG-0014 — Knowledge Engine Phase 1 (KE-1): Quran/Adhkar entity, relationship-shape, and in-memory search unification
+
+**Category:** `Roadmap`.
+
+**Summary:** Whether the schema-free, in-memory TypeScript unification of the Quran/Adhkar entity, relationship-shape, and deterministic search-matching concepts already proposed in `ALSAMAD_KNOWLEDGE_ENGINE_ARCHITECTURE.md` §16 Phase 1 may be implemented now, scoped to Quran and Adhkar only.
+
+**Committed evidence:** `ALSAMAD_KNOWLEDGE_ENGINE_ARCHITECTURE.md` §16's phased adoption path names Phase 1 as "Application-layer unification of the Adhkar/Duas/Quran source-metadata shape into one shared contract... 0 — TypeScript/application refactor only," requiring zero new physical tables. `ALSAMAD_IMPLEMENTATION_ROADMAP.md`'s "Knowledge Engine governance track (M7.0-track)" section (Governance Unit 1, committed `ca9358a`) already establishes that Knowledge Engine gates are named `M7.0-track` and reserves the structure this entry fills. `ALSAMAD_DATABASE_ARCHITECTURE.md` §2.1/§12 (anti-speculative-infrastructure) and §10 ("Add nodes and edges as projections over stable canonical identifiers; promote only independently curated relations to durable state") support keeping this unit schema-free until a real editorial need is proven.
+
+**Affected architecture:** `ALSAMAD_KNOWLEDGE_ENGINE_ARCHITECTURE.md` (KE-1 scope only, per its own §16 Phase 1).
+
+**Affected roadmap gate:** New `M7.0-track` / `KE-1` sub-gate under the Governance Unit 1 structure; does not affect, and is independent of, `M5 Gate 3`, `M5 Provider Import Dry Run Verified`, `M5 Quran Import Activated`, or `M6`.
+
+**Opened:** 2026-08-12.
+
+**Tier rationale:** Registry only — reversible TypeScript/application-layer change; no persisted physical representation; no database, schema, or migration of any kind; no data-shaping or irreversible content-integrity decision; no cross-module persisted ownership change. Fails `ALSAMAD_DECISION_REGISTRY.md` §7's ADR threshold on its second prong (reversal is neither expensive nor dangerous — the affected files can simply be deleted).
+
+**Status:** `DECIDED` (2026-08-12). **ADR reference:** None (Registry-only tier).
+
+**Decision outcome:** Approves implementation of exactly **KE-1** — the entity/identity layer, relationship-edge constructor/validator, and in-memory deterministic search-matching layer, together with Quran and Adhkar adapters only — bounded to exactly this file list:
+
+```
+src/lib/knowledge/types.ts
+src/lib/knowledge/identity.ts
+src/lib/knowledge/item.ts
+src/lib/knowledge/relationships.ts
+src/lib/knowledge/errors.ts
+src/lib/knowledge/adapters/shared.ts
+src/lib/knowledge/adapters/quran.ts
+src/lib/knowledge/adapters/adhkar.ts
+src/lib/knowledge/search/matching.ts
+src/lib/knowledge/search/filters.ts
+src/lib/knowledge/search/search.ts
+src/lib/knowledge/search/types.ts
+src/lib/knowledge/search/index.ts
+tests/knowledge-entity-layer.test.mjs
+tests/knowledge-relationship-layer.test.mjs
+tests/knowledge-search-layer.test.mjs
+```
+
+This entry explicitly does **not** approve: `src/lib/knowledge/adapters/duas.ts` (depends on uncommitted `src/lib/duas/content/*`, itself governed by a separate, unresolved Duas/M6.0 decision); `src/lib/knowledge/topics.ts`, `src/lib/knowledge/collections.ts`, or `src/lib/knowledge/references.ts` (Phase 2/4 territory per `ALSAMAD_KNOWLEDGE_ENGINE_ARCHITECTURE.md` §16); any database, schema, or migration file; any route, page, or component; any AI implementation; any later Knowledge Engine phase (2 through 7+); Hadith participation; semantic search; or the AI Search Assistant.
+
+**Duas boundary:** committed KE-1 files must carry zero reference to `src/lib/duas/**`. This is a binding acceptance condition, not merely a recommendation — it exists specifically so KE-1 authorization cannot be used to indirectly smuggle in the still-blocked Duas adapter.
+
+**Premature labeling correction required:** the existing prototype's comments and test descriptions self-label portions of this code "M7.1," "M7.2," and "M7.3" — labels that predate Governance Unit 1's `M7.0-track` naming and were never themselves authorized. Before any KE-1 commit, these must be corrected to reference `M7.0-track` / `KE-1` terminology instead.
+
+**Runtime-inert requirement:** KE-1 may be committed before Quran production activation only if it remains completely unwired from runtime. Acceptance condition: no file under `src/app/**`, `src/components/**` (excluding the unrelated, independently-governed `src/components/duas/**` work), or `scripts/**` may import anything from `src/lib/knowledge/**`. No feature flag is introduced for this purpose — none exists anywhere in this codebase today, and this narrow, currently-uncalled library does not warrant introducing one.
+
+**Later KE-1 implementation acceptance contract:** before a KE-1 implementation commit may be made, all of the following must hold: exactly the file boundary above (no more, no less); zero reference to `src/lib/duas/**`; zero database/schema/migration file touched; zero route/component/script importing `src/lib/knowledge/**`; the M7.1/M7.2/M7.3 labels corrected to `M7.0-track`/`KE-1`; `tests/knowledge-entity-layer.test.mjs`, `tests/knowledge-relationship-layer.test.mjs`, and `tests/knowledge-search-layer.test.mjs` passing; `npm run typecheck` and `npm run lint` (zero warnings) passing; the full existing repository test suite (`npm test`) remaining green; and no unauthorized feature or runtime wiring introduced anywhere else in the same change.
+
+**Independence from Quran/M5, Duas/M6.** This entry changes no M5 or M6 status: `M5 Gate 3` remains `PARTIAL`; `M5 Provider Import Dry Run Verified` and `M5 Quran Import Activated` remain `NOT PASS`; `M6` remains `BLOCKED`; Duas' independently-governed status is unchanged. KE-1 code authorization does not require `M5 Quran Import Activated` to PASS — but any later runtime surface built on KE-1 must still resolve Quran content honestly (`empty`/`pending`/`available`), never fabricating content when upstream Quran data is unavailable, exactly as every other Quran-adjacent surface in this codebase already does.
+
+**Implementation evidence:** None. This entry authorizes implementation; it does not itself constitute or claim implementation. No `src/lib/knowledge/**` or `tests/knowledge-*.test.mjs` file is staged or committed by this entry.
 
 **Supersedes / Superseded by:** None.
