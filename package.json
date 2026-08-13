@@ -14,6 +14,7 @@
     "quran:import:dry-run": "node --import tsx scripts/quran-import.mjs",
     "quran:import:verify": "node --import tsx scripts/quran-import-verify.mjs",
     "quran:credential-check": "node --env-file-if-exists=.env.local --import tsx scripts/quran-credential-check.mjs",
+    "quran:token-check": "node --env-file-if-exists=.env.local --import tsx scripts/quran-token-check.mjs",
     "db:up": "node scripts/db-lifecycle.mjs up",
     "db:down": "node scripts/db-lifecycle.mjs down",
     "db:safety": "node --import tsx scripts/db-safety.mjs",
