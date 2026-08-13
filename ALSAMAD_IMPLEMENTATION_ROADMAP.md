@@ -1382,7 +1382,7 @@ Production migrations remain forward-only. Before release, failure recovery uses
 
 ### Next-phase handoff
 
-After every M6 acceptance criterion passes, hand the stable devotional schema and mobile-first reading experience to **M7 — Editorial administration workflows**, which adds `editorial_users`, `editorial_role_grants`, and `review_records` and opens the actual Devotional Content Administration and Editorial General Dua Administration workflows (`ALSAMAD_ADMIN_ARCHITECTURE.md` §§8–9). This contract does not authorize M7 implementation, and does not authorize any Knowledge Engine (M7.0-track) implementation.
+After every M6 acceptance criterion passes, hand the stable devotional schema and mobile-first reading experience to **M7 — Editorial administration workflows**, which must reuse `editorial_users.id` after the independently governed Editorial Identity Foundation is implemented, adds `editorial_role_grants` and `review_records`, and opens the actual Devotional Content Administration and Editorial General Dua Administration workflows (`ALSAMAD_ADMIN_ARCHITECTURE.md` §§8–9). This contract does not authorize the Editorial Identity Foundation, M7 implementation, or any Knowledge Engine (M7.0-track) implementation.
 
 ### M6.0 — Duas Mobile-First Foundation
 
@@ -1457,6 +1457,45 @@ Consistent with `src/lib/quran/content/db-source.ts`'s own documented precedent 
 ### M6 release status
 
 Architecture contract complete; implementation not started by this documentation task.
+
+### M7-prerequisite / Editorial Identity Foundation
+
+**Governance status.** `REG-0016` and `ADR-0008` approve the architecture and exact physical contract for the independently sequenced Editorial Identity Foundation. Implementation is **NOT STARTED** and requires a later explicit execution against this gate. This prerequisite is not Phase 7 implementation and does not authorize any workflow or runtime surface.
+
+**Objective.** Add exactly the already-counted Release-1 `editorial_users` table defined by `ALSAMAD_DATABASE_ARCHITECTURE.md` §5.5.1 as the Editorial-owned, provider-independent, runtime-inert, seed-free durable FK root for accountable humans.
+
+**Exact future implementation boundary.** A later execution may touch only:
+
+```
+src/db/schema.ts
+drizzle/<next-authorized-forward-number>_editorial_identity_foundation.sql
+scripts/db-verify.mjs
+```
+
+The migration number is assigned mechanically at execution. At baseline `ac12718`, `0011` is only the expected non-reserved context and is not permanently preclaimed. `0010_devotional_content_foundation.sql` remains reserved for M6 and may not be used, renamed, or displaced. Every existing migration remains byte-unchanged.
+
+**Implementation constraints.** Add exactly four columns: `id`, `status`, `created_at`, and `updated_at`. Add no outgoing FK and no row. No application repository/domain module, authentication integration, authorization, runtime import, API, route, component, UI, workflow, or bootstrap identity is permitted. Absence of rows is the honest fail-closed state.
+
+**Acceptance contract.** An implementation commit may be made only when real PostgreSQL and repository verification prove:
+
+1. exactly one table, `editorial_users`, is added and remains an already-counted Release-1 Editorial table;
+2. valid application-generated UUIDv7 is accepted, non-v7 UUID is rejected under the established contract, no database UUID default exists, duplicate ID is rejected, and ID update is rejected;
+3. `created_at` update is rejected; status accepts only `active`/`disabled` and defaults to `disabled`;
+4. `disabled → active`, `active → disabled`, and reactivation `disabled → active` succeed;
+5. status and a strictly later `updated_at` change atomically; status change without valid timestamp advancement, timestamp-only mutation, and no-op timestamp fabrication fail;
+6. a referenced identity cannot be deleted, disablement preserves historical FK evidence, and no cascade is present;
+7. exactly the four authorized columns exist; no staff key/subject, username, email, display name, provider subject, public-user FK, authentication/profile/credential/password/passkey/MFA/recovery/role/capability/scope/grant/session column exists;
+8. no outgoing FK or auth-link table exists, and the migration creates zero rows;
+9. all fixtures are synthetic, transaction-scoped, and rolled back; a rollback-only temporary consumer may prove inactive-actor rejection without creating a permanent table, otherwise every future consumer gate, including KE-2, must prove active-actor enforcement before its own implementation can pass;
+10. prior migrations are byte-unchanged; table enumeration reports 17 of 30 after this unit and remains truthful if later migrations execute;
+11. `npm run typecheck`, `npm run lint`, `npm test`, `npm run test:db`, targeted Prettier check, production build, and `git diff --check` pass;
+12. runtime scans prove zero identity/admin wiring, and the staged set equals the exact three-file boundary above.
+
+**Explicit exclusions.** `editorial_role_grants`, `review_records`, `publication_events`, `audit_events`, any auth-link table, public `users`/`user_identities`, credentials/passwords/passkeys/MFA/recovery/sessions, roles/capabilities/scopes/grants, staff seeds/bootstrap accounts, Admin API/routes/pages/components/UI, editorial queues/workflows, topic-management UI, content review/publication workflows, KE-2 tables/repository implementation, M6/`devotional_items`, Duas, Quran/provider work, M5 Gate 4/5, Phase 7 completion, and later Knowledge Engine phases remain NOT AUTHORIZED.
+
+**Status and dependency truth.** KE-1 remains COMPLETE. KE-2 governance remains COMPLETE and KE-2 implementation remains NOT STARTED. This prerequisite, once implemented, removes only the `editorial_users` blocker; `devotional_items` remains a hard independent blocker and no KE-2 migration may begin. M5 Gate 3 remains PARTIAL; M5 Provider Import Dry Run Verified and M5 Quran Import Activated remain NOT PASS; M6 remains BLOCKED; Duas governance is unchanged.
+
+**Phase 7 reconciliation.** Editorial Identity Foundation governance is approved and its implementation remains NOT STARTED. `editorial_role_grants`, `review_records`, authentication/provider linking, MFA/passkeys/sessions/recovery, Admin API/UI, editorial workflows, and Phase 7 overall remain NOT STARTED / NOT COMPLETE. Future Phase 7 must reuse immutable `editorial_users.id` and may not replace it with a provider or public-account identity.
 
 ### Knowledge Engine governance track (M7.0-track)
 

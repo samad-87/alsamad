@@ -766,6 +766,25 @@ There is no independent `publication_state` column (`ADR-0002`). Rendering/publi
 
 Queues are database views over status. Approvals are typed review records followed by publication events. Locks use optimistic concurrency. Assignments, shareable preview tokens, scheduled publication, and persisted queues remain Prepared until real workflow volume requires them.
 
+### 5.5.1 `editorial_users` — independently sequenced identity foundation
+
+`REG-0016` and `ADR-0008` govern the early implementation of this already-counted Release-1 table under `M7-prerequisite / Editorial Identity Foundation`. It is an Editorial-owned, provider-independent, runtime-inert accountability root, not Phase 7 workflow implementation.
+
+| Column       | PostgreSQL type | Nullability and default               | Contract                                                                                  |
+| ------------ | --------------- | ------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `id`         | `uuid`          | Required; no database default         | Application-generated UUIDv7 primary key; sole durable internal staff subject; immutable. |
+| `status`     | `varchar(16)`   | Required; default `'disabled'`        | Closed values `active` or `disabled`; authentication-independent.                         |
+| `created_at` | `timestamptz`   | Required; default `current_timestamp` | UTC creation time; immutable.                                                             |
+| `updated_at` | `timestamptz`   | Required; default `current_timestamp` | UTC lifecycle-update time; changes when and only when status changes.                     |
+
+The primary key supplies the unique-staff-subject guarantee. A UUID-version check enforces the established application-generated UUIDv7 contract. A status check permits only `active` and `disabled`. A trigger rejects every change to `id` or `created_at`; requires each actual status transition to advance `updated_at` strictly; rejects a status transition without that timestamp advance; and rejects timestamp-only or no-op timestamp fabrication. Allowed transitions are `disabled → active`, `active → disabled`, and later reactivation `disabled → active`.
+
+The table has no outgoing FK. It stores no staff key, subject column, username, email, display name, provider subject, public-user link, authentication data, credential, password, passkey, MFA/recovery data, role, capability, scope, grant, session, or profile. Future authentication linking is a separate, separately governed relation to immutable `editorial_users.id`; no such relation is authorized here.
+
+Disabled rows remain valid historical FK targets but are ineligible for new accountable actions. Each future consumer, including KE-2, must enforce `status = 'active'` at its own database write boundary. Future FKs use `ON UPDATE RESTRICT ON DELETE RESTRICT`; no cascade may erase accountable evidence. Once referenced, disablement replaces deletion. No production hard-delete capability is authorized.
+
+The migration creates zero rows, seed rows, or bootstrap identities. Before this prerequisite, 16 of 30 Release-1 tables are physical; afterward, 17 of 30 are physical. If M6 later adds its four already-counted tables, 21 of 30 are physical. The frozen catalog remains exactly 30.
+
 ## 5.6 Prayer and calendar configuration — 5 tables
 
 | Table                        | Purpose and exact journey                                               | Essential constraints                                                                                                      | Why it cannot wait                                                                               |

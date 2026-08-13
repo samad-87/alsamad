@@ -147,22 +147,23 @@ Seeded only with decisions that are currently necessary and supported by committ
 
 As of 2026-08-08, the M6 architecture decision analysis covering REG-0001–REG-0008 has been reviewed and approved by the reviewing authority. REG-0001 and REG-0006 required an ADR under the §7 threshold; both `ADR-0001` and `ADR-0002` now exist with **Status: Accepted**, satisfying the §6 precondition for those two entries to move to `DECIDED`. The remaining six entries required no ADR and move to `DECIDED` directly on the same approval. **`DECIDED` here, as throughout this Registry, authorizes no implementation.** No entry is marked `IMPLEMENTED`: no schema exists yet, `ALSAMAD_DATABASE_ARCHITECTURE.md` §5.4.1–§5.4.4 have not been authored, and the independent M5 production-activation dependency blocking M6 implementation remains unresolved regardless of this Registry's status.
 
-| ID       | Title                                                                                      | Category          | Status  | Tier                                                                      |
-| -------- | ------------------------------------------------------------------------------------------ | ----------------- | ------- | ------------------------------------------------------------------------- |
-| REG-0001 | Editorial General Dua placement in the devotional physical model                           | Database, Admin   | DECIDED | Registry + ADR (`ADR-0001`, Accepted)                                     |
-| REG-0002 | `devotional_items` specialization depth and independent lifecycle                          | Database          | DECIDED | Registry only                                                             |
-| REG-0003 | `devotional_collections` ↔ content-item relationship cardinality and independent lifecycle | Database          | DECIDED | Registry only                                                             |
-| REG-0004 | `devotional_collections.collection_kind` closed-vocabulary source of truth                 | Database, Admin   | DECIDED | Registry only                                                             |
-| REG-0005 | Repetition-guidance storage locus and its source-evidence representation                   | Database          | DECIDED | Registry only                                                             |
-| REG-0006 | `content_translations` text-storage representation                                         | Database          | DECIDED | Registry + ADR (`ADR-0002`, Accepted)                                     |
-| REG-0007 | `content_translations` review/publication lifecycle column count                           | Database          | DECIDED | Registry only (decided alongside `ADR-0002`, which covers the same table) |
-| REG-0008 | `devotional_collection_items` membership deletion semantics                                | Database          | DECIDED | Registry only                                                             |
-| REG-0010 | In-application display and standalone redistribution rights separation                     | Database          | DECIDED | Registry + ADR (`ADR-0003`, Accepted)                                     |
-| REG-0011 | Immutable source import manifest and execution evidence separation                         | Database          | DECIDED | Registry + ADR (`ADR-0004`, Accepted)                                     |
-| REG-0012 | License-version immutability and historical license evidence                               | Database          | DECIDED | Registry + ADR (`ADR-0005`, Accepted)                                     |
-| REG-0013 | Atomic Quran release selector and publication consistency                                  | Database          | DECIDED | Registry + ADR (`ADR-0006`, Accepted)                                     |
-| REG-0014 | Knowledge Engine Phase 1 (KE-1): entity/relationship/search unification                    | Roadmap           | DECIDED | Registry only                                                             |
-| REG-0015 | Knowledge Engine Phase 2 (KE-2): durable topic vocabulary and assignments                  | Database, Roadmap | DECIDED | Registry + ADR (`ADR-0007`, Accepted)                                     |
+| ID       | Title                                                                                      | Category                    | Status  | Tier                                                                      |
+| -------- | ------------------------------------------------------------------------------------------ | --------------------------- | ------- | ------------------------------------------------------------------------- |
+| REG-0001 | Editorial General Dua placement in the devotional physical model                           | Database, Admin             | DECIDED | Registry + ADR (`ADR-0001`, Accepted)                                     |
+| REG-0002 | `devotional_items` specialization depth and independent lifecycle                          | Database                    | DECIDED | Registry only                                                             |
+| REG-0003 | `devotional_collections` ↔ content-item relationship cardinality and independent lifecycle | Database                    | DECIDED | Registry only                                                             |
+| REG-0004 | `devotional_collections.collection_kind` closed-vocabulary source of truth                 | Database, Admin             | DECIDED | Registry only                                                             |
+| REG-0005 | Repetition-guidance storage locus and its source-evidence representation                   | Database                    | DECIDED | Registry only                                                             |
+| REG-0006 | `content_translations` text-storage representation                                         | Database                    | DECIDED | Registry + ADR (`ADR-0002`, Accepted)                                     |
+| REG-0007 | `content_translations` review/publication lifecycle column count                           | Database                    | DECIDED | Registry only (decided alongside `ADR-0002`, which covers the same table) |
+| REG-0008 | `devotional_collection_items` membership deletion semantics                                | Database                    | DECIDED | Registry only                                                             |
+| REG-0010 | In-application display and standalone redistribution rights separation                     | Database                    | DECIDED | Registry + ADR (`ADR-0003`, Accepted)                                     |
+| REG-0011 | Immutable source import manifest and execution evidence separation                         | Database                    | DECIDED | Registry + ADR (`ADR-0004`, Accepted)                                     |
+| REG-0012 | License-version immutability and historical license evidence                               | Database                    | DECIDED | Registry + ADR (`ADR-0005`, Accepted)                                     |
+| REG-0013 | Atomic Quran release selector and publication consistency                                  | Database                    | DECIDED | Registry + ADR (`ADR-0006`, Accepted)                                     |
+| REG-0014 | Knowledge Engine Phase 1 (KE-1): entity/relationship/search unification                    | Roadmap                     | DECIDED | Registry only                                                             |
+| REG-0015 | Knowledge Engine Phase 2 (KE-2): durable topic vocabulary and assignments                  | Database, Roadmap           | DECIDED | Registry + ADR (`ADR-0007`, Accepted)                                     |
+| REG-0016 | Editorial Identity Foundation prerequisite                                                 | Database, Security, Roadmap | DECIDED | Registry + ADR (`ADR-0008`, Accepted)                                     |
 
 ### REG-0001 — Editorial General Dua placement in the devotional physical model
 
@@ -505,5 +506,41 @@ The Devotional endpoint is constraint-trigger validated through `content_items` 
 **Dependency truth:** Governance does not require `M5 Gate 3` PASS. This decision changes no M5 or M6 state, does not authorize M5 Gate 4/5, does not unblock M6, does not resolve Duas governance, and does not require KE-1 runtime wiring. KE-1 remains COMPLETE. Physical implementation requires this governance package to be committed and the referenced physical dependency tables to exist.
 
 **Implementation evidence:** None. Governance is decided; KE-2 implementation remains NOT STARTED.
+
+**Supersedes / Superseded by:** None.
+
+### REG-0016 — Editorial Identity Foundation prerequisite
+
+**Category:** `Database`, `Security`, `Roadmap`.
+
+**Summary:** Whether the already-counted Release-1 `editorial_users` table may be implemented before the rest of Phase 7 as a provider-independent durable human-accountability FK root, without authorizing authentication, authorization, administration, or editorial workflows.
+
+**Committed evidence:** `ALSAMAD_DATABASE_ARCHITECTURE.md` §5.5 defines `editorial_users` as staff identity independent of optional public accounts, with a unique staff subject and active/disabled lifecycle; `ALSAMAD_SECURITY_ARCHITECTURE.md` §§6 and 8 require stable dedicated staff identity separate from public accounts; `ALSAMAD_ADMIN_ARCHITECTURE.md` §§2.4, 4.1–4.2, 30–32 require attributable individual actions while keeping authentication-dependent linking separate; `REG-0015`/`ADR-0007` require accountable staff FKs before KE-2 may be implemented.
+
+**Affected architecture:** `ALSAMAD_DATABASE_ARCHITECTURE.md` §5.5.1.
+
+**Affected roadmap gate:** `M7-prerequisite / Editorial Identity Foundation`.
+
+**Opened:** 2026-08-13.
+
+**Tier rationale:** Registry + ADR. This fixes a durable Release-1 actor identity used by future cross-module content-integrity FKs and establishes a security-sensitive boundary between internal staff identity and authentication-provider identity. Reversal after accountable records reference these UUIDs would require data-shaping cross-module reconstruction and could damage historical attribution. Both §7 conditions are met; `ADR-0008` records the rationale and rejected alternatives.
+
+**Status:** `DECIDED` (2026-08-13). **ADR reference:** `ADR-0008` (Accepted).
+
+**Decision outcome:** Governance-approves in principle the early, independent implementation of exactly the existing Release-1 `editorial_users` table as an Editorial-owned, provider-independent, runtime-inert, seed-free identity root. Its four columns are exactly `id`, `status`, `created_at`, and `updated_at`. `id` is the sole durable internal staff subject: an application-generated immutable UUIDv7 primary key with no database default. No second staff key or authentication/profile attribute is introduced. `status` is `active` or `disabled`, defaults to `disabled`, permits disablement and reactivation, and is independent of authentication. Disabled identities remain valid historical FK targets but are ineligible for new accountable actions at each future consumer boundary.
+
+Future authentication identity linking may map a provider/authentication identity to `editorial_users.id` without changing that durable FK identity, but no such relation or provider subject is authorized here. Referenced identities are deletion-restricted; no cascade may erase accountable evidence. The table has no outgoing FK and contains no email, username, display name, public-user link, provider subject, credential, password, passkey, MFA, recovery, role, capability, scope, grant, session, or profile data.
+
+**Release-1/count truth:** `editorial_users` is already one of the frozen 30 Release-1 tables. Before implementation, 16 of 30 are physical; after this prerequisite, 17 of 30 are physical; if M6 later adds its four already-counted tables, 21 of 30 are physical. The historical catalog remains exactly 30.
+
+**Implementation boundary:** A later execution is limited to `src/db/schema.ts`, one mechanically numbered `drizzle/*_editorial_identity_foundation.sql`, and the Editorial Identity additions within `scripts/db-verify.mjs`. Migration `0010_devotional_content_foundation.sql` remains reserved for M6 and cannot be used, renamed, or displaced. All existing migrations remain immutable.
+
+**No implementation/runtime authorization:** This governance entry and ADR do not themselves implement the table. Implementation remains `NOT STARTED` until a later execution satisfies the Roadmap gate. No production row, bootstrap identity, authentication, authorization, runtime import, API, route, component, UI, or workflow is authorized.
+
+**Explicit exclusions:** `editorial_role_grants`, `review_records`, `publication_events`, `audit_events`, any auth-link table, public `users`/`user_identities`, credentials/passwords/passkeys/MFA/recovery/sessions, roles/capabilities/scopes/grants, staff seeds/bootstrap accounts, Admin API/routes/pages/components/UI, editorial queues/workflows, topic-management UI, content review/publication workflows, KE-2 implementation, M6/`devotional_items`, Duas, Quran/provider work, M5 Gate 4/5, Phase 7 completion, and later Knowledge Engine phases.
+
+**Dependency truth:** This prerequisite is independent of M5 and M6 and changes no provider, Quran, Duas, or runtime status. It removes only the future `editorial_users` physical blocker once implemented. `devotional_items` remains an independent hard KE-2 blocker; KE-2 implementation remains NOT STARTED. KE-1 remains COMPLETE; KE-2 governance remains COMPLETE; M5 Gate 3 remains PARTIAL; M5 Provider Import Dry Run Verified and M5 Quran Import Activated remain NOT PASS; M6 remains BLOCKED.
+
+**Implementation evidence:** None. Governance is decided; Editorial Identity Foundation implementation remains NOT STARTED.
 
 **Supersedes / Superseded by:** None.
