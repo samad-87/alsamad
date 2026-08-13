@@ -1472,7 +1472,53 @@ This section formally opens the governance track already forward-referenced twic
 
 **Independence from Quran/M5 and Duas/M6.** The `M7.0-track` is governance-independent of Phase 5's Quran provider-credential/legal gates and Phase 6's Duas/devotional gates. `M5 Gate 3` being `PARTIAL`, `M5 Quran Import Activated` being `NOT PASS`, and `M6` being `BLOCKED` neither block nor are affected by this documentation-only track. This entry changes no M5, M6, Quran, Duas, or provider status recorded elsewhere in this document.
 
-**Status.** `M7.0-track` gate structure recorded. `M7.0` remains documentation-only and not approved for implementation. `REG-0014` (`ALSAMAD_DECISION_REGISTRY.md`) approves implementation of exactly `KE-1` — the schema-free, runtime-inert Phase-1 entity/relationship/search-matching file boundary it records — and nothing else: the Duas adapter, `topics`/`collections`/`references`, every later Knowledge Engine phase, and all database/schema/migration/UI/route/AI work remain documentation-only and NOT AUTHORIZED, and no prototype file outside KE-1's exact boundary carries any authority merely by existing. This authorization takes effect once this governance documentation is committed; it does not itself mark KE-1 implementation complete, and no KE-1 code has been staged or committed by this entry. `M5 Gate 3` remains `PARTIAL`, `M5 Quran Import Activated` remains `NOT PASS`, `M6` remains `BLOCKED`, and Duas' independently-governed status is unchanged.
+**Status.** `M7.0-track` gate structure is recorded. `REG-0014` authorized exactly KE-1, which is now COMPLETE at `e073879`; it remains runtime-inert. `REG-0015`/`ADR-0007` governance-approve exactly KE-2's later additive two-table contract, while KE-2 implementation remains NOT STARTED. Phase 3 onward, Duas, collections/references, generic persisted knowledge edges, runtime UI/search wiring, and AI remain NOT AUTHORIZED. No prototype outside an explicit gate boundary carries authority merely by existing. `M5 Gate 3` remains `PARTIAL`, `M5 Provider Import Dry Run Verified` and `M5 Quran Import Activated` remain `NOT PASS`, `M6` remains `BLOCKED`, and Duas' independently governed status is unchanged.
+
+#### M7.0-track / KE-2 — Controlled Topic Vocabulary and Content Assignment Foundation
+
+**Governance status.** `REG-0015` and `ADR-0007` approve the architecture and physical contract for KE-2. KE-1 remains COMPLETE at `e073879`. KE-2 implementation is **NOT STARTED** and requires a separate execution task against this exact gate; this documentation does not authorize migration execution, schema/code implementation, staging, commit, push, seed data, or runtime wiring.
+
+**Objective.** Add exactly the later additive, non-Release-1 `topics` and `content_topics` tables defined by `ALSAMAD_DATABASE_ARCHITECTURE.md` §10.1. The package owns a controlled localized topic vocabulary and reviewed assignments to either `quran_ayahs.id` or authenticated Adhkar-only `devotional_items.id`. It owns no canonical religious content.
+
+**Dependencies.** Governance does not require `M5 Gate 3` PASS and may be completed now. Later schema execution requires the referenced `locales`, `quran_ayahs`, `devotional_items`, `content_items`, and `editorial_users` tables to exist and their governing migrations/gates to remain green. Draft assignments require canonical endpoints but may precede their publication eligibility. Approval and every future read require current canonical-owner eligibility: published Quran structure plus the matching active Arabic release's full §5.3.12 live chain and referenced-ayah text, or an Adhkar `dhikr` with a published `source_verified` revision. The KE-2 migration itself remains empty and may not create canonical content. KE-1 runtime wiring is not a dependency. This gate does not change `M5 Gate 3 = PARTIAL`, does not authorize M5 Gate 4/5, does not unblock M6, and does not resolve Duas governance.
+
+**Exact future implementation boundary.** A future KE-2 execution may touch only:
+
+```
+src/db/schema.ts
+drizzle/<next-authorized-forward-number>_ke2_topics.sql
+src/lib/knowledge/topics.ts
+src/lib/knowledge/topic-repository.ts
+tests/knowledge-topic-layer.test.mjs
+scripts/db-verify.mjs
+```
+
+The migration number is assigned mechanically at execution from the then-authoritative forward-only sequence; it is not an architectural choice and may not reuse or displace `0010_devotional_content_foundation.sql`. The existing uncommitted `src/lib/knowledge/topics.ts` is prototype evidence only and must conform to §10.1 before inclusion. No other prototype file is authorized.
+
+**Implementation constraints.** The migration is one atomic empty-schema unit for exactly two tables, their authorized constraints, triggers, and indexes. It is forward-only; every prior migration remains byte-unchanged. The repository layer is the only code permitted to access the two tables and must have no network/provider side effect. No application route, component, runtime script composition root, search implementation, related-content surface, editorial/admin UI, AI consumer, or feature flag is introduced.
+
+**Acceptance contract.** A KE-2 implementation commit may be made only when all of the following pass:
+
+1. exactly `topics` and `content_topics` are added and classified outside the historical Release-1 30-table catalog;
+2. prior migrations are byte-unchanged and the new migration is forward-only, atomic, and empty;
+3. real PostgreSQL verifies UUIDv7 IDs, immutable unique lowercase topic keys, locale-key/name JSON integrity, status/review checks, timestamps, all FKs, exactly-one endpoint enforcement, and deletion restrictions;
+4. exact partial unique indexes `WHERE quran_ayah_id IS NOT NULL AND review_state <> 'rejected'` and `WHERE devotional_item_id IS NOT NULL AND review_state <> 'rejected'` enforce at most one current assignment per pair; rejected rows are terminal immutable history, and a new-identity replacement for the same pair is accepted only when no other current row exists;
+5. invalid/missing topics, Quran ayahs, Devotional items, non-dhikr Devotional content, both endpoints, and neither endpoint are rejected; draft may precede publication eligibility, but approval fails unless the Quran ayah/surah are published and the full current Arabic release eligibility chain passes, or the Adhkar item has a published `source_verified` revision;
+6. advisory weight accepts only `0.000` through `1.000` and cannot affect authenticity, verification, or publication;
+7. curator/reviewer integrity, reviewer separation for approval, and approved/rejected evidence pairing are enforced; a `BEFORE UPDATE` guard rejects every update to an already-rejected row, including state, weight, topic/endpoints, curator/reviewer, notes/evidence, timestamps, and all other columns;
+8. synthetic fixtures are non-religious, transaction-scoped, and rolled back; zero topic rows and zero religious-content assignment rows are seeded;
+9. all committed KE-2 files contain zero Duas dependency/reference and no collection/reference/generic-edge implementation;
+10. `src/app/**`, `src/components/**`, and runtime scripts contain zero KE-2 import; absence remains an honest empty/fail-closed state;
+11. targeted KE-2 tests and all KE-1 tests pass;
+12. `npm run typecheck`, `npm run lint`, `npm test`, targeted Prettier check, production build, and `git diff --check` pass;
+13. real PostgreSQL concurrency tests prove both mutation paths acquire the one fixed transaction-scoped lock `pg_advisory_xact_lock(hashtextextended('alsamad:ke2:locale-integrity', 0))` at required `READ COMMITTED`: concurrent multi-row topic writes using locale sets `{a,b}` and `{b,a}` do not deadlock from KE-2 locale-integrity locking; topic insert/update versus deletion cannot both commit a dangling reference in either transaction ordering; referenced deletion fails; lawful unreferenced deletion succeeds; unsupported isolation levels fail closed; the lock is automatically released at commit/rollback; and normal read-only topic queries acquire no advisory lock;
+14. a future read-model test proves topic/assignment approval alone is insufficient: the same canonical-owner eligibility predicate is re-derived at read time, and Quran withdrawal/unpublication/release or rights ineligibility and Adhkar withdrawal/supersession/verification loss fail closed without mutating the assignment or blocking the owner transition;
+15. rejected-assignment PostgreSQL tests prove rejected-to-draft, rejected-to-approved, weight changes, reviewer/evidence/notes changes, timestamp changes, and every other update fail; insertion of a new replacement for the same pair succeeds, while the partial indexes prevent two non-rejected rows for that pair;
+16. the staged set equals the exact boundary above with the mechanically assigned migration filename, and the complete staged diff contains no runtime, seed, provider, credential, M5 Gate 4/5, Duas, or later-phase work.
+
+**Explicit exclusions.** `src/lib/knowledge/collections.ts`, `src/lib/knowledge/references.ts`, `src/lib/knowledge/adapters/duas.ts`, generic persisted `knowledge_edges`, Articles/Guides, Hadith, Talibeen, Duas, entities, topic-to-topic edges, AI suggestions, semantic search, the AI Search Assistant, runtime search expansion, related-content UI, editorial/admin UI, topic/assignment seeds, provider/network/credential work, M5 Gate 4/5, canonical ownership changes, and Phase 3 onward remain NOT AUTHORIZED.
+
+**Completion evidence.** Only a later implementation commit satisfying every acceptance item may mark `M7.0-track / KE-2` COMPLETE. Governance approval alone must continue to report `KE-2 implementation = NOT STARTED`.
 
 ## Phase 7: Editorial administration workflows
 

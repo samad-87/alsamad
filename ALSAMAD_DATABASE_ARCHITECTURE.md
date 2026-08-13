@@ -884,6 +884,69 @@ Stable UUIDs and canonical keys for works, editions, passages, content items, lo
 
 All expansions use new tables, indexes, foreign keys, and views. They do not rewrite Release 1 canonical religious identities.
 
+## 10.1 KE-2 later additive package: controlled topics and content assignments
+
+**Classification and authority.** `REG-0015` and `ADR-0007` approve the physical design in this section for later implementation under the Roadmap's `M7.0-track / KE-2` gate. This is a non-Release-1 additive package owned by the `knowledge` module. Its two tables are not part of, and do not change, the frozen 30-table Release-1 catalog. This section authorizes no migration or implementation by itself.
+
+KE-2 adds exactly `topics` and `content_topics`, in that dependency order. It stores no Quran text, devotional text, source quotation, translation, or copied canonical identity. Quran and Devotional retain sole ownership of their canonical rows; Editorial retains staff identity.
+
+### 10.1.1 `topics`
+
+| Column            | PostgreSQL type | Nullability and default               | Contract                                                            |
+| ----------------- | --------------- | ------------------------------------- | ------------------------------------------------------------------- |
+| `id`              | `uuid`          | Required; no database default         | Application-generated UUIDv7 primary key; immutable.                |
+| `canonical_key`   | `varchar(160)`  | Required                              | Unique lowercase stable topic identity; immutable.                  |
+| `localized_names` | `jsonb`         | Required                              | Non-empty locale-code-to-display-name object; no religious content. |
+| `status`          | `varchar(16)`   | Required; default `'draft'`           | Closed values `draft`, `approved`, `retired`.                       |
+| `created_by`      | `uuid`          | Required                              | FK to `editorial_users.id`; update/delete `RESTRICT`; immutable.    |
+| `approved_by`     | `uuid`          | Nullable                              | FK to `editorial_users.id`; update/delete `RESTRICT`.               |
+| `approved_at`     | `timestamptz`   | Nullable                              | UTC approval time.                                                  |
+| `created_at`      | `timestamptz`   | Required; default `current_timestamp` | UTC creation time; immutable.                                       |
+| `updated_at`      | `timestamptz`   | Required; default `current_timestamp` | UTC last authorized metadata update.                                |
+
+Constraints are primary key `id`; `UNIQUE (canonical_key)`; non-blank lowercase canonical-key form; `jsonb_typeof(localized_names) = 'object'`; `localized_names <> '{}'::jsonb`; the closed status vocabulary; and paired approval evidence. `approved` requires non-null `approved_by` and `approved_at`; `draft` requires both null; `retired` preserves any evidence already recorded and cannot fabricate approval evidence.
+
+A deferred constraint trigger expands `localized_names` with `jsonb_each` and rejects any key that does not equal an existing `locales.code`, or any value that is not a JSON string whose decoded text is non-blank. The existing `enforce_locale_identity_immutability` trigger in `0001_global_locales_geography.sql` makes `locales.code` update-immutable. The M3 contract does not prohibit deletion of an otherwise unreferenced locale, so KE-2 does not invent that prohibition.
+
+JSONB locale references and locale deletion use one database-owned serialization protocol. Every operation that can affect the KE-2 `topics.localized_names` ↔ `locales.code` invariant acquires the single transaction-scoped advisory lock `pg_advisory_xact_lock(hashtextextended('alsamad:ke2:locale-integrity', 0))`. The key string, seed, and derivation are fixed and identical on both paths. The deferred topic insert/update constraint trigger acquires this global lock before validating any `localized_names` key against `locales.code`. A `BEFORE DELETE` trigger on `locales` acquires the same global lock before testing `EXISTS (SELECT 1 FROM topics WHERE localized_names ? OLD.code)`. Existing locale-code update immutability requires no additional mutation path.
+
+Both trigger functions begin by rejecting unless `current_setting('transaction_isolation') = 'read committed'`, the repository's standard isolation, so validation executed after a waited lock observes the preceding committed mutation rather than a stale transaction snapshot. The lock lasts through commit or rollback and is then released automatically. One global key serializes this small set of editorial/control-plane mutations, eliminates dependence on row or deferred-event order, prevents cross-row advisory-lock deadlocks, and closes topic insert/update versus locale-delete races. Normal read-only topic or locale queries never acquire it. Referenced deletion fails; deletion of a locale with no topic reference remains allowed subject to every pre-existing M3 FK/lifecycle rule. The deliberately coarse lock adds no table and does not broaden locale lifecycle. Missing requested-locale text resolves only through the existing locale fallback contract and otherwise fails closed; no label is inferred.
+
+The unique constraint supplies the canonical-key index. An index on `status` supports approved-vocabulary reads. No search/vector/full-text index is authorized. `id`, `canonical_key`, `created_by`, and `created_at` are immutable after insert. Renaming changes `localized_names`; correcting canonical identity creates a replacement topic and retires the prior row. Delete is restricted while `content_topics` references the topic. Approved or retired rows are not hard-deleted by ordinary application writes.
+
+### 10.1.2 `content_topics`
+
+| Column               | PostgreSQL type | Nullability and default               | Contract                                                                                            |
+| -------------------- | --------------- | ------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `id`                 | `uuid`          | Required; no database default         | Application-generated UUIDv7 primary key; immutable.                                                |
+| `topic_id`           | `uuid`          | Required                              | FK to `topics.id`; update/delete `RESTRICT`; immutable.                                             |
+| `quran_ayah_id`      | `uuid`          | Nullable                              | FK to `quran_ayahs.id`; update/delete `RESTRICT`; immutable.                                        |
+| `devotional_item_id` | `uuid`          | Nullable                              | FK to `devotional_items.id`; update/delete `RESTRICT`; immutable.                                   |
+| `weight`             | `numeric(4,3)`  | Required; default `1.000`             | Advisory ordering weight from `0.000` through `1.000`; never authenticity or publication authority. |
+| `review_state`       | `varchar(16)`   | Required; default `'draft'`           | Closed values `draft`, `approved`, `rejected`.                                                      |
+| `curated_by`         | `uuid`          | Required                              | FK to `editorial_users.id`; update/delete `RESTRICT`; immutable creation responsibility.            |
+| `reviewed_by`        | `uuid`          | Nullable                              | FK to `editorial_users.id`; update/delete `RESTRICT`.                                               |
+| `reviewed_at`        | `timestamptz`   | Nullable                              | UTC review time.                                                                                    |
+| `review_notes`       | `text`          | Nullable                              | Optional non-blank review rationale; no religious payload.                                          |
+| `created_at`         | `timestamptz`   | Required; default `current_timestamp` | UTC creation time; immutable.                                                                       |
+| `updated_at`         | `timestamptz`   | Required; default `current_timestamp` | UTC last authorized review/weight update.                                                           |
+
+The endpoint check is exactly `(quran_ayah_id IS NOT NULL)::integer + (devotional_item_id IS NOT NULL)::integer = 1`. Both absent and both present fail. This is intentionally two real FKs, not a text-only polymorphic endpoint. KE-2 supports Quran ayahs and authenticated Adhkar items only: a deferred constraint trigger follows `devotional_items.content_item_id` to `content_items` and requires `owning_module = 'devotional'` and `content_type = 'dhikr'`. Surahs, collections, authentic Dua, Editorial General Dua, Articles/Guides, Hadith, Talibeen, and future module kinds are not valid KE-2 endpoints.
+
+Constraints also enforce `weight BETWEEN 0.000 AND 1.000`; the closed review-state vocabulary; non-blank `review_notes` when present; paired `reviewed_by`/`reviewed_at`; review evidence absent for `draft` and required for `approved`/`rejected`; and `reviewed_by <> curated_by` for `approved`. A draft assignment needs only valid FKs and endpoint classification. On every insert or update that would leave `review_state = 'approved'`, a deferred constraint trigger must fail closed unless the canonical owner currently proves eligibility: a Quran endpoint requires the referenced `quran_ayahs` row and its `quran_surahs` parent to have `publication_state = 'published'` and requires a currently active Arabic Quran release for that surah's `work_id` whose full live eligibility chain passes §5.3.12, including eligible text for the referenced ayah; an Adhkar endpoint requires the referenced `devotional_items`/`content_items` chain to remain `owning_module = 'devotional'` and `content_type = 'dhikr'` and requires at least one `content_revisions` row for that content item with `publication_state = 'published'` and `verification_state = 'source_verified'`. Missing evidence rejects approval. The trigger reads and locks the matched owner rows in the approval transaction, stores no duplicate publication or verification status in KE-2, and does not block later canonical-owner safety transitions after that transaction commits.
+
+Duplicate prevention permits immutable rejected history but at most one current assignment per canonical pair. The exact partial indexes are `UNIQUE (topic_id, quran_ayah_id) WHERE quran_ayah_id IS NOT NULL AND review_state <> 'rejected'` and `UNIQUE (topic_id, devotional_item_id) WHERE devotional_item_id IS NOT NULL AND review_state <> 'rejected'`. A rejected row may coexist with a new draft or approved replacement having its own `id` and review lifecycle; any number of historical rejected rows may coexist. A `BEFORE UPDATE` guard rejects every update when `OLD.review_state = 'rejected'`, without exception for `updated_at`, weight, endpoints, topic, curator/reviewer, notes/evidence, or any other column. A rejected row therefore cannot return to draft/approved or be rewritten in place; correction inserts a new row. The partial indexes prevent two concurrent current replacements for the same pair from both committing. Additional indexes are the two non-null endpoint indexes and `(topic_id, review_state)`.
+
+Future consumers may read only assignments with `review_state = 'approved'`, whose topic has `status = 'approved'`, and whose canonical endpoint still passes the same owner-controlled eligibility predicate used at approval. Topic/assignment approval alone is never sufficient. Quran withdrawal, unpublication, release deactivation, license revocation/expiry, or other §5.3.12 eligibility loss, and Adhkar withdrawal, supersession, or absence of a currently published `source_verified` revision, immediately make the assignment ineligible for reads without mutating or deleting its historical KE-2 row. Reads fail closed; canonical owners remain free to perform their governed safety transitions. KE-2 itself adds no runtime consumer.
+
+`id`, `topic_id`, both endpoint columns, `curated_by`, and `created_at` are immutable. Incorrect assignments are rejected and replaced rather than retargeted; rejected rows are immutable historical review evidence. Foreign-key deletion is `RESTRICT`; review history is preserved. The initial migration creates zero rows. All verification data is synthetic, non-religious, transaction-scoped, and rolled back.
+
+### 10.1.3 Migration and dependency rules
+
+KE-2 uses one new atomic forward-only migration after `locales`, `content_items`, `quran_ayahs`, `devotional_items`, and `editorial_users` physically exist. Migration `0010` remains reserved for M6 and is not reassigned. Committed migrations `0000`–`0009` and all intervening Release-1 migrations remain byte-unchanged. Failure rolls back both KE-2 tables, triggers, constraints, and indexes together; production uses no destructive down migration.
+
+No topic or assignment seed is authorized. Absence of the schema before its gate, or absence of approved rows after it, is an honest empty state. Runtime wiring, search expansion, related-content UI, admin tooling, AI, network/provider access, and later Knowledge Engine phases require separate authorization.
+
 # 11. Explicitly Rejected Release 1 Fragmentation
 
 The following former proposals do not remain physical Release 1 tables:

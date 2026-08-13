@@ -147,21 +147,22 @@ Seeded only with decisions that are currently necessary and supported by committ
 
 As of 2026-08-08, the M6 architecture decision analysis covering REG-0001–REG-0008 has been reviewed and approved by the reviewing authority. REG-0001 and REG-0006 required an ADR under the §7 threshold; both `ADR-0001` and `ADR-0002` now exist with **Status: Accepted**, satisfying the §6 precondition for those two entries to move to `DECIDED`. The remaining six entries required no ADR and move to `DECIDED` directly on the same approval. **`DECIDED` here, as throughout this Registry, authorizes no implementation.** No entry is marked `IMPLEMENTED`: no schema exists yet, `ALSAMAD_DATABASE_ARCHITECTURE.md` §5.4.1–§5.4.4 have not been authored, and the independent M5 production-activation dependency blocking M6 implementation remains unresolved regardless of this Registry's status.
 
-| ID       | Title                                                                                      | Category        | Status  | Tier                                                                      |
-| -------- | ------------------------------------------------------------------------------------------ | --------------- | ------- | ------------------------------------------------------------------------- |
-| REG-0001 | Editorial General Dua placement in the devotional physical model                           | Database, Admin | DECIDED | Registry + ADR (`ADR-0001`, Accepted)                                     |
-| REG-0002 | `devotional_items` specialization depth and independent lifecycle                          | Database        | DECIDED | Registry only                                                             |
-| REG-0003 | `devotional_collections` ↔ content-item relationship cardinality and independent lifecycle | Database        | DECIDED | Registry only                                                             |
-| REG-0004 | `devotional_collections.collection_kind` closed-vocabulary source of truth                 | Database, Admin | DECIDED | Registry only                                                             |
-| REG-0005 | Repetition-guidance storage locus and its source-evidence representation                   | Database        | DECIDED | Registry only                                                             |
-| REG-0006 | `content_translations` text-storage representation                                         | Database        | DECIDED | Registry + ADR (`ADR-0002`, Accepted)                                     |
-| REG-0007 | `content_translations` review/publication lifecycle column count                           | Database        | DECIDED | Registry only (decided alongside `ADR-0002`, which covers the same table) |
-| REG-0008 | `devotional_collection_items` membership deletion semantics                                | Database        | DECIDED | Registry only                                                             |
-| REG-0010 | In-application display and standalone redistribution rights separation                     | Database        | DECIDED | Registry + ADR (`ADR-0003`, Accepted)                                     |
-| REG-0011 | Immutable source import manifest and execution evidence separation                         | Database        | DECIDED | Registry + ADR (`ADR-0004`, Accepted)                                     |
-| REG-0012 | License-version immutability and historical license evidence                               | Database        | DECIDED | Registry + ADR (`ADR-0005`, Accepted)                                     |
-| REG-0013 | Atomic Quran release selector and publication consistency                                  | Database        | DECIDED | Registry + ADR (`ADR-0006`, Accepted)                                     |
-| REG-0014 | Knowledge Engine Phase 1 (KE-1): entity/relationship/search unification                    | Roadmap         | DECIDED | Registry only                                                             |
+| ID       | Title                                                                                      | Category          | Status  | Tier                                                                      |
+| -------- | ------------------------------------------------------------------------------------------ | ----------------- | ------- | ------------------------------------------------------------------------- |
+| REG-0001 | Editorial General Dua placement in the devotional physical model                           | Database, Admin   | DECIDED | Registry + ADR (`ADR-0001`, Accepted)                                     |
+| REG-0002 | `devotional_items` specialization depth and independent lifecycle                          | Database          | DECIDED | Registry only                                                             |
+| REG-0003 | `devotional_collections` ↔ content-item relationship cardinality and independent lifecycle | Database          | DECIDED | Registry only                                                             |
+| REG-0004 | `devotional_collections.collection_kind` closed-vocabulary source of truth                 | Database, Admin   | DECIDED | Registry only                                                             |
+| REG-0005 | Repetition-guidance storage locus and its source-evidence representation                   | Database          | DECIDED | Registry only                                                             |
+| REG-0006 | `content_translations` text-storage representation                                         | Database          | DECIDED | Registry + ADR (`ADR-0002`, Accepted)                                     |
+| REG-0007 | `content_translations` review/publication lifecycle column count                           | Database          | DECIDED | Registry only (decided alongside `ADR-0002`, which covers the same table) |
+| REG-0008 | `devotional_collection_items` membership deletion semantics                                | Database          | DECIDED | Registry only                                                             |
+| REG-0010 | In-application display and standalone redistribution rights separation                     | Database          | DECIDED | Registry + ADR (`ADR-0003`, Accepted)                                     |
+| REG-0011 | Immutable source import manifest and execution evidence separation                         | Database          | DECIDED | Registry + ADR (`ADR-0004`, Accepted)                                     |
+| REG-0012 | License-version immutability and historical license evidence                               | Database          | DECIDED | Registry + ADR (`ADR-0005`, Accepted)                                     |
+| REG-0013 | Atomic Quran release selector and publication consistency                                  | Database          | DECIDED | Registry + ADR (`ADR-0006`, Accepted)                                     |
+| REG-0014 | Knowledge Engine Phase 1 (KE-1): entity/relationship/search unification                    | Roadmap           | DECIDED | Registry only                                                             |
+| REG-0015 | Knowledge Engine Phase 2 (KE-2): durable topic vocabulary and assignments                  | Database, Roadmap | DECIDED | Registry + ADR (`ADR-0007`, Accepted)                                     |
 
 ### REG-0001 — Editorial General Dua placement in the devotional physical model
 
@@ -465,5 +466,44 @@ This entry explicitly does **not** approve: `src/lib/knowledge/adapters/duas.ts`
 **Independence from Quran/M5, Duas/M6.** This entry changes no M5 or M6 status: `M5 Gate 3` remains `PARTIAL`; `M5 Provider Import Dry Run Verified` and `M5 Quran Import Activated` remain `NOT PASS`; `M6` remains `BLOCKED`; Duas' independently-governed status is unchanged. KE-1 code authorization does not require `M5 Quran Import Activated` to PASS — but any later runtime surface built on KE-1 must still resolve Quran content honestly (`empty`/`pending`/`available`), never fabricating content when upstream Quran data is unavailable, exactly as every other Quran-adjacent surface in this codebase already does.
 
 **Implementation evidence:** None. This entry authorizes implementation; it does not itself constitute or claim implementation. No `src/lib/knowledge/**` or `tests/knowledge-*.test.mjs` file is staged or committed by this entry.
+
+**Supersedes / Superseded by:** None.
+
+### REG-0015 — Knowledge Engine Phase 2 (KE-2): durable topic vocabulary and content assignments
+
+**Category:** `Database`, `Roadmap`.
+
+**Summary:** Whether Phase 2 may adopt a durable, curated topic vocabulary and FK-enforced Quran/Adhkar-to-topic assignments, and how that package remains truthful to the frozen 30-table Release-1 catalog.
+
+**Committed evidence:** `ALSAMAD_KNOWLEDGE_ENGINE_ARCHITECTURE.md` §6.2 layers 1–2 and §16 Phase 2 specify a controlled topic vocabulary plus content-to-topic edges for Quran and Devotional content; `ALSAMAD_DATABASE_ARCHITECTURE.md` §§1, 2.1, 2.3, and 10 classify the Knowledge Graph as zero Release-1 tables while permitting separately approved additive future packages; KE-1 implementation `e073879` proves stable owning-module identity without authorizing persistence. Prototype `src/lib/knowledge/topics.ts` is evidence only and is not authority.
+
+**Affected architecture:** `ALSAMAD_DATABASE_ARCHITECTURE.md` §10.1 and `ALSAMAD_KNOWLEDGE_ENGINE_ARCHITECTURE.md` §§6.3/16 Phase 2.
+
+**Affected roadmap gate:** `M7.0-track / KE-2 — Controlled Topic Vocabulary and Content Assignment Foundation`.
+
+**Opened:** 2026-08-13.
+
+**Tier rationale:** Registry + ADR. The decision is architecturally material because it introduces persistent cross-module classification state, two physical tables, and a new `knowledge` ownership boundary. Reversal after stable topic IDs and curated religious-content assignments exist would be data-shaping, content-integrity sensitive, and require cross-module migration/reconstruction. Both prongs of §7 are met. `ADR-0007` records the physical rationale and rejected alternatives.
+
+**Status:** `DECIDED` (2026-08-13). **ADR reference:** `ADR-0007` (Accepted).
+
+**Decision outcome:** Governance-approves in principle exactly KE-2's later additive, non-Release-1 two-table package:
+
+1. `topics`, owned by `knowledge`, with UUIDv7 identity, immutable unique lowercase canonical key, locale-key-validated localized names, draft/approved/retired lifecycle, and accountable human creation/approval metadata;
+2. `content_topics`, owned by `knowledge`, with one topic FK and exactly one canonical endpoint FK — `quran_ayahs.id` or Adhkar-only `devotional_items.id` — plus advisory weight, draft/approved/rejected review state, curator/reviewer evidence, one non-rejected current assignment per canonical pair, immutable rejected history with new-identity replacement, and restrictive deletion.
+
+The Devotional endpoint is constraint-trigger validated through `content_items` as `owning_module = 'devotional'` and `content_type = 'dhikr'`; Duas cannot participate. Draft assignments may precede publication eligibility, but approval fails closed unless Quran owner state is published and currently release-eligible under Database Architecture §5.3.12, or the Adhkar owner has a published `source_verified` revision. Future reads must revalidate the same canonical-owner predicate, so later withdrawal, unpublication, revocation, expiry, deactivation, supersession, or verification loss stops use without copying owner state or blocking canonical safety transitions. Locale-key validation and locale deletion use one identical global transaction-scoped locale-integrity advisory lock under required `READ COMMITTED`, eliminating row-order deadlocks and preventing concurrent JSONB reference creation and deletion from both committing while preserving lawful deletion of an unreferenced locale. A `BEFORE UPDATE` guard freezes every column of a rejected assignment; replacement requires a new row. The two real nullable FKs plus an exactly-one check replace any unvalidated polymorphic text endpoint. No canonical Quran or Devotional content is copied or re-owned.
+
+**Release-1 classification:** Neither table belongs to the frozen Release-1 30. They are a separately approved later additive package under Database Architecture §10.1. The historical 30-table count remains exact and unchanged. Migration execution must wait until its referenced Release-1 dependencies exist, use a new forward-only number assigned from the then-authoritative sequence, and leave every prior migration byte-unchanged. It may not take M6's reserved `0010`.
+
+**Implementation boundary:** A later execution is limited to the exact Roadmap boundary: `src/db/schema.ts`; one mechanically numbered `drizzle/*_ke2_topics.sql`; `src/lib/knowledge/topics.ts`; `src/lib/knowledge/topic-repository.ts`; `tests/knowledge-topic-layer.test.mjs`; and the KE-2 additions within `scripts/db-verify.mjs`. Existing prototype content must conform before inclusion and has no independent authority.
+
+**No implementation/runtime/data authorization:** This entry does not authorize or claim a migration, schema/code/test change, seed row, topic, religious-content assignment, runtime import, search expansion, related-content UI, editorial/admin UI, provider/network/credential work, or deployment. Implementation is `NOT STARTED` until a separate execution satisfies every Roadmap acceptance condition. Empty/unavailable state must remain honest and fail closed.
+
+**Explicit exclusions:** `src/lib/knowledge/collections.ts`, `src/lib/knowledge/references.ts`, `src/lib/knowledge/adapters/duas.ts`, generic persisted `knowledge_edges`, collections/references, Duas, Articles/Guides, Hadith, Talibeen, entities, topic-to-topic edges, AI suggestions, semantic search, the AI Search Assistant, runtime search expansion, related-content UI, editorial/admin UI, seed data, provider/network/credentials, M5 Gate 4/5, canonical ownership changes, and Phase 3 onward.
+
+**Dependency truth:** Governance does not require `M5 Gate 3` PASS. This decision changes no M5 or M6 state, does not authorize M5 Gate 4/5, does not unblock M6, does not resolve Duas governance, and does not require KE-1 runtime wiring. KE-1 remains COMPLETE. Physical implementation requires this governance package to be committed and the referenced physical dependency tables to exist.
+
+**Implementation evidence:** None. Governance is decided; KE-2 implementation remains NOT STARTED.
 
 **Supersedes / Superseded by:** None.
