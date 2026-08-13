@@ -1264,6 +1264,63 @@ provider_network_validation=not_performed
 
 **Dependency and handoff:** depends only on M5.2B's already-committed `env.ts` functions; adds no new credential-handling logic. Completing this unit later still does not satisfy the legal/license, source-selection, scholarly, provider dry-run, or production-activation gate, and does not authorize any Production access or any provider network call. `M5 Provider Import Dry Run Verified` and `M5 Quran Import Activated` remain NOT PASS, and M6 remains blocked, independent of this contract.
 
+### M5.2D — Pre-Production Token Transport and Offline Validation Tooling
+
+This subsection authorizes one later **offline implementation and synthetic-verification unit only** behind M5.2B's already-accepted injected `QuranFoundationTokenTransport` boundary. It supplies the missing real-HTTP transport shape and an offline-testable validation CLI, but it authorizes no real credential use, token request, or other provider/network access. Implementation remains **NOT STARTED** until a separate execution task applies this exact boundary.
+
+**Official protocol and environment mapping.** Quran.Foundation's official Content API documentation defines Pre-Production as `prelive`; ALSAMAD continues to represent that environment internally as `sandbox`, without renaming the committed credential keys. The fixed authentication operation for this unit is `POST https://prelive-oauth2.quran.foundation/oauth2/token`, using OAuth2 `client_credentials`, required scope `content`, HTTP Basic authentication with `client_id:client_secret`, `Content-Type: application/x-www-form-urlencoded`, and exactly `grant_type=client_credentials` plus `scope=content` in the form body. The response fields validated are `access_token`, `token_type`, `expires_in`, and `scope`; this Client Credentials flow has no refresh token. Authority: Quran.Foundation's official [Manual Authentication for Content APIs](https://api-docs.quran.foundation/docs/quickstart/manual-authentication/), [Content APIs OAuth2 Quickstart](https://api-docs.quran.foundation/docs/quickstart/), [Token Management for Content APIs](https://api-docs.quran.foundation/docs/quickstart/token-management/), and [Content APIs v4 authentication reference](https://api-docs.quran.foundation/docs/content_apis_versioned/4.0.0/content-apis/).
+
+**Exact future implementation boundary.** A later M5.2D implementation may change only:
+
+```text
+src/lib/providers/quran-foundation/token-transport.ts
+scripts/quran-token-check.mjs
+tests/quran-import/token-transport.test.mjs
+tests/quran-import/token-check-cli.test.mjs
+package.json
+```
+
+`package.json` may receive exactly one command for the validation CLI and no dependency or unrelated change. `src/lib/providers/quran-foundation/adapter.ts`, `types.ts`, `env.ts`, `.env.example`, `package-lock.json`, and every other file remain outside the boundary. If implementation proves another file necessary, work must stop for governance-boundary reassessment.
+
+**Transport contract.** The new transport is server-only and Pre-Production-only. It accepts only ALSAMAD `sandbox` credentials for this unit and rejects any other environment before reading Production credentials or starting network work. It uses only the fixed official endpoint above; issues exactly one `POST` per validation attempt; constructs HTTP Basic authentication from the supplied credentials; sends the exact form Content-Type, grant, and scope; applies a finite timeout; performs no automatic retry; and rejects a redirect or final response origin different from `https://prelive-oauth2.quran.foundation`. It fails closed on timeout, network error, non-2xx status, malformed JSON, an oversized bounded response, blank/missing `access_token`, non-positive/non-finite/non-integer `expires_in`, a `token_type` other than case-insensitive `bearer`, or a response scope that does not contain `content`. After validation it narrows the response to exactly `{ accessToken, expiresInSeconds }` through the existing `QuranFoundationTokenTransport` abstraction. Raw response bodies and sensitive material never cross that boundary or appear in errors/evidence.
+
+This one-attempt tooling does not implement later runtime token management: no refresh token, early-renewal scheduler, shared cache, request-stampede coordination, or Content API `401` retry belongs here. The existing adapter may retain the returned token only in its process-local instance memory until immediate closure; no durable cache is authorized.
+
+**CLI contract.** `scripts/quran-token-check.mjs` is a dedicated server-only, offline-testable composition boundary. It must require `QURAN_FOUNDATION_ENVIRONMENT=sandbox`; invoke the existing structural credential validation; instantiate only the dedicated Pre-Production transport; call `QuranFoundationAdapter.acquireAccessToken()` exactly once; reduce the outcome to the safe evidence fields below without inspecting token contents; close the adapter immediately; and exit `0` only after a successful, structurally valid exchange. It rejects Production before Production credential access or network activity. It must not call any Content API or database, `discoverResources()`, `fetchResourceMetadata()`, `fetchBatch()`, or `getVersionToken()`; create a manifest/import artifact; inspect, print, hash, persist, or otherwise derive evidence from token/credential material; or retry.
+
+**Offline synthetic verification contract.** M5.2D implementation and tests perform zero provider/network access and use synthetic credentials plus an injected/mock HTTP operation only. Transport tests must prove: the exact Pre-Production URL; one `POST`; Basic authentication from synthetic values; exact form Content-Type, `grant_type=client_credentials`, and `scope=content`; Production rejection before network; finite-timeout abort; zero retry; redirect/cross-origin rejection; safe non-2xx failure; malformed/oversized-response failure; rejection of missing/blank access token, invalid expiry, non-bearer token type, and missing/incompatible scope; valid narrowing to only `accessToken` and `expiresInSeconds`; and complete sensitive-value redaction from errors.
+
+CLI tests must prove: an invalid selector fails before network; Production fails before credential access/network; invalid synthetic sandbox credentials fail before network; valid synthetic credentials invoke exactly one injected request; PASS evidence is safe; FAIL evidence is safe and exits nonzero; discovery/resource/import/database paths are unreachable; adapter closure discards token state; and no M5 gate status changes. Existing M5.2B adapter, credential, memory-only lifecycle, environment-isolation, error-redaction, expiry, and close tests remain unchanged and green. Typecheck, lint, focused tests, full tests, targeted Prettier, production build, and `git diff --check` must pass, and the staged set must equal the five-file boundary above.
+
+**Safe evidence contract.** The CLI may emit only these fields and closed values:
+
+- `executed_at`
+- `environment=preproduction`
+- `internal_environment=sandbox`
+- `credential_config=valid|invalid`
+- `token_endpoint_attempted=yes|no`
+- `token_endpoint_host=prelive-oauth2.quran.foundation`
+- `http_status_class=2xx|4xx|5xx|network_error|timeout|not_attempted`
+- `authentication=pass|fail|not_attempted`
+- `token_returned=yes|no`
+- `token_type_valid=yes|no|not_evaluated`
+- `scope_valid=yes|no|not_evaluated`
+- `expiry_metadata_valid=yes|no|not_evaluated`
+- `redaction=pass|fail`
+- `content_api_calls=0`
+- `metadata_discovery_calls=0`
+- `resource_calls=0`
+- `database_mutations=0`
+- `provider_validation=pass|fail`
+
+No evidence, stdout/stderr, exception, log, test artifact, or committed file may contain the client secret, complete client identifier, Basic-auth material, `Authorization` header, access token, refresh token, raw response body, or any token/credential prefix, suffix, length, hash, fingerprint, or masked fragment. Client-ID presence/configuration validity is sufficient; its value is not evidence. Environment and credential files remain uncommitted, and tokens remain process-memory only.
+
+**Real-network execution remains separately unauthorized.** Implementing and committing M5.2D does **not** authorize a real token request. After implementation, controlled Pre-Production credential availability must first be established locally under the committed credential boundary, and a separate Roadmap execution authorization must then authorize exactly one real Pre-Production token-validation request. Only that later execution may contact Quran.Foundation, and it remains limited to one request to the fixed endpoint, one finite timeout, no retry, no Content API call afterward, no metadata/resource discovery or source selection, safe evidence only, and immediate token disposal. Its PASS could prove only controlled Pre-Production authentication; it could not imply Gate 3, Gate 4, provider dataset approval, content availability, dry-run approval, production activation, or M6 authorization. Failure leaves every downstream gate blocked.
+
+**Network order and exclusions.** The binding order remains: credential configuration implemented; controlled credentials available; M5.2D transport/tooling governance and offline implementation complete; separate real-token execution authorization; one successful provider-side token validation; legal/license Gate 3; exact-source Gate 4; controlled sandbox fetch; then later manifest/import gates. This unit authorizes no Production credentials or host, credential inspection, real network operation, token request, metadata/resource enumeration, Content API call, source selection, manifest, fetch, import, database/schema/migration change, canonical-content mutation, provider-code change outside the exact new transport file, M5 Gate PASS, M6, KE-2, Phase 7, Duas, or Knowledge Engine work.
+
+**Governance treatment and status truth.** No Registry entry or ADR is required: this is a reversible provider-specific implementation behind the accepted injected transport boundary and changes no persisted representation, canonical ownership, licensing decision, or difficult-to-reverse architecture. M5.2D governance is authorized by this Roadmap subsection; implementation remains NOT STARTED, and real provider token validation remains NOT EXECUTED. `M5 Schema Foundation Verified` remains PASS; M5 Gate 3 remains PARTIAL/incomplete; Gate 4 remains NOT STARTED/incomplete; `M5 Provider Import Dry Run Verified` and `M5 Quran Import Activated` remain NOT PASS; M6 remains BLOCKED; KE-2 and Phase 7 implementation remain NOT STARTED. Governance approval changes none of those statuses.
+
 ## Phase 6: Devotional content and Editorial General Dua
 
 ### Objective
