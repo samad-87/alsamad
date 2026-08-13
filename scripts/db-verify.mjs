@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
+import { join } from "node:path";
 
 import { sql } from "drizzle-orm";
 import { validate as validateUuid, version as uuidVersion } from "uuid";
@@ -19,6 +20,17 @@ const ids = {
 const expectDatabaseRejection = async (label, operation) => {
   await assert.rejects(() => queryClient.begin(operation), undefined, label);
   console.log(`PASS rejection: ${label}`);
+};
+
+const listFilesRecursively = async (directory) => {
+  const entries = await readdir(directory, { withFileTypes: true });
+  const files = [];
+  for (const entry of entries) {
+    const path = join(directory, entry.name);
+    if (entry.isDirectory()) files.push(...(await listFilesRecursively(path)));
+    else files.push(path);
+  }
+  return files;
 };
 
 try {
@@ -76,6 +88,7 @@ try {
       "content_items",
       "content_revisions",
       "editions",
+      "editorial_users",
       "geographic_areas",
       "licenses",
       "locales",
@@ -91,6 +104,230 @@ try {
       "works",
     ],
   );
+
+  const editorialColumns = await queryClient`
+    select column_name, data_type, character_maximum_length, is_nullable, column_default
+    from information_schema.columns
+    where table_schema='public' and table_name='editorial_users'
+    order by ordinal_position
+  `;
+  assert.deepEqual(
+    editorialColumns.map(({ column_name }) => column_name),
+    ["id", "status", "created_at", "updated_at"],
+  );
+  assert.deepEqual(
+    editorialColumns.map(({ data_type }) => data_type),
+    [
+      "uuid",
+      "character varying",
+      "timestamp with time zone",
+      "timestamp with time zone",
+    ],
+  );
+  assert.equal(editorialColumns[0]?.is_nullable, "NO");
+  assert.equal(editorialColumns[0]?.column_default, null);
+  assert.equal(editorialColumns[1]?.character_maximum_length, 16);
+  assert.equal(editorialColumns[1]?.is_nullable, "NO");
+  assert.match(editorialColumns[1]?.column_default ?? "", /disabled/);
+  for (const column of editorialColumns.slice(2)) {
+    assert.equal(column.is_nullable, "NO");
+    assert.equal(column.column_default, "CURRENT_TIMESTAMP");
+  }
+
+  assert.equal(
+    (
+      await queryClient`
+        select count(*)::int as count
+        from information_schema.table_constraints
+        where table_schema='public' and table_name='editorial_users'
+          and constraint_type='FOREIGN KEY'
+      `
+    )[0]?.count,
+    0,
+  );
+  assert.equal(
+    (await queryClient`select count(*)::int as count from editorial_users`)[0]
+      ?.count,
+    0,
+  );
+
+  const editorialId = "0198a7b0-d000-7000-8000-000000000001";
+  const editorialId2 = "0198a7b0-d000-7000-8000-000000000002";
+  await queryClient
+    .begin(async (transaction) => {
+      await transaction`insert into editorial_users(id) values(${editorialId}::uuid)`;
+      let row = (
+        await transaction`select status,created_at=updated_at as timestamps_equal from editorial_users where id=${editorialId}::uuid`
+      )[0];
+      assert.equal(row?.status, "disabled");
+      assert.equal(row?.timestamps_equal, true);
+
+      await transaction`update editorial_users set status='active',updated_at=updated_at+interval '1 second' where id=${editorialId}::uuid`;
+      row = (
+        await transaction`select status,created_at,updated_at from editorial_users where id=${editorialId}::uuid`
+      )[0];
+      assert.equal(row?.status, "active");
+
+      await transaction`update editorial_users set status='disabled',updated_at=updated_at+interval '1 second' where id=${editorialId}::uuid`;
+      await transaction`update editorial_users set status='active',updated_at=updated_at+interval '1 second' where id=${editorialId}::uuid`;
+      assert.equal(
+        (
+          await transaction`select status from editorial_users where id=${editorialId}::uuid`
+        )[0]?.status,
+        "active",
+      );
+
+      await transaction`update editorial_users set status=status,updated_at=updated_at where id=${editorialId}::uuid`;
+      throw new Error("Editorial Identity lifecycle rollback");
+    })
+    .catch((error) =>
+      assert.equal(error.message, "Editorial Identity lifecycle rollback"),
+    );
+
+  await expectDatabaseRejection("non-v7 editorial id", async (transaction) => {
+    await transaction`insert into editorial_users(id) values('0198a7b0-d000-4000-8000-000000000001'::uuid)`;
+  });
+  await expectDatabaseRejection(
+    "invalid RFC variant editorial id",
+    async (transaction) => {
+      await transaction`insert into editorial_users(id) values('0198a7b0-d000-7000-0000-000000000001'::uuid)`;
+    },
+  );
+  await expectDatabaseRejection(
+    "duplicate editorial id",
+    async (transaction) => {
+      await transaction`insert into editorial_users(id) values(${editorialId}::uuid),(${editorialId}::uuid)`;
+    },
+  );
+  await expectDatabaseRejection(
+    "editorial id mutation",
+    async (transaction) => {
+      await transaction`insert into editorial_users(id) values(${editorialId}::uuid)`;
+      await transaction`update editorial_users set id=${editorialId2}::uuid where id=${editorialId}::uuid`;
+    },
+  );
+  await expectDatabaseRejection(
+    "editorial created_at mutation",
+    async (transaction) => {
+      await transaction`insert into editorial_users(id) values(${editorialId}::uuid)`;
+      await transaction`update editorial_users set created_at=created_at+interval '1 second' where id=${editorialId}::uuid`;
+    },
+  );
+  await expectDatabaseRejection(
+    "invalid editorial status",
+    async (transaction) => {
+      await transaction`insert into editorial_users(id,status) values(${editorialId}::uuid,'pending')`;
+    },
+  );
+  await expectDatabaseRejection(
+    "status transition without updated_at",
+    async (transaction) => {
+      await transaction`insert into editorial_users(id) values(${editorialId}::uuid)`;
+      await transaction`update editorial_users set status='active' where id=${editorialId}::uuid`;
+    },
+  );
+  await expectDatabaseRejection(
+    "status transition with earlier updated_at",
+    async (transaction) => {
+      await transaction`insert into editorial_users(id) values(${editorialId}::uuid)`;
+      await transaction`update editorial_users set status='active',updated_at=updated_at-interval '1 second' where id=${editorialId}::uuid`;
+    },
+  );
+  await expectDatabaseRejection(
+    "editorial timestamp-only mutation",
+    async (transaction) => {
+      await transaction`insert into editorial_users(id) values(${editorialId}::uuid)`;
+      await transaction`update editorial_users set updated_at=updated_at+interval '1 second' where id=${editorialId}::uuid`;
+    },
+  );
+  await expectDatabaseRejection(
+    "editorial no-op timestamp fabrication",
+    async (transaction) => {
+      await transaction`insert into editorial_users(id) values(${editorialId}::uuid)`;
+      await transaction`update editorial_users set status='disabled',updated_at=updated_at+interval '1 second' where id=${editorialId}::uuid`;
+    },
+  );
+  await expectDatabaseRejection(
+    "synthetic referenced editorial identity deletion",
+    async (transaction) => {
+      await transaction`create temporary table editorial_user_consumer_fixture(actor_id uuid not null references editorial_users(id) on update restrict on delete restrict) on commit drop`;
+      await transaction`insert into editorial_users(id) values(${editorialId}::uuid)`;
+      await transaction`insert into editorial_user_consumer_fixture(actor_id) values(${editorialId}::uuid)`;
+      await transaction`delete from editorial_users where id=${editorialId}::uuid`;
+    },
+  );
+  assert.equal(
+    (await queryClient`select count(*)::int as count from editorial_users`)[0]
+      ?.count,
+    0,
+  );
+
+  const forbiddenEditorialColumns = [
+    "staff_key",
+    "subject",
+    "username",
+    "email",
+    "display_name",
+    "provider_subject",
+    "user_id",
+    "profile",
+  ];
+  assert.equal(
+    editorialColumns.some(({ column_name }) =>
+      forbiddenEditorialColumns.includes(column_name),
+    ),
+    false,
+  );
+
+  const editorialMigration = await readFile(
+    "drizzle/0011_editorial_identity_foundation.sql",
+    "utf8",
+  );
+  assert.match(
+    editorialMigration,
+    /create table if not exists editorial_users/,
+  );
+  assert.doesNotMatch(
+    editorialMigration,
+    /\binsert\s+into\s+editorial_users\b/i,
+  );
+  const journal = JSON.parse(
+    await readFile("drizzle/meta/_journal.json", "utf8"),
+  );
+  assert.deepEqual(
+    journal.entries.slice(0, 10).map(({ idx, tag }) => [idx, tag]),
+    [
+      [0, "0000_foundation"],
+      [1, "0001_global_locales_geography"],
+      [2, "0002_content_integrity_foundation"],
+      [3, "0003_fix_m4_source_reference_trigger"],
+      [4, "0004_quran_data_model"],
+      [5, "0005_license_publication_rights_separation"],
+      [6, "0006_license_version_immutability"],
+      [7, "0007_m5_publication_trigger_table_branching"],
+      [8, "0008_atomic_quran_release_selector"],
+      [9, "0009_arc005_insert_activation_validation"],
+    ],
+  );
+  assert.deepEqual(journal.entries.at(-1), {
+    idx: 10,
+    version: "7",
+    when: 1785796810000,
+    tag: "0011_editorial_identity_foundation",
+    breakpoints: true,
+  });
+
+  const runtimeFiles = (
+    await Promise.all(
+      ["src/app", "src/components", "scripts"].map(listFilesRecursively),
+    )
+  )
+    .flat()
+    .filter((path) => path !== join("scripts", "db-verify.mjs"));
+  for (const path of runtimeFiles) {
+    const content = await readFile(path, "utf8");
+    assert.doesNotMatch(content, /editorial_users|editorialUsers/);
+  }
 
   const locales = await queryClient`
     select code, id::text, language_tag, direction, native_name, fallback_locale_id
@@ -1810,7 +2047,10 @@ try {
     );
   }
 
-  console.log("PASS schema tables: exactly 16 cumulative Release 1 tables");
+  console.log("PASS schema tables: exactly 17 cumulative Release 1 tables");
+  console.log(
+    "PASS Editorial Identity Foundation: exact four-column table, UUIDv7/variant and lifecycle enforcement, zero rows, synthetic fixtures rolled back",
+  );
   console.log(
     "PASS M4: 8 tables, 12 restrictive foreign keys, pgcrypto checksums, zero seed rows",
   );

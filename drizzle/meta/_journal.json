@@ -71,6 +71,13 @@
       "when": 1785796809000,
       "tag": "0009_arc005_insert_activation_validation",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1785796810000,
+      "tag": "0011_editorial_identity_foundation",
+      "breakpoints": true
     }
   ]
 }

@@ -692,5 +692,32 @@ export const quranTranslationTexts = pgTable(
   ],
 );
 
+export const editorialUsers = pgTable(
+  "editorial_users",
+  {
+    id: uuid("id").primaryKey(),
+    status: varchar("status", { length: 16 }).notNull().default("disabled"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    check(
+      "ck_editorial_users__id_uuidv7",
+      sql`(get_byte(uuid_send(${table.id}), 6) >> 4) = 7 and (get_byte(uuid_send(${table.id}), 8) & 192) = 128`,
+    ),
+    check(
+      "ck_editorial_users__status",
+      sql`${table.status} in ('disabled', 'active')`,
+    ),
+  ],
+);
+
 export const m5DomainTableCount = 6 as const;
 export const release1DomainTableCountAfterM5 = 16 as const;
+export const editorialIdentityFoundationTableCount = 1 as const;
+export const release1DomainTableCountAfterEditorialIdentityFoundation =
+  17 as const;
