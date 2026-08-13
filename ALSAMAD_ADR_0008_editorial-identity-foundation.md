@@ -53,7 +53,9 @@ This decision authorizes no auth-link table, provider selection, public-user rel
 
 `editorial_users` is already one of the frozen 30 Release-1 tables; early implementation changes sequencing, not scope or count. Physical count moves from 16 of 30 to 17 of 30. If M6 later adds its four already-counted tables, the physical count becomes 21 of 30.
 
-The implementation uses one new forward-only migration numbered mechanically at execution. It cannot use, rename, or displace M6's reserved `0010_devotional_content_foundation.sql`, and every existing migration remains byte-immutable. At baseline `ac12718`, `0011` is the expected non-reserved context, not a permanently preclaimed filename.
+The exact future implementation boundary is `src/db/schema.ts`, one mechanically numbered `drizzle/<next-authorized-forward-number>_editorial_identity_foundation.sql`, `drizzle/meta/_journal.json`, and `scripts/db-verify.mjs`. The journal file is authorized only for the single append required to register that one migration under the established Drizzle convention; unrelated journal rewriting is prohibited, and every existing journal entry remains unchanged.
+
+The implementation uses one new forward-only migration numbered mechanically from the authoritative repository state at execution. It cannot use, rename, or displace M6's reserved `0010_devotional_content_foundation.sql`, and every existing migration remains byte-immutable. At baseline `ac12718`, `0011` is the expected non-reserved context, not a permanently preclaimed filename.
 
 ## Why alternatives were rejected
 

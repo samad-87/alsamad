@@ -1469,10 +1469,11 @@ Architecture contract complete; implementation not started by this documentation
 ```
 src/db/schema.ts
 drizzle/<next-authorized-forward-number>_editorial_identity_foundation.sql
+drizzle/meta/_journal.json
 scripts/db-verify.mjs
 ```
 
-The migration number is assigned mechanically at execution. At baseline `ac12718`, `0011` is only the expected non-reserved context and is not permanently preclaimed. `0010_devotional_content_foundation.sql` remains reserved for M6 and may not be used, renamed, or displaced. Every existing migration remains byte-unchanged.
+The migration number is assigned mechanically from the authoritative repository state at execution. At baseline `ac12718`, `0011` is only the observed lawful non-reserved context and is not permanently preclaimed. `0010_devotional_content_foundation.sql` remains reserved for M6 and may not be used, renamed, or displaced. `drizzle/meta/_journal.json` may receive exactly the single mechanical append required to register this one migration; no unrelated journal rewrite is authorized, every existing journal entry remains unchanged, and every existing migration remains byte-unchanged.
 
 **Implementation constraints.** Add exactly four columns: `id`, `status`, `created_at`, and `updated_at`. Add no outgoing FK and no row. No application repository/domain module, authentication integration, authorization, runtime import, API, route, component, UI, workflow, or bootstrap identity is permitted. Absence of rows is the honest fail-closed state.
 
@@ -1489,7 +1490,7 @@ The migration number is assigned mechanically at execution. At baseline `ac12718
 9. all fixtures are synthetic, transaction-scoped, and rolled back; a rollback-only temporary consumer may prove inactive-actor rejection without creating a permanent table, otherwise every future consumer gate, including KE-2, must prove active-actor enforcement before its own implementation can pass;
 10. prior migrations are byte-unchanged; table enumeration reports 17 of 30 after this unit and remains truthful if later migrations execute;
 11. `npm run typecheck`, `npm run lint`, `npm test`, `npm run test:db`, targeted Prettier check, production build, and `git diff --check` pass;
-12. runtime scans prove zero identity/admin wiring, and the staged set equals the exact three-file boundary above.
+12. runtime scans prove zero identity/admin wiring, and the staged set equals the exact four-file boundary above; the journal diff is exactly one registration append for this migration and changes no existing entry.
 
 **Explicit exclusions.** `editorial_role_grants`, `review_records`, `publication_events`, `audit_events`, any auth-link table, public `users`/`user_identities`, credentials/passwords/passkeys/MFA/recovery/sessions, roles/capabilities/scopes/grants, staff seeds/bootstrap accounts, Admin API/routes/pages/components/UI, editorial queues/workflows, topic-management UI, content review/publication workflows, KE-2 tables/repository implementation, M6/`devotional_items`, Duas, Quran/provider work, M5 Gate 4/5, Phase 7 completion, and later Knowledge Engine phases remain NOT AUTHORIZED.
 
