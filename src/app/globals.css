@@ -345,9 +345,9 @@ button.chip[aria-pressed="true"] {
   inset-block-start: 0;
   z-index: 50;
   padding-block-start: env(safe-area-inset-top);
-  border-block-end: 1px solid color-mix(in srgb, var(--border) 75%, transparent);
-  background: color-mix(in srgb, var(--background) 88%, transparent);
-  backdrop-filter: blur(18px);
+  border-block-end: var(--border-subtle);
+  background: var(--color-surface-principal);
+  box-shadow: var(--elevation-none);
 }
 .header-inner {
   min-height: 3.75rem;
@@ -364,13 +364,13 @@ button.chip[aria-pressed="true"] {
 .brand {
   display: inline-flex;
   align-items: center;
-  gap: 0.65rem;
-  font-size: 1.2rem;
+  gap: var(--space-inline-tight);
+  font-size: 1.125rem;
   font-weight: 800;
 }
 .brand-mark {
-  width: 2.2rem;
-  height: 2.2rem;
+  width: 2.125rem;
+  height: 2.125rem;
   display: grid;
   place-items: center;
   border-radius: 50% 50% 48% 52%;
@@ -381,23 +381,58 @@ button.chip[aria-pressed="true"] {
 .desktop-nav {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: var(--space-control-gap);
   margin-inline: auto;
-  font-weight: 650;
+  color: var(--color-text-muted);
+  font-weight: 600;
   font-size: 0.92rem;
 }
-.desktop-nav a:hover {
-  color: var(--primary);
+.desktop-nav a {
+  position: relative;
+  padding-block: var(--space-inline-default);
+  transition: color var(--duration-fast) var(--ease-sakinah);
+}
+.desktop-nav a:hover,
+.desktop-nav a:focus-visible {
+  color: var(--color-action-primary);
+}
+.desktop-nav a[aria-current="page"] {
+  color: var(--state-navigation-current);
+  font-weight: 750;
+}
+.desktop-nav a[aria-current="page"]::after {
+  content: "";
+  position: absolute;
+  inset-inline: 20%;
+  inset-block-end: 0.25rem;
+  height: 2px;
+  border-radius: var(--radius-pill);
+  background: currentColor;
 }
 .header-actions {
   display: flex;
-  gap: 0.45rem;
+  gap: var(--space-inline-tight);
   align-items: center;
+}
+.header-actions .button {
+  border-color: var(--color-border-structural);
+  background: transparent;
+  color: var(--color-text-muted);
+  box-shadow: var(--elevation-none);
+}
+.header-actions .button:hover {
+  border-color: var(--color-action-primary);
+  background: var(--color-surface-grouped);
+  color: var(--color-action-primary-strong);
 }
 .icon-button {
   width: 2.85rem;
   padding: 0;
   flex-shrink: 0;
+}
+.locale-button {
+  border-radius: var(--radius-control);
+  font-weight: 600;
 }
 .mobile-menu {
   display: none;

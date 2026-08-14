@@ -5,6 +5,7 @@ import { SearchIcon } from "./icons";
 import { ThemeSwitcher } from "./client-controls";
 import { BottomNav } from "./bottom-nav";
 import { LocaleSwitcher } from "./locale-switcher";
+import { DesktopNavigation } from "./desktop-navigation";
 import { arabicReadingFont, arabicUiFont } from "@/app/fonts";
 
 export { LocaleSwitcher } from "./locale-switcher";
@@ -17,18 +18,6 @@ export function AppShell({
   children: React.ReactNode;
 }) {
   const c = t(locale);
-  const nav = [
-    ["", c.today],
-    ["/quran", c.quran],
-    ["/adhkar", c.adhkar],
-    ["/duas", c.duas],
-    ["/prayer-times", c.prayer],
-  ];
-  const links = nav.map(([href, label]) => (
-    <Link key={href} href={`/${locale}${href}`}>
-      {label}
-    </Link>
-  ));
   return (
     <html
       lang={locale}
@@ -49,9 +38,7 @@ export function AppShell({
               </span>
               <span className="brand-wordmark">{c.brand}</span>
             </Link>
-            <nav aria-label={c.menu} className="desktop-nav">
-              {links}
-            </nav>
+            <DesktopNavigation locale={locale} />
             <div className="header-actions">
               <Link
                 className="button icon-button"
