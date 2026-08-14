@@ -1,12 +1,7 @@
 import { notFound } from "next/navigation";
-import {
-  Container,
-  EmptyState,
-  FixtureNotice,
-  PageHeader,
-  Section,
-} from "@/components/ui";
+import { Container, PageHeader, Section } from "@/components/ui";
 import { isLocale, t } from "@/lib/i18n";
+
 export default async function Page({
   params,
 }: {
@@ -15,38 +10,36 @@ export default async function Page({
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
   const c = t(locale);
+  const unavailable =
+    locale === "ar"
+      ? {
+          heading: "البحث قيد الإعداد",
+          description: "ميزة البحث الموحّد قيد الإعداد.",
+          message:
+            "البحث الموحّد غير متاح بعد. هذه الميزة ما زالت قيد الإعداد.",
+        }
+      : {
+          heading: "Search is being prepared",
+          description: "The unified search feature is being prepared.",
+          message:
+            "Unified search is not available yet. This feature is still being prepared.",
+        };
+
   return (
     <Section>
       <Container>
         <PageHeader
           eyebrow={c.verifiedStructure}
           title={c.search}
-          description={c.noAi}
+          description={unavailable.description}
         />
-        <FixtureNotice locale={locale} />
-        <label className="search-field search-large">
-          <span className="sr-only">{c.search}</span>
-          <input
-            placeholder={
-              locale === "ar"
-                ? "ابحث في المصادر…"
-                : "Search source-aware content…"
-            }
-          />
-          <button className="button button-primary">{c.search}</button>
-        </label>
-        <div className="filter-bar">
-          {[c.all, c.quran, c.adhkar, c.duas, c.learning].map((x) => (
-            <button className="chip" key={x}>
-              {x}
-            </button>
-          ))}
-        </div>
-        <div className="states-grid">
-          <EmptyState locale={locale} />
-          <EmptyState locale={locale} kind="loading" />
-          <EmptyState locale={locale} kind="error" />
-        </div>
+        <section className="notice" aria-labelledby="search-unavailable-title">
+          <span aria-hidden="true">ⓘ</span>
+          <div>
+            <h2 id="search-unavailable-title">{unavailable.heading}</h2>
+            <p>{unavailable.message}</p>
+          </div>
+        </section>
       </Container>
     </Section>
   );
