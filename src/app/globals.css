@@ -1013,13 +1013,15 @@ button.chip[aria-pressed="true"] {
   padding: 0;
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1023.98px) {
   .desktop-nav {
     display: none;
   }
   .mobile-menu {
     display: block;
   }
+}
+@media (max-width: 1024px) {
   .hero {
     grid-template-columns: 1fr;
   }
