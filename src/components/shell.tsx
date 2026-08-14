@@ -4,32 +4,9 @@ import { t } from "@/lib/i18n";
 import { SearchIcon } from "./icons";
 import { ThemeSwitcher } from "./client-controls";
 import { BottomNav } from "./bottom-nav";
+import { LocaleSwitcher } from "./locale-switcher";
 
-export function LocaleSwitcher({
-  locale,
-  path = "",
-}: {
-  locale: Locale;
-  path?: string;
-}) {
-  const other = locale === "ar" ? "en" : "ar";
-  const label = other === "ar" ? "العربية" : "English";
-  const short = other === "ar" ? "AR" : "EN";
-  return (
-    <Link
-      className="button locale-button"
-      href={`/${other}${path}`}
-      aria-label={label}
-    >
-      <span className="locale-label-full" aria-hidden="true">
-        {label}
-      </span>
-      <span className="locale-label-short" aria-hidden="true">
-        {short}
-      </span>
-    </Link>
-  );
-}
+export { LocaleSwitcher } from "./locale-switcher";
 
 export function AppShell({
   locale,
