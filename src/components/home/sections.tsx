@@ -18,7 +18,7 @@ export function Hero({ locale }: { locale: Locale }) {
   return (
     <Section>
       <Container>
-        <div className="hero feature-surface home-reveal">
+        <div className="hero home-reveal">
           <div className="hero-copy">
             <span className="eyebrow">Alsamad · Sakīnah</span>
             <h1 className="display">{c.heroTitle}</h1>
@@ -30,13 +30,6 @@ export function Hero({ locale }: { locale: Locale }) {
               <Link className="button" href={`/${locale}/adhkar`}>
                 {c.heroSecondaryCta}
               </Link>
-            </div>
-          </div>
-          <div className="hero-orbit" aria-hidden="true">
-            <div className="orbit-inner">
-              <BookIcon size={34} />
-              <span>{c.daily}</span>
-              <small>{c.fixture}</small>
             </div>
           </div>
         </div>

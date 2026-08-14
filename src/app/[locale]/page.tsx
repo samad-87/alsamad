@@ -1,11 +1,7 @@
 import { notFound } from "next/navigation";
 import {
   AdhkarDuas,
-  ArticlesGuides,
-  DailyJourney,
   Hero,
-  Knowledge,
-  MarriageJourney,
   PrayerCalendar,
   QuranEntry,
   TrustStatement,
@@ -26,13 +22,9 @@ export default async function Home({
       <Container>
         <FixtureNotice locale={locale} />
       </Container>
-      <DailyJourney locale={locale} />
       <QuranEntry locale={locale} />
       <AdhkarDuas locale={locale} />
       <PrayerCalendar locale={locale} />
-      <Knowledge locale={locale} />
-      <MarriageJourney locale={locale} />
-      <ArticlesGuides locale={locale} />
       <TrustStatement locale={locale} />
     </>
   );

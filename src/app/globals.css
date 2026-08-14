@@ -500,28 +500,12 @@ button.chip[aria-pressed="true"] {
   border-block: 1px solid var(--border);
 }
 .hero {
-  min-height: 36rem;
-  padding: clamp(2rem, 6vw, 5.5rem);
-  display: grid;
-  grid-template-columns: 1.4fr 0.8fr;
-  gap: 3rem;
-  align-items: center;
-  overflow: hidden;
-  position: relative;
-}
-.hero::after {
-  content: "";
-  position: absolute;
-  width: 25rem;
-  height: 25rem;
-  inset-inline-end: -10rem;
-  inset-block-start: -10rem;
-  border: 1px solid var(--border);
-  border-radius: 50%;
+  padding: clamp(2.5rem, 7vw, 5rem) clamp(1.5rem, 5vw, 4rem);
+  border-block: var(--border-subtle);
+  background: var(--color-surface-principal);
+  box-shadow: var(--elevation-none);
 }
 .hero-copy {
-  position: relative;
-  z-index: 1;
   max-width: 46rem;
 }
 .hero-copy p {
@@ -534,44 +518,6 @@ button.chip[aria-pressed="true"] {
   flex-wrap: wrap;
   gap: 0.75rem;
   margin-block-start: 2rem;
-}
-.hero-orbit {
-  aspect-ratio: 1;
-  border: 1px solid var(--border);
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  position: relative;
-  z-index: 1;
-  background: var(--surface-soft);
-}
-.hero-orbit::before,
-.hero-orbit::after {
-  content: "";
-  position: absolute;
-  border: 1px solid var(--border);
-  border-radius: 50%;
-}
-.hero-orbit::before {
-  inset: 12%;
-}
-.hero-orbit::after {
-  inset: 25%;
-}
-.orbit-inner {
-  position: relative;
-  z-index: 2;
-  display: grid;
-  justify-items: center;
-  text-align: center;
-  gap: 0.5rem;
-}
-.orbit-inner strong {
-  font-size: 1.75rem;
-}
-.orbit-inner small {
-  max-width: 12rem;
-  color: var(--muted);
 }
 .notice {
   display: flex;
@@ -1154,14 +1100,6 @@ button.chip[aria-pressed="true"] {
   }
 }
 @media (max-width: 1024px) {
-  .hero {
-    grid-template-columns: 1fr;
-  }
-  .hero-orbit {
-    max-width: 20rem;
-    margin-inline: auto;
-    width: 100%;
-  }
   .daily-grid {
     grid-template-columns: 1fr 1fr;
   }
@@ -1189,15 +1127,10 @@ button.chip[aria-pressed="true"] {
     margin-inline-end: auto;
   }
   .hero {
-    min-height: auto;
     padding: 2rem 1.25rem;
-    border-radius: 1.5rem;
   }
   .display {
     font-size: 2.7rem;
-  }
-  .hero-orbit {
-    max-width: 13rem;
   }
   .daily-grid,
   .surah-grid,
