@@ -1563,6 +1563,25 @@ Because `src/app/globals.css` contains unrelated local prototype work at governa
 
 **Explicit exclusions and status truth.** This unit authorizes no Quran font binary, Quran route/component restyling, Quran typography activation, canonical text change, provider/import/network work, visual redesign, Latin-font decision, Duas prototype adoption, Knowledge Engine work, database change, or search-runtime expansion. The Quran Presentation gate remains unresolved. M5 Gate 3 and Gate 4, Quran provider/import status, M6, KE-2, Phase 7, search runtime, and Duas governance remain unchanged.
 
+### Sakīnah Visual Foundation Implementation
+
+**Governance status.** `REG-0018` decides the Quiet Editorial Sanctuary Phase-1 semantic palette, surface hierarchy, tonal-separation/border/elevation preference, `12 / 20 / 32px` radius scale, 4px spacing foundation, and compact state-role distinctions. Governance is COMPLETE; implementation is **NOT STARTED**. Registry entry required: YES. ADR required: NO.
+
+**Objective.** Implement only the governed semantic visual foundation so later page and shell redesign units consume one coherent token contract. This foundation reduces visible containers, keeps most sections unframed, favors flat or minimally outlined reading surfaces, uses grouped tone before border or shadow, reserves controlled elevation for actual floating layers, and prevents unrelated semantic objects from collapsing into one generic card or pill language.
+
+**Exact future implementation boundary.** A later execution may change only:
+
+- the exact reviewed visual-foundation token/primitives hunk in `src/app/globals.css`;
+- `tests/visual-foundation.test.mjs`.
+
+If implementation proves that a separate reusable committed token source is necessary, execution must stop for boundary review; REG-0018 does not silently authorize a third file. Because `src/app/globals.css` contains unrelated dirty prototype work at governance time, the future unit must inspect, review, and stage only its exact visual-foundation hunk.
+
+**Allowed implementation.** The unit may reconcile the governed light/dark semantic palette tokens, radius tokens, surface roles, border/elevation tokens, approved spacing/rhythm aliases, and state-role primitive selectors. It may remove automatic border/shadow coupling from foundation primitives only where the reviewed token contract requires it. It must preserve accessibility, RTL/LTR logical behavior, reduced motion, existing functional behavior, and the governed REG-0017 typography roles without implying that Typography Phase-1 implementation has started.
+
+**Acceptance.** Tests and complete diff review must prove: all frozen REG-0018 light/dark values and meanings are represented consistently; the authoritative radius scale is exactly controls `12px`, standard cards/surfaces `20px`, feature/modal `32px` only when warranted; tonal separation precedes border and shadow; canvas and reading roles receive no automatic elevation; shadows remain rare and dark mode introduces no glow; status/category/badge/filter/navigation/action/source roles remain distinguishable; color is not the sole status channel; gold is not a generic link accent; no Quran typography token becomes bound; and no unrelated dirty hunk is staged. Verification includes typecheck, relevant tests, production build, targeted lint/format checks, and exact staged-diff inspection.
+
+**Explicit exclusions and status truth.** This unit does not authorize homepage, shell/header, desktop or mobile navigation, More overlay, Quran chrome, utility-page, or route redesign; dark-mode page redesign; final logo, symbol, brand lockup, icon-library, illustration, or Latin-font selection; Quran font, Mushaf layout, verse typography, canonical line height, verse-marker styling, Quran route/component/text change, or `--font-quran` binding; provider/M5, database, M6, KE-2, Phase-7, SEO, search-runtime, Duas, or Knowledge prototype work. Every later visual area remains a separate reviewable unit. M5/M6/KE-2/Phase-7 and Quran statuses remain unchanged.
+
 ### M7-prerequisite / Editorial Identity Foundation
 
 **Governance status.** `REG-0016` and `ADR-0008` approve the architecture and exact physical contract for the independently sequenced Editorial Identity Foundation. Implementation is **NOT STARTED** and requires a later explicit execution against this gate. This prerequisite is not Phase 7 implementation and does not authorize any workflow or runtime surface.

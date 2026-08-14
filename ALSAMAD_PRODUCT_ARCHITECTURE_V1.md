@@ -414,21 +414,23 @@ The visual system should evoke calm, clarity and reverence through proportion an
 
 ### 8.1 Color tokens
 
-Names are semantic; raw values remain replaceable tokens after visual testing.
+REG-0018 freezes these semantic Phase-1 values after reconciliation with the committed frontend. Later replacement requires an explicit reviewed decision; components consume semantic roles rather than raw values.
 
-| Token            | Light proposal | Dark proposal | Use                                  |
-| ---------------- | -------------: | ------------: | ------------------------------------ |
-| `background`     |      `#FAFCFA` |     `#07130F` | Page canvas                          |
-| `surface`        |      `#FFFFFF` |     `#0D1D17` | Cards and elevated reading surfaces  |
-| `foreground`     |      `#10231B` |     `#F3F7F4` | Primary text                         |
-| `muted`          |      `#607168` |     `#9BAAA2` | Secondary text                       |
-| `primary`        |      `#0F5B43` |     `#45A77E` | Primary action and selected state    |
-| `primary-strong` |      `#083D2D` |     `#74C9A5` | Emphasis/hover where contrast passes |
-| `accent-gold`    |      `#A67C2E` |     `#D3AE62` | Rare accent, not body links          |
-| `border`         |      `#DDE7E1` |     `#243A31` | Dividers and fields                  |
-| `danger`         |      `#B42318` |     `#FF8A80` | Errors only                          |
+| Token            |     Light |      Dark | Use                                  |
+| ---------------- | --------: | --------: | ------------------------------------ |
+| `background`     | `#F8FBF9` | `#07130F` | Page canvas                          |
+| `surface`        | `#FFFFFF` | `#0D1D17` | Principal content/reading surfaces   |
+| `surface-soft`   | `#EEF5F1` | `#14271F` | Grouped tonal surface                |
+| `foreground`     | `#10231B` | `#F3F7F4` | Primary text                         |
+| `muted`          | `#617168` | `#A2B0A8` | Secondary text                       |
+| `primary`        | `#0F5B43` | `#68BC98` | Primary action and selected state    |
+| `primary-strong` | `#083D2D` | `#91D3B4` | Emphasis/hover where contrast passes |
+| `primary-soft`   | `#DCECE5` | `#173D2E` | Selected and grouped states          |
+| `accent-gold`    | `#9B742B` | `#D3AE62` | Rare trust/source/ceremonial accent  |
+| `border`         | `#DBE6E0` | `#263C33` | Dividers and fields                  |
+| `danger`         | `#B42318` | `#FF8A80` | Errors only                          |
 
-Gold must be scarce. Green should signal action/identity, not decorate every surface. Final values require contrast testing in real components.
+Gold must be scarce and is not the generic link color. Green signals action, selection, progress, and restrained identity rather than decorating every surface. Most sections remain unframed on the canvas; status never depends on color alone; decorative gradients are exceptional.
 
 ### 8.2 Typography
 
@@ -447,9 +449,12 @@ Never simulate Arabic bold if the face lacks a real weight. Never use letter spa
 - 4 px base scale; common spacing: 4, 8, 12, 16, 24, 32, 48, 64
 - Reading column: approximately 680–760 px depending on script and mode
 - General content container: 1200–1280 px
-- Radius: 10 px controls, 16 px cards, 24 px feature surfaces; pills only for true compact filters/status
-- Borders and tonal separation before shadows
-- Shadows soft and rare; dark mode uses borders and surfaces, not glowing effects
+- Radius: 12 px controls, 20 px standard cards/surfaces, 32 px feature/modal surfaces only when scale warrants it; pills only for genuinely compact filters, selections, or status roles
+- Surface order: canvas/unframed, principal content/reading, grouped tonal, interactive card, floating overlay, feature, then status/source where required
+- Separation preference: tonal separation, then border, then shadow
+- Shadows are soft, rare, and reserved for real elevation; dark mode uses tonal surfaces and borders, not stronger shadow or glow
+- Informational/reading content has no default hover lift; interactive desktop cards prefer border/tone state changes
+- Status, category, badge, filter, navigation state, compact action, and source/trust metadata remain semantically distinct rather than sharing one generic pill treatment
 
 ### 8.4 Core components
 

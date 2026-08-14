@@ -165,6 +165,7 @@ As of 2026-08-08, the M6 architecture decision analysis covering REG-0001–REG-
 | REG-0015 | Knowledge Engine Phase 2 (KE-2): durable topic vocabulary and assignments                  | Database, Roadmap           | DECIDED | Registry + ADR (`ADR-0007`, Accepted)                                     |
 | REG-0016 | Editorial Identity Foundation prerequisite                                                 | Database, Security, Roadmap | DECIDED | Registry + ADR (`ADR-0008`, Accepted)                                     |
 | REG-0017 | Typography Phase 1: Arabic UI and devotional-reading font roles                            | Product, Roadmap            | DECIDED | Registry only                                                             |
+| REG-0018 | Sakīnah Phase-1 visual foundation: palette, surfaces, elevation, radii, and state roles    | Product, Roadmap            | DECIDED | Registry only                                                             |
 
 ### REG-0001 — Editorial General Dua placement in the devotional physical model
 
@@ -329,6 +330,48 @@ This decision explicitly does **not** approve ALSAMAD's future broader-platform 
 The existing redistribution right retains its original standalone-redistribution meaning and is never reinterpreted as application-display permission. Application-display permission defaults fail-closed and is never inferred from a historical redistribution value. Historical manifest schema/checksum semantics remain unchanged; corrected manifests require a new schema version. REG-0009 remains the controlling non-commercial/no-standalone-redistribution intended-use decision and is not superseded or modified by this entry.
 
 **Implementation evidence:** None. The decision and ADR authorize no migration, provider access, fetch, dry run, publication, M5 gate PASS, M6, or M7 work.
+
+**Supersedes / Superseded by:** None.
+
+### REG-0018 — Sakīnah Phase-1 visual foundation: palette, surfaces, elevation, radii, and state roles
+
+**Category:** `Product`, `Roadmap`.
+
+**Summary:** Which exact semantic palette, surface hierarchy, border/elevation preference, radius scale, spacing foundation, and compact state-role distinctions govern the first visual-foundation implementation, reconciling the long-form document's previously open exact palette and radius descriptions with the concrete concise contract and committed frontend evidence.
+
+**Committed evidence:** `ALSAMAD_SAKINAH_DESIGN_SYSTEM.md` §§2–8, §§11–13, §§23–27, §42, and §50 define Sakīnah, semantic token ownership, restrained color, flat religious reading, rare elevation, and distinct component meanings while previously leaving exact palette values open; `ALSAMAD_PRODUCT_ARCHITECTURE_V1.md` §8.1 and §8.3 carry concrete but partly conflicting palette/radius proposals; `DESIGN_SYSTEM.md` and committed `src/app/globals.css` already establish the deployed `12 / 20 / 32px` radius scale and the current green-neutral, emerald, gold, border, text, and danger values. Dirty/uncommitted CSS and prototype work are excluded from this evidence.
+
+**Affected architecture:** `ALSAMAD_SAKINAH_DESIGN_SYSTEM.md` §§1.3, 8, 11, 13, 27, 42, and 50; `ALSAMAD_PRODUCT_ARCHITECTURE_V1.md` §§8.1 and 8.3; concise mirror `DESIGN_SYSTEM.md`.
+
+**Affected roadmap gate:** `Sakīnah Visual Foundation Implementation`.
+
+**Opened:** 2026-08-15.
+
+**Tier rationale:** Registry only. This is an architecturally relevant cross-surface presentation contract, but its semantic token values and visual role bindings are reversible. It changes no persisted representation, canonical ownership, database, security, provider, religious-content integrity, or difficult-to-reconstruct module boundary. The ADR threshold in §7 is not met. **ADR reference:** None.
+
+**Status:** `DECIDED` (2026-08-15).
+
+**Decision outcome:** The Phase-1 visual direction is **Quiet Editorial Sanctuary**: calm, contemporary, premium, spiritually respectful, editorial, highly readable, and restrained. Islamic identity comes primarily from typography, proportion, reading dignity, source transparency, restrained geometry, and content hierarchy. The system reduces visible containers instead of restyling every object as a card. Ornamental overload, generic mosque or crescent decoration, gold-on-black luxury clichés, repeated background patterns, ordinary-section gradients, and shadows on every card are outside this foundation.
+
+The frozen semantic palette is the existing committed family: light canvas `#F8FBF9`, principal surface `#FFFFFF`, grouped tonal surface `#EEF5F1`, primary text `#10231B`, secondary text `#617168`, primary emerald `#0F5B43`, strong emerald `#083D2D`, soft emerald `#DCECE5`, muted gold `#9B742B`, structural border `#DBE6E0`, and danger `#B42318`; dark canvas `#07130F`, principal surface `#0D1D17`, grouped tonal surface `#14271F`, primary text `#F3F7F4`, secondary text `#A2B0A8`, primary emerald `#68BC98`, strong emerald `#91D3B4`, soft emerald `#173D2E`, muted gold `#D3AE62`, structural border `#263C33`, and danger `#FF8A80`. Emerald is for primary action, selected navigation, progress, and restrained identity; gold is rare and reserved for trust/source/ceremonial emphasis and the governed focus treatment, not generic links; danger is only destructive or actual error state. Most sections remain unframed on the canvas, decorative gradients are exceptional, and status never depends on color alone.
+
+The semantic surface hierarchy is: canvas/unframed content; principal content or reading surface; grouped tonal surface; interactive card; floating overlay; feature surface; and status/source surface where required. Canvas sections receive no default border or shadow. Reading surfaces are flat or minimally outlined. Grouped information uses tone first. Interactive cards use a subtle border and tone/state change. Floating overlays alone may use controlled elevation for layer separation. Feature size or radius does not automatically grant a strong shadow. Bordered-card-inside-bordered-card composition is avoided.
+
+The required separation order is **tonal separation → border → shadow**. Shadows are rare, soft, and purposeful; dark mode relies primarily on tonal surfaces and borders rather than stronger shadow or glow. Informational and reading content receives no default hover lift. Interactive desktop cards prefer border/tone state changes before translation or elevation.
+
+The authoritative semantic radius scale is exactly `12px` for controls, `20px` for standard cards/surfaces, and `32px` for feature or modal surfaces only when their scale and hierarchy warrant it. Square/technical treatment remains available where semantically necessary. Fully rounded pills are limited to genuinely compact pill-shaped filters, selections, statuses, or similar controls; ordinary cards, links, metadata, and navigation items do not become pills by default. The foundation retains a 4px spacing base with the existing common steps `8, 12, 16, 24, 32, 48, 64`; later page units choose semantic rhythm aliases and may not turn maximum section spacing into a universal default.
+
+Status, category, badge, filter, navigation state, compact action, and source/trust metadata remain different semantic roles. Status communicates state with text plus another non-color channel; category classifies content; badge identifies compact provenance or identity; filter is an interactive selection with selected state; navigation state communicates current location; compact action remains visibly actionable; source/trust metadata carries provenance and may use scarce gold. A shared geometry token does not erase these differences.
+
+Dark mode preserves the same hierarchy and meanings, uses the frozen low-glare values above, favors tonal separation and borders, prohibits glow as elevation, and preserves focus, source, status, Arabic readability, and diacritic clarity. Exact high-contrast and Quran-night mappings remain separately unresolved.
+
+REG-0017 remains unchanged: Arabic UI is Noto Sans Arabic `v2.013`, devotional reading is Noto Naskh Arabic `v2.021`, Latin selection remains unresolved, and `--font-quran` remains intentionally unbound. This decision selects no Quran font, canonical verse typography, Mushaf layout, line height, verse marker, or Quran presentation treatment. It also does not finalize the logo, symbol, brand lockup, icon library, illustration style, motion tooling, component library, CSS technology, or exact breakpoints.
+
+**Implementation boundary:** Only the Roadmap's later `Sakīnah Visual Foundation Implementation` unit may implement the governed semantic palette, surface, border/elevation, radius, spacing/rhythm alias, and state-role primitives. It may touch only the exact reviewed foundation-token hunk in `src/app/globals.css` and a focused `tests/visual-foundation.test.mjs`; if a reusable committed token source is proven necessary, governance must be revisited before adding it. Because `src/app/globals.css` contains unrelated dirty prototype work at decision time, implementation requires exact-hunk review and staging.
+
+**No implementation authorization:** This Registry decision does not modify CSS or source, redesign any page, shell, header, navigation, Quran chrome, utility surface, or dark-mode page, finalize brand/icon work, bind Quran typography, or adopt Duas/Knowledge prototypes.
+
+**Implementation evidence:** None. Governance is DECIDED; Sakīnah Visual Foundation Implementation is NOT STARTED.
 
 **Supersedes / Superseded by:** None.
 

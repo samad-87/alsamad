@@ -42,7 +42,7 @@ Design a coherent visual and interaction architecture that can operate for decad
 This architecture does not:
 
 - approve a final logo;
-- select exact hex values;
+- select exact values beyond the bounded Phase-1 visual foundation approved later in REG-0018;
 - distribute or license fonts;
 - choose a component library;
 - choose CSS technology;
@@ -367,7 +367,7 @@ The brand system must eventually define:
 
 ### 7.2 Decision boundary
 
-No final logo, symbol, color, calligraphy, or font is invented by this document. Brand assets require a separate approved identity process.
+No final logo, symbol, calligraphy, or brand asset is invented by this document. REG-0018 governs only the Phase-1 semantic product palette; brand assets still require a separate approved identity process.
 
 ### 7.3 Requirements
 
@@ -394,6 +394,8 @@ No final logo, symbol, color, calligraphy, or font is invented by this document.
 
 ## 8. Color-System Architecture
 
+REG-0018 freezes the Phase-1 visual direction as **Quiet Editorial Sanctuary**: calm, contemporary, premium, spiritually respectful, editorial, highly readable, and restrained. Islamic identity is expressed primarily through typography, proportion, reading dignity, source transparency, restrained geometry, and content hierarchy. The foundation reduces visible containers rather than turning every semantic object into a decorated card. Ornamental overload, generic mosque or crescent decoration, gold-on-black luxury clichés, repeated background patterns, ordinary-section gradients, and shadows on every card are prohibited.
+
 ### 8.1 Selection criteria
 
 The final palette must be:
@@ -407,6 +409,24 @@ The final palette must be:
 - culturally respectful without relying on stereotypical “Islamic” color assumptions.
 
 ### 8.2 Semantic color roles
+
+The Phase-1 values are authoritative:
+
+| Semantic role         | Light     | Dark      | Governed use                                                       |
+| --------------------- | --------- | --------- | ------------------------------------------------------------------ |
+| Canvas                | `#F8FBF9` | `#07130F` | quiet page background; most sections remain unframed               |
+| Principal surface     | `#FFFFFF` | `#0D1D17` | principal content and reading structure                            |
+| Grouped tonal surface | `#EEF5F1` | `#14271F` | related secondary information before border/elevation              |
+| Text primary          | `#10231B` | `#F3F7F4` | main readable content                                              |
+| Text secondary        | `#617168` | `#A2B0A8` | supporting text that still passes applicable contrast              |
+| Primary emerald       | `#0F5B43` | `#68BC98` | primary action, selected navigation, progress, restrained identity |
+| Strong emerald        | `#083D2D` | `#91D3B4` | governed emphasis/interaction state                                |
+| Soft emerald          | `#DCECE5` | `#173D2E` | selected and grouped states                                        |
+| Muted gold            | `#9B742B` | `#D3AE62` | rare trust/source/ceremonial emphasis and focus; not generic links |
+| Structural border     | `#DBE6E0` | `#263C33` | grouping, controls, and separators                                 |
+| Danger                | `#B42318` | `#FF8A80` | actual destructive or error state only                             |
+
+Color communicates hierarchy, never authenticity by itself. Decorative gradients are exceptional rather than a default section treatment. Every status retains text and at least one additional non-color channel.
 
 | Role               | Purpose                              | Must not imply             |
 | ------------------ | ------------------------------------ | -------------------------- |
@@ -561,6 +581,8 @@ Text resizing and browser zoom must not break layout, hide controls, or clip Qur
 
 Use a consistent base scale with semantic aliases:
 
+The Phase-1 foundation uses a 4px base and common steps `8, 12, 16, 24, 32, 48, 64`. These steps do not make the largest section gap a universal page default; later bounded page units map them to content-sensitive rhythm aliases.
+
 - inline-tight;
 - inline-default;
 - control-gap;
@@ -643,9 +665,13 @@ Breakpoints are selected from content pressure and interaction needs, not named 
 6. Modal/blocking surface.
 7. Security-critical or high-trust surface.
 
+For the public Phase-1 foundation these map to canvas/unframed content, principal content or reading surface, grouped tonal surface, interactive card, floating overlay, feature surface, and status/source surface where required. Canvas sections receive no default border or shadow. Reading surfaces are flat or minimally outlined. Grouped information uses tonal separation first. Interactive cards use subtle border/tone state changes. Floating overlays may use controlled elevation for real layer separation. Feature size or radius does not automatically imply a strong shadow, and bordered-card-inside-bordered-card composition is avoided.
+
 ### 13.2 Flat versus elevated
 
 Public religious reading favors flat surfaces and subtle separation. Elevation is reserved for temporary layers, interactive overlays, and clear hierarchy.
+
+The required order of preference is **tonal separation → border → shadow**. Shadows are rare, soft, and purposeful. Informational and reading content receives no default hover lift; interactive desktop cards prefer border or tone before translation/elevation.
 
 ### 13.3 Borders
 
@@ -653,13 +679,7 @@ Borders communicate grouping, state, focus, or integrity. They are preferred ove
 
 ### 13.4 Radii
 
-Use a small controlled scale:
-
-- square/technical;
-- subtle;
-- standard;
-- prominent;
-- fully rounded only for appropriate chips or avatars.
+The authoritative Phase-1 scale is `12px` for controls, `20px` for standard cards/surfaces, and `32px` for feature or modal surfaces only when scale and hierarchy warrant it. Square/technical treatment remains available where semantically necessary. Fully rounded pills are limited to genuinely compact pill-shaped filters, selections, statuses, or similar controls; ordinary cards, links, metadata, and navigation items do not become pills by default.
 
 Religious content cards should not resemble entertainment tiles through excessive rounding or glossy effects.
 
@@ -1147,6 +1167,8 @@ Cards group related content. Card surfaces are not automatically fully clickable
 ### Badges and chips
 
 Badges express compact status. Chips express filters/selections. Verification, editorial, AI, private, and withdrawn badges use text plus color/icon.
+
+Status, category, badge, filter, navigation state, compact action, and source/trust metadata are separate semantic roles even when they share a spacing or radius token. Status communicates state; category classifies content; badge identifies compact provenance or identity; filter is interactive selection; navigation state communicates current location; compact action remains visibly actionable; source/trust metadata carries provenance and may use scarce gold. They must not collapse into one generic pill treatment.
 
 ### Tables
 
@@ -1722,6 +1744,7 @@ Use precise language such as:
 - Quran themes cannot hide review or source state.
 - High contrast may reduce decorative imagery and shadows.
 - Future sub-products cannot override constitutional design principles.
+- Phase-1 dark mode uses the frozen REG-0018 low-glare palette and relies primarily on tonal separation and borders, not stronger shadows or glow. It preserves focus, source/status distinction, Arabic readability, and diacritic clarity.
 
 ## 43. Responsive and Device Architecture
 
@@ -1979,29 +2002,30 @@ The following decisions remain unresolved and must not be guessed:
 
 1. Final brand identity.
 2. Approved logo and symbol.
-3. Exact color palette.
-4. Quran font and licensing; the separate `--font-quran` role remains unbound after the Phase-1 Arabic UI and devotional-reading selections in REG-0017.
-5. Latin font.
-6. Urdu font strategy.
-7. Icon library.
-8. Illustration style.
-9. Motion tooling.
-10. Component implementation library.
-11. CSS and token technology.
-12. Design documentation tooling.
-13. Accessibility testing tools.
-14. Chart library.
-15. Map provider.
-16. Media player.
-17. PDF/export engine.
-18. Native-app strategy.
-19. Exact design breakpoint values.
-20. Quran page-rendering approach.
-21. Whether transliteration is enabled by locale or content availability.
-22. Exact high-contrast theme mappings.
-23. Offline caching policy for Quran and devotional content.
-24. Screenshot/watermark policy for future Talibeen.
-25. Admin comparison/diff rendering technology.
+3. Quran font and licensing; the separate `--font-quran` role remains unbound after the Phase-1 Arabic UI and devotional-reading selections in REG-0017.
+4. Latin font.
+5. Urdu font strategy.
+6. Icon library.
+7. Illustration style.
+8. Motion tooling.
+9. Component implementation library.
+10. CSS and token technology.
+11. Design documentation tooling.
+12. Accessibility testing tools.
+13. Chart library.
+14. Map provider.
+15. Media player.
+16. PDF/export engine.
+17. Native-app strategy.
+18. Exact design breakpoint values.
+19. Quran page-rendering approach.
+20. Whether transliteration is enabled by locale or content availability.
+21. Exact high-contrast theme mappings.
+22. Offline caching policy for Quran and devotional content.
+23. Screenshot/watermark policy for future Talibeen.
+24. Admin comparison/diff rendering technology.
+
+The Phase-1 semantic palette, surfaces, elevation preference, radius scale, spacing foundation, and state-role distinctions are decided by REG-0018. Final brand identity, exact high-contrast mappings, and later sub-product/theme palettes remain open.
 
 ## 51. Final Validation Matrix
 
