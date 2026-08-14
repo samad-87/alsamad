@@ -164,6 +164,7 @@ As of 2026-08-08, the M6 architecture decision analysis covering REG-0001–REG-
 | REG-0014 | Knowledge Engine Phase 1 (KE-1): entity/relationship/search unification                    | Roadmap                     | DECIDED | Registry only                                                             |
 | REG-0015 | Knowledge Engine Phase 2 (KE-2): durable topic vocabulary and assignments                  | Database, Roadmap           | DECIDED | Registry + ADR (`ADR-0007`, Accepted)                                     |
 | REG-0016 | Editorial Identity Foundation prerequisite                                                 | Database, Security, Roadmap | DECIDED | Registry + ADR (`ADR-0008`, Accepted)                                     |
+| REG-0017 | Typography Phase 1: Arabic UI and devotional-reading font roles                            | Product, Roadmap            | DECIDED | Registry only                                                             |
 
 ### REG-0001 — Editorial General Dua placement in the devotional physical model
 
@@ -542,5 +543,39 @@ Future authentication identity linking may map a provider/authentication identit
 **Dependency truth:** This prerequisite is independent of M5 and M6 and changes no provider, Quran, Duas, or runtime status. It removes only the future `editorial_users` physical blocker once implemented. `devotional_items` remains an independent hard KE-2 blocker; KE-2 implementation remains NOT STARTED. KE-1 remains COMPLETE; KE-2 governance remains COMPLETE; M5 Gate 3 remains PARTIAL; M5 Provider Import Dry Run Verified and M5 Quran Import Activated remain NOT PASS; M6 remains BLOCKED.
 
 **Implementation evidence:** None. Governance is decided; Editorial Identity Foundation implementation remains NOT STARTED.
+
+**Supersedes / Superseded by:** None.
+
+### REG-0017 — Typography Phase 1: Arabic UI and devotional-reading font roles
+
+**Category:** `Product`, `Roadmap`.
+
+**Summary:** Which exact, locally delivered Arabic fonts may back the general user-interface and devotional-reading roles before canonical Quran typography can be selected, and how that separation prevents a devotional font from becoming an implicit Quran-font decision.
+
+**Committed evidence:** `ALSAMAD_SAKINAH_DESIGN_SYSTEM.md` §§9.1–9.7, §10, and §50 distinguish general Arabic UI, devotional reading, and Quranic Arabic; `ALSAMAD_PRODUCT_ARCHITECTURE_V1.md` §8.2 names the Phase-1 candidates and requires edition-specific Quran glyph validation; `ALSAMAD_IMPLEMENTATION_ROADMAP.md` keeps Quran font rights and selection behind the Presentation gate. Official upstream evidence is the `notofonts/arabic` releases `NotoSansArabic-v2.013` and `NotoNaskhArabic-v2.021`, each licensed under SIL Open Font License 1.1.
+
+**Affected architecture:** `ALSAMAD_SAKINAH_DESIGN_SYSTEM.md` §§9–10 and §50; `ALSAMAD_PRODUCT_ARCHITECTURE_V1.md` §8.2; concise mirror `DESIGN_SYSTEM.md`.
+
+**Affected roadmap gate:** `Typography Phase 1 — Deterministic Arabic UI and Devotional Reading Fonts`.
+
+**Opened:** 2026-08-14.
+
+**Tier rationale:** Registry only. The role binding and locally delivered presentation assets are reversible and change no persisted content representation, canonical ownership, database, security, provider, or religious-content source boundary. Reversal does not require dangerous or cross-module data reconstruction, so the ADR threshold in §7 is not met. **ADR reference:** None.
+
+**Status:** `DECIDED` (2026-08-14).
+
+**Decision outcome:** Phase 1 selects Noto Sans Arabic release `NotoSansArabic-v2.013` for Arabic user-interface typography and Noto Naskh Arabic release `NotoNaskhArabic-v2.021` for long-form/general devotional Arabic reading. Both come from the official `notofonts/arabic` project under SIL Open Font License 1.1 and must be self-hosted from version-pinned local assets with the applicable copyright and complete OFL notice; no runtime third-party font request is permitted.
+
+The approved Phase-1 webfont identities are `NotoSansArabic[wdth,wght]-v2.013.woff2` for the UI role and `NotoNaskhArabic[wght]-v2.021.woff2` for the devotional-reading role. These repository asset names identify the variable WOFF2 files sourced exclusively from their matching official tagged release archives. The upstream archives are `NotoSansArabic-v2.013.zip` (SHA-256 `1301aceaea84c501cf2e6dcfb3182e2328c8eae5725817fcb239672bda7154f1`) and `NotoNaskhArabic-v2.021.zip` (SHA-256 `6c050ab9bd087d69b733c505a7576e60c528c2f33cd7b91005a5bd7da4514032`). Before implementation may proceed, each extracted WOFF2 must be matched to the named family/version and its own SHA-256 must be recorded and reviewed; an archive checksum does not substitute for the binary checksum.
+
+The Noto Sans Arabic variable asset is the smallest current-UI set because one binary supplies the committed normal/default 400 weight and the existing emphasized weights 500, 600, 650, 700, 750, and 800 at normal width; Phase 1 authorizes only the 400–800 weight range and default width, with no decorative or future-only face. Noto Naskh Arabic authorizes only its regular 400 reading instance; no bold devotional-reading requirement is approved. Safe fallbacks remain `Tahoma, Arial, sans-serif` for Arabic UI and `serif` for devotional reading.
+
+Canonical Quran typography is a separate role represented by `--font-quran` and remains intentionally **UNBOUND**. Noto Naskh Arabic's devotional selection is not Quran-font approval, no Quran binary or fallback binding is authorized, and no canonical Quran surface may silently inherit this decision. Quran typography remains blocked pending the approved canonical source/resource and exact script/edition; a representative corpus covering Uthmani marks, waqf symbols, annotation characters, combining marks, and superscript alif; line-breaking and cross-browser/OS shaping QA; the exact Quran font/version; licensing/distribution evidence; and presentation approval. Latin typography also remains unresolved.
+
+**Implementation boundary:** Only the later Roadmap unit may authorize implementation. Its boundary is `src/app/fonts.ts`, `src/components/shell.tsx`, the exact typography hunk in `src/app/globals.css`, the two approved WOFF2 assets above, applicable OFL notice file(s), and `tests/font-loading.test.mjs`. No Quran font binary is included.
+
+**No implementation authorization:** This Registry decision selects roles and assets but does not download fonts, modify source or CSS, implement loading, activate Quran typography, restyle routes, adopt prototype work, or authorize provider/import activity.
+
+**Implementation evidence:** None. Governance is DECIDED; Typography Phase 1 implementation is NOT STARTED.
 
 **Supersedes / Superseded by:** None.

@@ -492,6 +492,10 @@ General Arabic UI must support:
 - long labels;
 - Arabic localization without condensed emergency fonts.
 
+Typography Phase 1 binds Arabic user-interface typography to **Noto Sans Arabic `NotoSansArabic-v2.013`** through the local variable WOFF2 asset `NotoSansArabic[wdth,wght]-v2.013.woff2`, limited to weights 400–800 at default width for the current normal and emphasized UI values. It binds long-form/general devotional Arabic reading, including committed Adhkar reading surfaces, to the regular 400 instance of **Noto Naskh Arabic `NotoNaskhArabic-v2.021`** through `NotoNaskhArabic[wght]-v2.021.woff2`. Arabic UI falls back to `Tahoma, Arial, sans-serif`; devotional reading falls back to `serif`. Both assets must be version-pinned, locally delivered, covered by their SIL OFL 1.1 notices, and verified by binary checksum. No runtime third-party font request is permitted.
+
+These are separate presentation roles. A distinct `--font-quran` role exists but remains intentionally unbound in Phase 1. Noto Naskh Arabic is approved only for general/devotional reading and must not become an implicit canonical Quran font or fallback. No Quran binary or Quran typography activation is authorized until the exact canonical source/script and edition, representative Uthmani/waqf/annotation corpus, combining-mark and superscript-alif behavior, line breaking, cross-browser/OS shaping, exact font/version, licensing, and presentation approval all pass their separate gate.
+
 ### 9.4 Future languages
 
 Typography must support English, Norwegian, Indonesian, Urdu, Turkish, Malay, and unlimited future languages through script-aware fallback stacks.
@@ -1974,29 +1978,28 @@ The following decisions remain unresolved and must not be guessed:
 1. Final brand identity.
 2. Approved logo and symbol.
 3. Exact color palette.
-4. Primary Arabic UI font.
-5. Quran font and licensing.
-6. Latin font.
-7. Urdu font strategy.
-8. Icon library.
-9. Illustration style.
-10. Motion tooling.
-11. Component implementation library.
-12. CSS and token technology.
-13. Design documentation tooling.
-14. Accessibility testing tools.
-15. Chart library.
-16. Map provider.
-17. Media player.
-18. PDF/export engine.
-19. Native-app strategy.
-20. Exact design breakpoint values.
-21. Quran page-rendering approach.
-22. Whether transliteration is enabled by locale or content availability.
-23. Exact high-contrast theme mappings.
-24. Offline caching policy for Quran and devotional content.
-25. Screenshot/watermark policy for future Talibeen.
-26. Admin comparison/diff rendering technology.
+4. Quran font and licensing; the separate `--font-quran` role remains unbound after the Phase-1 Arabic UI and devotional-reading selections in REG-0017.
+5. Latin font.
+6. Urdu font strategy.
+7. Icon library.
+8. Illustration style.
+9. Motion tooling.
+10. Component implementation library.
+11. CSS and token technology.
+12. Design documentation tooling.
+13. Accessibility testing tools.
+14. Chart library.
+15. Map provider.
+16. Media player.
+17. PDF/export engine.
+18. Native-app strategy.
+19. Exact design breakpoint values.
+20. Quran page-rendering approach.
+21. Whether transliteration is enabled by locale or content availability.
+22. Exact high-contrast theme mappings.
+23. Offline caching policy for Quran and devotional content.
+24. Screenshot/watermark policy for future Talibeen.
+25. Admin comparison/diff rendering technology.
 
 ## 51. Final Validation Matrix
 

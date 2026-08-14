@@ -19,7 +19,7 @@ ALSAMAD is a Mobile First product. The phone experience is the reference impleme
 
 ## Typography
 
-Arabic UI uses a project-safe Noto Sans Arabic/Tahoma fallback stack. Arabic religious reading uses a separate Noto Naskh Arabic/Amiri/serif role with generous leading. English uses Inter/system UI. The final Quran font remains blocked on edition, glyph, waqf-mark, and licensing approval. Decorative calligraphy is never body copy; joined Arabic receives no letter spacing.
+Arabic UI uses locally delivered Noto Sans Arabic `NotoSansArabic-v2.013`, limited to weights 400–800 at default width, with `Tahoma, Arial, sans-serif` fallback. General/devotional Arabic reading uses the regular 400 instance of locally delivered Noto Naskh Arabic `NotoNaskhArabic-v2.021`, with `serif` fallback and generous leading. Both are version-pinned SIL OFL 1.1 Phase-1 roles. English remains Inter/system UI and is not decided here. Canonical Quran typography is a separate, intentionally unbound `--font-quran` role; the devotional Noto Naskh selection is not Quran approval. Decorative calligraphy is never body copy; joined Arabic receives no letter spacing.
 
 ## Surfaces and focus
 

@@ -432,10 +432,10 @@ Gold must be scarce. Green should signal action/identity, not decorate every sur
 
 ### 8.2 Typography
 
-- Arabic reading candidate: **Noto Naskh Arabic** or a properly licensed, Quran-appropriate typeface after glyph and waqf-mark testing
-- Arabic UI candidate: **IBM Plex Sans Arabic** or Noto Sans Arabic
+- Phase-1 general/devotional Arabic reading: **Noto Naskh Arabic `NotoNaskhArabic-v2.021`**, regular 400 reading instance, delivered locally under SIL OFL 1.1
+- Phase-1 Arabic UI: **Noto Sans Arabic `NotoSansArabic-v2.013`**, using the version-pinned variable asset only at weights 400–800 and default width for current normal and emphasized UI values, delivered locally under SIL OFL 1.1
 - English UI: **Inter** or Geist
-- Quranic script must be selected based on authenticated text edition and full glyph/diacritic support, not visual taste alone
+- Canonical Quran typography remains separate and unbound as `--font-quran`; Noto Naskh Arabic's devotional role is not Quran approval. Quran font/script must be selected from the authenticated edition with full glyph, diacritic, waqf, annotation, shaping, line-breaking, licensing, and cross-platform evidence, not visual taste alone
 - Arabic body line height: approximately 1.9–2.1 depending on face; Quran reading adjustable
 - English body line height: approximately 1.55–1.7
 - User controls: Arabic/Quran size, translation size, translation visibility and transliteration visibility

@@ -1533,6 +1533,30 @@ Consistent with `src/lib/quran/content/db-source.ts`'s own documented precedent 
 
 Architecture contract complete; implementation not started by this documentation task.
 
+### Typography Phase 1 — Deterministic Arabic UI and Devotional Reading Fonts
+
+**Governance status.** `REG-0017` selects Noto Sans Arabic `NotoSansArabic-v2.013` for Arabic UI and Noto Naskh Arabic `NotoNaskhArabic-v2.021` for general/devotional Arabic reading. Governance is COMPLETE; implementation is **NOT STARTED**. Registry entry required: YES. ADR required: NO. This section authorizes only a later deterministic, local A/B font-loading implementation; it does not implement or download fonts in this documentation unit.
+
+**Frozen assets and delivery.** The later implementation is limited to `NotoSansArabic[wdth,wght]-v2.013.woff2` at weights 400–800 and default width for current normal and emphasized Arabic UI values, and the regular 400 instance of `NotoNaskhArabic[wght]-v2.021.woff2` for devotional reading. Both must originate exclusively from their named official `notofonts/arabic` tagged release archives, retain the applicable copyright and complete SIL OFL 1.1 notice, be self-hosted locally, and make no runtime third-party font request. Implementation must verify the archive identity recorded by REG-0017, the extracted family/version, and a separately recorded SHA-256 for each WOFF2 before adoption. Safe fallback stacks are `Tahoma, Arial, sans-serif` for Arabic UI and `serif` for devotional reading.
+
+**Quran and Latin separation.** A distinct `--font-quran` token may be created but must remain intentionally unbound. Noto Naskh Arabic is approved only for general/devotional reading; it is not an approved Quran font, may not be assigned as an implicit canonical Quran fallback, and authorizes no Quran binary or Quran typography activation. Quran typography remains behind the Presentation gate pending the approved canonical source/resource and script/edition, representative Uthmani/waqf/annotation/combining-mark/superscript-alif corpus, line-breaking and cross-platform shaping QA, exact Quran font/version, licensing/distribution evidence, and presentation approval. Latin-font selection remains unresolved and outside this unit.
+
+**Exact future implementation boundary.** A later execution may change only:
+
+- `src/app/fonts.ts`
+- `src/components/shell.tsx`
+- the exact reviewed typography hunk in `src/app/globals.css`
+- `src/app/fonts/NotoSansArabic[wdth,wght]-v2.013.woff2`
+- `src/app/fonts/NotoNaskhArabic[wght]-v2.021.woff2`
+- the applicable OFL copyright/license notice file or files under `src/app/fonts/`
+- `tests/font-loading.test.mjs`
+
+Because `src/app/globals.css` contains unrelated local prototype work at governance time, the later execution must review and stage only its exact typography hunk. No prototype CSS or other dirty work is authorized or adopted.
+
+**Acceptance.** The later implementation must prove that both fonts resolve locally at build/runtime with no runtime third-party request; Arabic UI receives Noto Sans Arabic; committed devotional-reading surfaces receive Noto Naskh Arabic; English UI inherits neither the devotional nor Quran role; `--font-quran` remains unbound; the exact assets, licenses, versions, and checksums match REG-0017; Arabic/Quran text code points remain unchanged; representative Arabic and tashkeel do not clip; and no Quran font activates. Real-browser visual verification is required for shaping and clipping because static or DOM-emulated tests cannot establish those properties.
+
+**Explicit exclusions and status truth.** This unit authorizes no Quran font binary, Quran route/component restyling, Quran typography activation, canonical text change, provider/import/network work, visual redesign, Latin-font decision, Duas prototype adoption, Knowledge Engine work, database change, or search-runtime expansion. The Quran Presentation gate remains unresolved. M5 Gate 3 and Gate 4, Quran provider/import status, M6, KE-2, Phase 7, search runtime, and Duas governance remain unchanged.
+
 ### M7-prerequisite / Editorial Identity Foundation
 
 **Governance status.** `REG-0016` and `ADR-0008` approve the architecture and exact physical contract for the independently sequenced Editorial Identity Foundation. Implementation is **NOT STARTED** and requires a later explicit execution against this gate. This prerequisite is not Phase 7 implementation and does not authorize any workflow or runtime surface.
