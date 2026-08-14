@@ -109,6 +109,20 @@ const emptyBookmarks: readonly string[] = [];
 let cachedBookmarksRaw: string | null = null;
 let cachedBookmarks: readonly string[] = emptyBookmarks;
 
+export function parseStoredBookmarks(raw: string | null): readonly string[] {
+  if (!raw) return emptyBookmarks;
+
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    return Array.isArray(parsed) &&
+      parsed.every((entry): entry is string => typeof entry === "string")
+      ? parsed
+      : emptyBookmarks;
+  } catch {
+    return emptyBookmarks;
+  }
+}
+
 function readBookmarks(): readonly string[] {
   let raw: string | null;
   try {
@@ -120,11 +134,7 @@ function readBookmarks(): readonly string[] {
     return cachedBookmarks;
   }
   cachedBookmarksRaw = raw;
-  try {
-    cachedBookmarks = raw ? (JSON.parse(raw) as string[]) : emptyBookmarks;
-  } catch {
-    cachedBookmarks = emptyBookmarks;
-  }
+  cachedBookmarks = parseStoredBookmarks(raw);
   return cachedBookmarks;
 }
 
