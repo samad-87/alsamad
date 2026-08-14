@@ -5,6 +5,7 @@ import { SearchIcon } from "./icons";
 import { ThemeSwitcher } from "./client-controls";
 import { BottomNav } from "./bottom-nav";
 import { LocaleSwitcher } from "./locale-switcher";
+import { arabicReadingFont, arabicUiFont } from "@/app/fonts";
 
 export { LocaleSwitcher } from "./locale-switcher";
 
@@ -34,7 +35,9 @@ export function AppShell({
       dir={locale === "ar" ? "rtl" : "ltr"}
       suppressHydrationWarning
     >
-      <body>
+      <body
+        className={`${arabicUiFont.variable} ${arabicReadingFont.variable}`}
+      >
         <a className="skip-link" href="#main">
           {c.skip}
         </a>
