@@ -1,7 +1,13 @@
 "use client";
-import { useEffect, useState, useSyncExternalStore } from "react";
-import { createPortal } from "react-dom";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { MenuIcon, MoonIcon, SunIcon } from "./icons";
+import { AccessibleOverlay } from "./accessible-overlay";
 import type { Locale } from "@/lib/i18n";
 import { t } from "@/lib/i18n";
 
@@ -65,12 +71,15 @@ export function MobileMenu({
   wrapperClassName?: string;
 }) {
   const [open, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const close = useCallback(() => setOpen(false), []);
   const c = t(locale);
   return (
     <div className={wrapperClassName}>
       <button
+        ref={triggerRef}
         className={triggerClassName}
-        onClick={() => setOpen(!open)}
+        onClick={() => setOpen((current) => !current)}
         aria-expanded={open}
         aria-controls={panelId}
       >
@@ -81,17 +90,19 @@ export function MobileMenu({
           </>
         )}
       </button>
-      {open &&
-        typeof document !== "undefined" &&
-        createPortal(
-          <div id={panelId} className="mobile-panel">
-            <button className="mobile-close" onClick={() => setOpen(false)}>
-              {c.close} ×
-            </button>
-            {children}
-          </div>,
-          document.body,
-        )}
+      <AccessibleOverlay
+        open={open}
+        id={panelId}
+        label={c.more}
+        className="mobile-panel"
+        returnFocusRef={triggerRef}
+        onClose={close}
+      >
+        <button className="mobile-close" onClick={close} aria-label={c.close}>
+          {c.close} ×
+        </button>
+        {children}
+      </AccessibleOverlay>
     </div>
   );
 }

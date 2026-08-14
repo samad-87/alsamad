@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { AccessibleOverlay } from "@/components/accessible-overlay";
 import { ClockIcon, MenuIcon } from "@/components/icons";
 import type { Locale } from "@/lib/i18n";
 import { t } from "@/lib/i18n";
@@ -24,6 +25,8 @@ export function SurahSidebar({
   const lastReadSurahNumber = lastRead ? Number(lastRead.split(":")[0]) : null;
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const close = useCallback(() => setOpen(false), []);
 
   const filtered = useMemo(() => {
     const trimmed = query.trim();
@@ -109,6 +112,7 @@ export function SurahSidebar({
   return (
     <>
       <button
+        ref={triggerRef}
         type="button"
         className="button quran-sidebar-toggle"
         onClick={() => setOpen(true)}
@@ -129,26 +133,32 @@ export function SurahSidebar({
         </div>
         {renderList()}
       </aside>
-      {open && (
-        <div id="quran-sidebar-panel" className="quran-sidebar-panel">
-          <button
-            type="button"
-            className="mobile-close"
-            onClick={() => setOpen(false)}
-          >
-            {c.close} ×
-          </button>
-          <div className="quran-sidebar-search">
-            <input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder={c.searchQuranPlaceholder}
-              aria-label={searchLabel}
-            />
-          </div>
-          {renderList()}
+      <AccessibleOverlay
+        open={open}
+        id="quran-sidebar-panel"
+        label={c.surahs}
+        className="quran-sidebar-panel"
+        returnFocusRef={triggerRef}
+        onClose={close}
+      >
+        <button
+          type="button"
+          className="mobile-close"
+          onClick={close}
+          aria-label={c.close}
+        >
+          {c.close} ×
+        </button>
+        <div className="quran-sidebar-search">
+          <input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder={c.searchQuranPlaceholder}
+            aria-label={searchLabel}
+          />
         </div>
-      )}
+        {renderList()}
+      </AccessibleOverlay>
     </>
   );
 }
