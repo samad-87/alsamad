@@ -64,7 +64,12 @@ for (const locale of ["ar", "en"]) {
           ?.textContent.includes(t(locale).fixture),
         true,
       );
-      assert.match(content, new RegExp(t(locale).quranSectionBody));
+      assert.equal(
+        [...document.querySelectorAll("h2")].some(
+          (heading) => heading.textContent.trim() === t(locale).quran,
+        ),
+        true,
+      );
       assert.match(content, new RegExp(t(locale).morning));
       assert.match(content, new RegExp(t(locale).evening));
       assert.match(content, new RegExp(t(locale).setupRequired));

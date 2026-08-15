@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Locale } from "@/lib/i18n";
 import { t } from "@/lib/i18n";
 import { loc } from "@/lib/fixtures";
-import { ArrowIcon, BookIcon, HeartHandsIcon } from "@/components/icons";
+import { ArrowIcon, HeartHandsIcon } from "@/components/icons";
 import { Container, ContentCard, Section } from "@/components/ui";
 import { getQuranOverallStatus } from "@/lib/quran/content/reader-data";
 import { getAdhkarOverallStatus } from "@/lib/adhkar/content/reader-data";
@@ -98,49 +98,19 @@ export async function QuranEntry({ locale }: { locale: Locale }) {
   return (
     <Section>
       <Container>
-        <div className="section-heading">
-          <div>
-            <span className="eyebrow">{c.quranSectionEyebrow}</span>
-            <h2 className="title">{c.quran}</h2>
-          </div>
-          <div className="chip-row">
+        <div className="today-quran surface-grouped home-reveal">
+          <div className="today-quran-heading">
+            <div>
+              <span className="eyebrow">{c.today}</span>
+              <h2 className="title">{c.quran}</h2>
+            </div>
             <span className="chip status-chip">
               {statusIcon} {statusLabel}
             </span>
-            <Link className="button" href={`/${locale}/quran`}>
-              {c.surahs}
-            </Link>
           </div>
-        </div>
-        <div className="quran-entry-grid">
-          <div className="quran-entry-main feature-surface home-reveal">
-            <BookIcon size={30} />
-            <p>{c.quranSectionBody}</p>
-            <div className="hero-actions">
-              <Link className="button button-primary" href={`/${locale}/quran`}>
-                {c.exploreQuran}
-              </Link>
-              <Link className="button" href={`/${locale}/quran/1`}>
-                {c.continueReadingCta}
-              </Link>
-            </div>
-          </div>
-          <div className="quran-entry-side">
-            <ContentCard
-              eyebrow={c.continueReading}
-              title={c.continueReadingPlaceholder}
-              body={c.placeholderBody}
-              href={`/${locale}/quran/1`}
-              action={c.view}
-            />
-            <ContentCard
-              eyebrow={c.settings}
-              title={c.readerWidth}
-              body={c.placeholderBody}
-              href={`/${locale}/quran/1`}
-              action={c.view}
-            />
-          </div>
+          <Link className="button today-quran-action" href={`/${locale}/quran`}>
+            {c.surahs}
+          </Link>
         </div>
       </Container>
     </Section>

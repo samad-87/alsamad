@@ -1755,19 +1755,26 @@ button.chip[aria-pressed="true"] {
   flex-wrap: wrap;
   gap: 0.5rem;
 }
-.quran-entry-grid {
-  display: grid;
-  gap: 1.25rem;
-}
-.quran-entry-main {
+.today-quran {
   padding: clamp(1.5rem, 5vw, 2.5rem);
   display: grid;
-  gap: 1rem;
-  align-content: start;
+  gap: 1.25rem;
+  border: var(--border-subtle);
+  box-shadow: var(--elevation-none);
 }
-.quran-entry-side {
-  display: grid;
+.today-quran-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
   gap: 1rem;
+  flex-wrap: wrap;
+}
+.today-quran-heading .title {
+  margin-block-start: 0.25rem;
+  margin-block-end: 0;
+}
+.today-quran-action {
+  justify-self: start;
 }
 .placeholder-card {
   gap: 0.6rem;
@@ -1814,13 +1821,6 @@ button.chip[aria-pressed="true"] {
 .marriage-journey-card > * {
   position: relative;
   z-index: 1;
-}
-
-@media (min-width: 1024px) {
-  .quran-entry-grid {
-    grid-template-columns: 1.6fr 1fr;
-    align-items: start;
-  }
 }
 
 @media (hover: hover) and (pointer: fine) {
