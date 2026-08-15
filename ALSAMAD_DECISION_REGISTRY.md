@@ -147,25 +147,25 @@ Seeded only with decisions that are currently necessary and supported by committ
 
 As of 2026-08-08, the M6 architecture decision analysis covering REG-0001–REG-0008 has been reviewed and approved by the reviewing authority. REG-0001 and REG-0006 required an ADR under the §7 threshold; both `ADR-0001` and `ADR-0002` now exist with **Status: Accepted**, satisfying the §6 precondition for those two entries to move to `DECIDED`. The remaining six entries required no ADR and move to `DECIDED` directly on the same approval. **`DECIDED` here, as throughout this Registry, authorizes no implementation.** No entry is marked `IMPLEMENTED`: no schema exists yet, `ALSAMAD_DATABASE_ARCHITECTURE.md` §5.4.1–§5.4.4 have not been authored, and the independent M5 production-activation dependency blocking M6 implementation remains unresolved regardless of this Registry's status.
 
-| ID       | Title                                                                                      | Category                    | Status  | Tier                                                                      |
-| -------- | ------------------------------------------------------------------------------------------ | --------------------------- | ------- | ------------------------------------------------------------------------- |
-| REG-0001 | Editorial General Dua placement in the devotional physical model                           | Database, Admin             | DECIDED | Registry + ADR (`ADR-0001`, Accepted)                                     |
-| REG-0002 | `devotional_items` specialization depth and independent lifecycle                          | Database                    | DECIDED | Registry only                                                             |
-| REG-0003 | `devotional_collections` ↔ content-item relationship cardinality and independent lifecycle | Database                    | DECIDED | Registry only                                                             |
-| REG-0004 | `devotional_collections.collection_kind` closed-vocabulary source of truth                 | Database, Admin             | DECIDED | Registry only                                                             |
-| REG-0005 | Repetition-guidance storage locus and its source-evidence representation                   | Database                    | DECIDED | Registry only                                                             |
-| REG-0006 | `content_translations` text-storage representation                                         | Database                    | DECIDED | Registry + ADR (`ADR-0002`, Accepted)                                     |
-| REG-0007 | `content_translations` review/publication lifecycle column count                           | Database                    | DECIDED | Registry only (decided alongside `ADR-0002`, which covers the same table) |
-| REG-0008 | `devotional_collection_items` membership deletion semantics                                | Database                    | DECIDED | Registry only                                                             |
-| REG-0010 | In-application display and standalone redistribution rights separation                     | Database                    | DECIDED | Registry + ADR (`ADR-0003`, Accepted)                                     |
-| REG-0011 | Immutable source import manifest and execution evidence separation                         | Database                    | DECIDED | Registry + ADR (`ADR-0004`, Accepted)                                     |
-| REG-0012 | License-version immutability and historical license evidence                               | Database                    | DECIDED | Registry + ADR (`ADR-0005`, Accepted)                                     |
-| REG-0013 | Atomic Quran release selector and publication consistency                                  | Database                    | DECIDED | Registry + ADR (`ADR-0006`, Accepted)                                     |
-| REG-0014 | Knowledge Engine Phase 1 (KE-1): entity/relationship/search unification                    | Roadmap                     | DECIDED | Registry only                                                             |
-| REG-0015 | Knowledge Engine Phase 2 (KE-2): durable topic vocabulary and assignments                  | Database, Roadmap           | DECIDED | Registry + ADR (`ADR-0007`, Accepted)                                     |
-| REG-0016 | Editorial Identity Foundation prerequisite                                                 | Database, Security, Roadmap | DECIDED | Registry + ADR (`ADR-0008`, Accepted)                                     |
-| REG-0017 | Typography Phase 1: Arabic UI and devotional-reading font roles                            | Product, Roadmap            | DECIDED | Registry only                                                             |
-| REG-0018 | Sakīnah Phase-1 visual foundation: palette, surfaces, elevation, radii, and state roles    | Product, Roadmap            | DECIDED | Registry only                                                             |
+| ID       | Title                                                                                      | Category                    | Status      | Tier                                                                      |
+| -------- | ------------------------------------------------------------------------------------------ | --------------------------- | ----------- | ------------------------------------------------------------------------- |
+| REG-0001 | Editorial General Dua placement in the devotional physical model                           | Database, Admin             | DECIDED     | Registry + ADR (`ADR-0001`, Accepted)                                     |
+| REG-0002 | `devotional_items` specialization depth and independent lifecycle                          | Database                    | DECIDED     | Registry only                                                             |
+| REG-0003 | `devotional_collections` ↔ content-item relationship cardinality and independent lifecycle | Database                    | DECIDED     | Registry only                                                             |
+| REG-0004 | `devotional_collections.collection_kind` closed-vocabulary source of truth                 | Database, Admin             | DECIDED     | Registry only                                                             |
+| REG-0005 | Repetition-guidance storage locus and its source-evidence representation                   | Database                    | DECIDED     | Registry only                                                             |
+| REG-0006 | `content_translations` text-storage representation                                         | Database                    | DECIDED     | Registry + ADR (`ADR-0002`, Accepted)                                     |
+| REG-0007 | `content_translations` review/publication lifecycle column count                           | Database                    | DECIDED     | Registry only (decided alongside `ADR-0002`, which covers the same table) |
+| REG-0008 | `devotional_collection_items` membership deletion semantics                                | Database                    | DECIDED     | Registry only                                                             |
+| REG-0010 | In-application display and standalone redistribution rights separation                     | Database                    | DECIDED     | Registry + ADR (`ADR-0003`, Accepted)                                     |
+| REG-0011 | Immutable source import manifest and execution evidence separation                         | Database                    | DECIDED     | Registry + ADR (`ADR-0004`, Accepted)                                     |
+| REG-0012 | License-version immutability and historical license evidence                               | Database                    | DECIDED     | Registry + ADR (`ADR-0005`, Accepted)                                     |
+| REG-0013 | Atomic Quran release selector and publication consistency                                  | Database                    | DECIDED     | Registry + ADR (`ADR-0006`, Accepted)                                     |
+| REG-0014 | Knowledge Engine Phase 1 (KE-1): entity/relationship/search unification                    | Roadmap                     | DECIDED     | Registry only                                                             |
+| REG-0015 | Knowledge Engine Phase 2 (KE-2): durable topic vocabulary and assignments                  | Database, Roadmap           | DECIDED     | Registry + ADR (`ADR-0007`, Accepted)                                     |
+| REG-0016 | Editorial Identity Foundation prerequisite                                                 | Database, Security, Roadmap | DECIDED     | Registry + ADR (`ADR-0008`, Accepted)                                     |
+| REG-0017 | Typography Phase 1: Arabic UI and devotional-reading font roles                            | Product, Roadmap            | IMPLEMENTED | Registry only                                                             |
+| REG-0018 | Sakīnah Phase-1 visual foundation: palette, surfaces, elevation, radii, and state roles    | Product, Roadmap            | DECIDED     | Registry only                                                             |
 
 ### REG-0001 — Editorial General Dua placement in the devotional physical model
 
@@ -605,7 +605,7 @@ Future authentication identity linking may map a provider/authentication identit
 
 **Tier rationale:** Registry only. The role binding and locally delivered presentation assets are reversible and change no persisted content representation, canonical ownership, database, security, provider, or religious-content source boundary. Reversal does not require dangerous or cross-module data reconstruction, so the ADR threshold in §7 is not met. **ADR reference:** None.
 
-**Status:** `DECIDED` (2026-08-14).
+**Status:** `IMPLEMENTED` (2026-08-15; decision recorded 2026-08-14).
 
 **Decision outcome:** Phase 1 selects Noto Sans Arabic release `NotoSansArabic-v2.013` for Arabic user-interface typography and Noto Naskh Arabic release `NotoNaskhArabic-v2.021` for long-form/general devotional Arabic reading. Both come from the official `notofonts/arabic` project under SIL Open Font License 1.1 and must be self-hosted from version-pinned local assets with the applicable copyright and complete OFL notice; no runtime third-party font request is permitted.
 
@@ -625,6 +625,6 @@ Canonical Quran typography is a separate role represented by `--font-quran` and 
 
 **License-format reconciliation:** SIL OFL 1.1 permits redistribution and self-hosting of the original TTFs and the converted WOFF2 derivatives. Derived files remain under OFL 1.1 and must ship with the applicable copyright and complete license notice. Format conversion alone requires no family rename under the applicable Noto notice; ALSAMAD must preserve family metadata and must not imply upstream endorsement of its derived binaries.
 
-**Implementation evidence:** None. Governance is DECIDED; Typography Phase 1 implementation is NOT STARTED.
+**Implementation evidence:** Typography Phase 1 implementation is **COMPLETE** at commit `ee0bed65e6999a6546ead663c027072dc427e831`; the applicable Roadmap gate is `TYPOGRAPHY PHASE-1 REAL-BROWSER ACCEPTANCE = PASS`. This citation records the later execution and passed acceptance of the original Roadmap authorization; it does not change the REG-0017 decision outcome or imply that the Registry decision itself performed implementation.
 
 **Supersedes / Superseded by:** None.
