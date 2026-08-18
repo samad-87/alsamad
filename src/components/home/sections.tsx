@@ -3,9 +3,9 @@ import type { Locale } from "@/lib/i18n";
 import { t } from "@/lib/i18n";
 import { loc } from "@/lib/fixtures";
 import { ArrowIcon, HeartHandsIcon } from "@/components/icons";
-import { Container, ContentCard, Section } from "@/components/ui";
+import { Container, Section } from "@/components/ui";
 import { getQuranOverallStatus } from "@/lib/quran/content/reader-data";
-import { getAdhkarOverallStatus } from "@/lib/adhkar/content/reader-data";
+import { getCategoryReaderData } from "@/lib/adhkar/content/reader-data";
 
 /**
  * Homepage sections — Mobile First, Desktop Excellent.
@@ -119,100 +119,121 @@ export async function QuranEntry({ locale }: { locale: Locale }) {
 
 export async function AdhkarDuas({ locale }: { locale: Locale }) {
   const c = t(locale);
-  const snapshot = await getAdhkarOverallStatus();
-  const statusIcon =
-    snapshot.status === "available"
-      ? "✓"
-      : snapshot.status === "pending"
-        ? "◐"
-        : "◌";
-  const statusLabel =
-    snapshot.status === "available"
+  const [morning, evening] = await Promise.all([
+    getCategoryReaderData("morning"),
+    getCategoryReaderData("evening"),
+  ]);
+  const practices = [
+    {
+      title: c.morning,
+      href: `/${locale}/adhkar/morning`,
+      symbol: "☼",
+      status: morning?.status ?? "empty",
+    },
+    {
+      title: c.evening,
+      href: `/${locale}/adhkar/evening`,
+      symbol: "☾",
+      status: evening?.status ?? "empty",
+    },
+  ] as const;
+  const statusLabel = (status: (typeof practices)[number]["status"]) =>
+    status === "available"
       ? c.adhkarStatusAvailable
-      : snapshot.status === "pending"
+      : status === "pending"
         ? c.adhkarStatusPending
         : c.adhkarStatusEmpty;
+
   return (
-    <Section soft>
+    <section className="section section-soft home-practice-region">
       <Container>
         <div className="section-heading">
           <div>
-            <span className="eyebrow">{c.adhkar}</span>
-            <h2 className="title">
-              {locale === "ar"
-                ? "لحظتان هادئتان، ودعاء"
-                : "Two quiet moments, and dua"}
-            </h2>
+            <span className="eyebrow">{c.daily}</span>
+            <h2 className="title">{c.adhkar}</h2>
           </div>
-          <span className="chip status-chip">
-            {statusIcon} {statusLabel}
-          </span>
         </div>
-        <div className="grid-3">
-          <ContentCard
-            eyebrow="☼"
-            title={c.morning}
-            body={c.placeholderBody}
-            href={`/${locale}/adhkar/morning`}
-            action={c.view}
-          />
-          <ContentCard
-            eyebrow="☾"
-            title={c.evening}
-            body={c.placeholderBody}
-            href={`/${locale}/adhkar/evening`}
-            action={c.view}
-          />
-          <ContentCard
-            eyebrow={c.categories}
-            title={c.duas}
-            body={c.placeholderBody}
-            href={`/${locale}/duas`}
-            action={c.view}
-          />
+        <div className="home-practice-grid">
+          {practices.map((practice) => (
+            <Link
+              className="home-practice-entry surface-interactive"
+              href={practice.href}
+              key={practice.href}
+            >
+              <span className="home-entry-symbol" aria-hidden="true">
+                {practice.symbol}
+              </span>
+              <span className="home-entry-copy">
+                <h3>{practice.title}</h3>
+                <span className="home-entry-status">
+                  {statusLabel(practice.status)}
+                </span>
+              </span>
+              <span className="card-action">
+                {c.view} <ArrowIcon size={16} />
+              </span>
+            </Link>
+          ))}
         </div>
       </Container>
-    </Section>
+    </section>
   );
 }
 
 export function PrayerCalendar({ locale }: { locale: Locale }) {
   const c = t(locale);
+  const utilities = [
+    {
+      title: c.prayer,
+      href: `/${locale}/prayer-times`,
+      status: c.setupRequired,
+      detail: c.noLiveStatus,
+    },
+    {
+      title: c.calendar,
+      href: `/${locale}/calendar`,
+      status: c.setupRequired,
+      detail: c.noLiveStatus,
+    },
+    { title: c.tasbeeh, href: `/${locale}/tasbeeh` },
+    { title: c.duas, href: `/${locale}/duas` },
+  ] as const;
+
   return (
-    <Section>
+    <section className="section home-utility-region">
       <Container>
         <div className="section-heading">
           <div>
-            <span className="eyebrow">{c.prayer}</span>
-            <h2 className="title">{c.staticTimes}</h2>
+            <span className="eyebrow">{c.daily}</span>
+            <h2 className="title">
+              {c.prayer} · {c.calendar} · {c.tasbeeh} · {c.duas}
+            </h2>
           </div>
         </div>
-        <div className="grid-2">
-          <div className="content-card surface placeholder-card">
-            <span className="eyebrow">{c.prayer}</span>
-            <h3>{c.nextPrayer}</h3>
-            <p className="muted">{c.setupRequired}</p>
-            <div className="source-row">
-              <span className="chip">◌ {c.noLiveStatus}</span>
-            </div>
-            <Link className="card-action" href={`/${locale}/prayer-times`}>
-              {c.view} →
-            </Link>
-          </div>
-          <div className="content-card surface placeholder-card">
-            <span className="eyebrow">{c.calendar}</span>
-            <h3>{c.calendar}</h3>
-            <p className="muted">{c.setupRequired}</p>
-            <div className="source-row">
-              <span className="chip">◌ {c.noLiveStatus}</span>
-            </div>
-            <Link className="card-action" href={`/${locale}/calendar`}>
-              {c.view} →
-            </Link>
+        <div className="home-utility-group surface-grouped">
+          <div className="home-utility-grid">
+            {utilities.map((utility) => (
+              <Link
+                className="home-utility-entry surface-interactive"
+                href={utility.href}
+                key={utility.href}
+              >
+                <h3>{utility.title}</h3>
+                {"status" in utility ? (
+                  <span className="home-utility-status">
+                    <span>{utility.status}</span>
+                    <span>{utility.detail}</span>
+                  </span>
+                ) : null}
+                <span className="card-action">
+                  {c.view} <ArrowIcon size={16} />
+                </span>
+              </Link>
+            ))}
           </div>
         </div>
       </Container>
-    </Section>
+    </section>
   );
 }
 

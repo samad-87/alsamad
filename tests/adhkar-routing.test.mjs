@@ -75,13 +75,25 @@ test("routing: no broken links — the index only links categories that have a r
 // ---------------------------------------------------------------------------
 
 test("homepage: morning and evening adhkar links are correct", () => {
-  assert.match(sections, /href=\{`\/\$\{locale\}\/adhkar\/morning`\}/);
-  assert.match(sections, /href=\{`\/\$\{locale\}\/adhkar\/evening`\}/);
+  const adhkarSectionMatch = sections.match(
+    /export async function AdhkarDuas[\s\S]*?\n}\n/,
+  );
+  assert.ok(adhkarSectionMatch, "expected to find the AdhkarDuas section");
+  const body = adhkarSectionMatch[0];
+  assert.match(body, /href:\s*`\/\$\{locale\}\/adhkar\/morning`/);
+  assert.match(body, /href:\s*`\/\$\{locale\}\/adhkar\/evening`/);
 });
 
 test("homepage: the Adhkar section reflects honest, non-fabricated status", () => {
-  assert.match(sections, /getAdhkarOverallStatus/);
-  assert.doesNotMatch(sections, /adhkarStatusAvailable\s*:\s*true/);
+  const adhkarSectionMatch = sections.match(
+    /export async function AdhkarDuas[\s\S]*?\n}\n/,
+  );
+  assert.ok(adhkarSectionMatch, "expected to find the AdhkarDuas section");
+  const body = adhkarSectionMatch[0];
+  assert.match(body, /getCategoryReaderData\("morning"\)/);
+  assert.match(body, /getCategoryReaderData\("evening"\)/);
+  assert.doesNotMatch(body, /getAdhkarOverallStatus/);
+  assert.doesNotMatch(body, /adhkarStatusAvailable\s*:\s*true/);
 });
 
 test("homepage: no fake counts or live data in the Adhkar section", () => {

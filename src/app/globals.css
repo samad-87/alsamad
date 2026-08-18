@@ -1776,6 +1776,63 @@ button.chip[aria-pressed="true"] {
 .today-quran-action {
   justify-self: start;
 }
+.home-practice-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  gap: 0.75rem;
+}
+.home-practice-entry,
+.home-utility-entry {
+  min-height: 2.75rem;
+  padding: 1rem;
+  display: grid;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--color-text);
+  text-decoration: none;
+  box-shadow: var(--elevation-none);
+}
+.home-practice-entry {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+.home-entry-symbol {
+  color: var(--color-action-primary);
+  font-size: 1.15rem;
+}
+.home-entry-copy {
+  min-width: 0;
+  display: grid;
+  gap: 0.25rem;
+}
+.home-practice-entry h3,
+.home-utility-entry h3 {
+  margin: 0;
+}
+.home-entry-status,
+.home-utility-status {
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+}
+.home-utility-group {
+  padding: 0.75rem;
+  border: var(--border-subtle);
+  box-shadow: var(--elevation-none);
+}
+.home-utility-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 9.5rem), 1fr));
+  gap: 0.75rem;
+}
+.home-utility-entry {
+  align-content: start;
+}
+.home-utility-status {
+  display: grid;
+  gap: 0.2rem;
+}
+.home-utility-entry .card-action {
+  margin-block-start: auto;
+}
 .placeholder-card {
   gap: 0.6rem;
 }
