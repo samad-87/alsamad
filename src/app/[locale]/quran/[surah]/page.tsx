@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Breadcrumb } from "@/components/quran/breadcrumb";
@@ -16,9 +17,42 @@ import {
   verseSlotsFor,
 } from "@/lib/quran/content/reader-data";
 import { surahStructures } from "@/lib/quran/content/structure";
+import { canonicalPath, localeAlternates } from "@/lib/seo";
 
 export function generateStaticParams() {
   return surahStructures.map((surah) => ({ surah: surah.slug }));
+}
+
+function surahLabel(locale: Locale, number: number) {
+  return `${locale === "ar" ? "سورة" : "Surah"} ${number}`;
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; surah: string }>;
+}): Promise<Metadata> {
+  const { locale, surah: surahSlug } = await params;
+  if (!isLocale(locale)) return {};
+  const surah = await getSurahReaderData(surahSlug);
+  if (!surah) notFound();
+  const c = t(locale);
+  const label = surahLabel(locale, surah.number);
+  const statusBody =
+    surah.status === "available"
+      ? c.quranStatusAvailableBody
+      : surah.status === "pending"
+        ? c.quranStatusPendingBody
+        : c.quranStatusEmptyBody;
+  const path = `/quran/${surahSlug}`;
+  return {
+    title: label,
+    description: `${label} — ${statusBody}`,
+    alternates: {
+      canonical: canonicalPath(locale, path),
+      languages: localeAlternates(path),
+    },
+  };
 }
 
 export default async function Page({
@@ -33,7 +67,7 @@ export default async function Page({
   const c = t(locale);
   const slots = verseSlotsFor(surah);
   const containerId = `verse-container-${surah.number}`;
-  const surahLabel = `${locale === "ar" ? "سورة" : "Surah"} ${surah.number}`;
+  const label = surahLabel(locale, surah.number);
 
   return (
     <div className="section">
@@ -47,10 +81,7 @@ export default async function Page({
           <div className="quran-main">
             <Breadcrumb
               locale={locale}
-              items={[
-                { label: c.quran, href: `/${locale}/quran` },
-                { label: surahLabel },
-              ]}
+              items={[{ label: c.quran, href: `/${locale}/quran` }, { label }]}
             />
             <SurahHeader locale={locale} surah={surah} />
             <ReaderToolbar

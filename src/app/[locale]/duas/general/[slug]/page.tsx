@@ -1,11 +1,33 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Breadcrumbs, Container } from "@/components/ui";
 import { GeneralDuaActions } from "@/components/general-dua-actions";
 import { generalDuas, generalDuaText } from "@/lib/general-duas";
 import { isLocale, t } from "@/lib/i18n";
+import { canonicalPath, localeAlternates } from "@/lib/seo";
 
 export function generateStaticParams() {
   return generalDuas.map((dua) => ({ slug: dua.slug }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; slug: string }>;
+}): Promise<Metadata> {
+  const { locale, slug } = await params;
+  if (!isLocale(locale)) return {};
+  const dua = generalDuas.find((item) => item.slug === slug);
+  if (!dua) notFound();
+  const path = `/duas/general/${slug}`;
+  return {
+    title: generalDuaText(locale, dua.title),
+    description: generalDuaText(locale, dua.purpose),
+    alternates: {
+      canonical: canonicalPath(locale, path),
+      languages: localeAlternates(path),
+    },
+  };
 }
 
 export default async function Page({

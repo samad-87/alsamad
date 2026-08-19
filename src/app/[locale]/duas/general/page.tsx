@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import {
   Breadcrumbs,
@@ -7,6 +8,43 @@ import {
 } from "@/components/ui";
 import { generalDuas, generalDuaText } from "@/lib/general-duas";
 import { isLocale, t } from "@/lib/i18n";
+import { canonicalPath, localeAlternates } from "@/lib/seo";
+
+function pageCopy(locale: "ar" | "en") {
+  return locale === "ar"
+    ? {
+        title: "أدعية عامة",
+        description:
+          "أدعية إسلامية معاصرة يكتبها فريق الصمد لترافق لحظات الحياة اليومية بهدوء ووضوح.",
+        notice:
+          "هذا الدعاء تحريري كتبه فريق الصمد، وليس منقولاً من القرآن أو السنة.",
+      }
+    : {
+        title: "General Duas",
+        description:
+          "Modern Islamic supplications written by the Alsamad editorial team for calm, everyday reflection.",
+        notice:
+          "This supplication is an editorial dua written by the Alsamad team. It is not quoted from the Quran or Sunnah.",
+      };
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  if (!isLocale(locale)) return {};
+  const copy = pageCopy(locale);
+  return {
+    title: copy.title,
+    description: copy.description,
+    alternates: {
+      canonical: canonicalPath(locale, "/duas/general"),
+      languages: localeAlternates("/duas/general"),
+    },
+  };
+}
 
 export default async function Page({
   params,
@@ -16,22 +54,7 @@ export default async function Page({
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
 
-  const copy =
-    locale === "ar"
-      ? {
-          title: "أدعية عامة",
-          description:
-            "أدعية إسلامية معاصرة يكتبها فريق الصمد لترافق لحظات الحياة اليومية بهدوء ووضوح.",
-          notice:
-            "هذا الدعاء تحريري كتبه فريق الصمد، وليس منقولاً من القرآن أو السنة.",
-        }
-      : {
-          title: "General Duas",
-          description:
-            "Modern Islamic supplications written by the Alsamad editorial team for calm, everyday reflection.",
-          notice:
-            "This supplication is an editorial dua written by the Alsamad team. It is not quoted from the Quran or Sunnah.",
-        };
+  const copy = pageCopy(locale);
 
   return (
     <section className="section general-duas-section">

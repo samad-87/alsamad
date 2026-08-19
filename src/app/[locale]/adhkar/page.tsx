@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { AdhkarCategoryExplorer } from "@/components/adhkar/category-explorer";
 import {
@@ -9,6 +10,25 @@ import {
 } from "@/components/ui";
 import { isLocale, t } from "@/lib/i18n";
 import { listCategoryReaderData } from "@/lib/adhkar/content/reader-data";
+import { canonicalPath, localeAlternates } from "@/lib/seo";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  if (!isLocale(locale)) return {};
+  const c = t(locale);
+  return {
+    title: c.adhkar,
+    description: c.adhkarIndexBody,
+    alternates: {
+      canonical: canonicalPath(locale, "/adhkar"),
+      languages: localeAlternates("/adhkar"),
+    },
+  };
+}
 
 export default async function Page({
   params,

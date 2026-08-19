@@ -8,7 +8,6 @@ import {
   isSameKnowledgeItem,
 } from "../src/lib/knowledge/identity.ts";
 import { createKnowledgeItem } from "../src/lib/knowledge/item.ts";
-import { KnowledgeEntityError } from "../src/lib/knowledge/errors.ts";
 
 import {
   surahToKnowledgeItem,

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import {
   ContentCard,
@@ -12,6 +13,11 @@ import {
 import { LocaleSwitcher, FooterGroup } from "@/components/shell";
 import { ThemeSwitcher } from "@/components/client-controls";
 import { isLocale, t } from "@/lib/i18n";
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: true },
+};
+
 export default async function Page({
   params,
 }: {

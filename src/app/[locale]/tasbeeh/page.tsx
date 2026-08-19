@@ -1,7 +1,33 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { TasbeehCounter } from "@/components/client-controls";
 import { Container, FixtureNotice, PageHeader, Section } from "@/components/ui";
 import { isLocale, t } from "@/lib/i18n";
+import { canonicalPath, localeAlternates } from "@/lib/seo";
+
+const tasbeehDescription = (locale: "ar" | "en") =>
+  locale === "ar"
+    ? "عداد محلي هادئ؛ لا نقاط ولا تصنيفات."
+    : "A calm local-only counter with no points or rankings.";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  if (!isLocale(locale)) return {};
+  const c = t(locale);
+  return {
+    title: c.tasbeeh,
+    description: tasbeehDescription(locale),
+    alternates: {
+      canonical: canonicalPath(locale, "/tasbeeh"),
+      languages: localeAlternates("/tasbeeh"),
+    },
+  };
+}
+
 export default async function Page({
   params,
 }: {
@@ -16,11 +42,7 @@ export default async function Page({
         <PageHeader
           eyebrow={c.daily}
           title={c.tasbeeh}
-          description={
-            locale === "ar"
-              ? "عداد محلي هادئ؛ لا نقاط ولا تصنيفات."
-              : "A calm local-only counter with no points or rankings."
-          }
+          description={tasbeehDescription(locale)}
         />
         <FixtureNotice locale={locale} />
         <TasbeehCounter locale={locale} />
