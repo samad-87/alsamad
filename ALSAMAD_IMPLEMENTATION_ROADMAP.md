@@ -1789,6 +1789,72 @@ The migration number is assigned mechanically at execution from the then-authori
 - Rollback/recovery
 - Release status
 
+The above Phase 11 template remains unpopulated. This gate does not fill in, redesign, or authorize the remainder of Phase 11; it opens exactly one narrowly-scoped sub-unit within it.
+
+### SEO Foundation Unit-1
+
+**Governance status.** `ALSAMAD_PRODUCT_ARCHITECTURE_V1.md`'s "Alsamad SEO & Discoverability Architecture" section already settles the architectural *what* for this narrow subset; no new Decision Registry entry is required, consistent with Registry §1 ("the Decision Registry exists to record exactly one thing: the status and outcome of an architecturally relevant decision that is not yet, or was not already, settled by an existing architecture document"). This Roadmap gate supplies only the *when*, per Registry §2 point 4. Implementation is **NOT STARTED**. Acceptance has **NOT PASSED**. No implementation evidence exists. `REG-0018` (Sakīnah Visual Foundation Implementation) does not authorize this unit — its own explicit-exclusions clause names "SEO" by name as not authorized by that gate.
+
+**Objective.** Provide the smallest, uncontroversial SEO foundation for the already-real, already-committed content routes: localized per-route metadata, self-referencing locale canonicals, reciprocal `ar`/`en` alternates, a sitemap covering only the authorized indexable route universe, a robots policy with no invented crawler restriction, and explicit `noindex` for the two routes repository authority already unambiguously classifies as non-indexable.
+
+**Dependency position.** Independent of M5, M6, KE-2, and Phase 7. Requires no database schema, no migration, and no quarantined prototype content. Depends only on already-committed route/content data.
+
+**Included scope — authorized implementation, once this gate exists:**
+
+1. Localized per-route `title`/`description` metadata for the authorized real-content route set: `/{locale}`, `/{locale}/quran`, `/{locale}/quran/[surah]`, `/{locale}/adhkar`, `/{locale}/adhkar/[period]`, `/{locale}/duas/general`, `/{locale}/duas/general/[slug]`, `/{locale}/tasbeeh`.
+2. A self-referencing canonical URL per locale for each authorized route.
+3. Reciprocal `ar` ↔ `en` language alternates for each authorized route pair.
+4. `src/app/sitemap.ts`, containing exactly the authorized real-content route universe above — no placeholder route, no `/search`, no `/showcase`, no non-existent route.
+5. `src/app/robots.ts`, with no site-wide `Disallow` and no invented crawler policy beyond what this gate authorizes.
+6. Explicit `noindex` for `/{locale}/search` and `/{locale}/showcase` only.
+7. Dynamic metadata for the authorized dynamic routes (`quran/[surah]`, `adhkar/[period]`, `duas/general/[slug]`), derived only from committed authoritative reader-data; malformed or missing route params must not fabricate metadata and must remain consistent with each route's existing `notFound()` truth.
+8. Targeted SEO contract tests proving the above.
+9. If a shared helper is genuinely necessary, exactly one new, narrowly-scoped module whose sole responsibility is canonical/alternate/metadata URL construction — no broader "SEO library," no reuse for unrelated concerns.
+
+**Explicit exclusions.** `/{locale}/duas` (fixture index), `/{locale}/prayer-times`, `/{locale}/calendar` indexability decisions — remain deferred pending separate policy/authority reconciliation; no index/noindex/sitemap-inclusion default may be assigned to them by this unit merely for implementation convenience. Also excluded: any quarantined Duas/Knowledge prototype file or content; root `/` locale negotiation (a separate, already-identified concern); removal or redesign of `/showcase`; Open Graph and Twitter Card metadata; structured data / schema.org markup; fabricated or synthetic `lastModified` values where no real committed revision timestamp exists; Performance/Core Web Vitals work; general accessibility work beyond what already exists; full localization work beyond metadata strings; homepage composition, shell/header/navigation, Mobile Navigation, and More overlay; Quran typography/`--font-quran`; M5; M6 and M6.0/M6.1/M6.2; KE-2; Phase 7; Editorial Identity Foundation; any database/schema/migration change; and all remaining, unpopulated Phase 11 categories (general Accessibility, Performance, full Localization). This gate authorizes none of the above.
+
+**Placeholder truthfulness.** No SEO indexability decision may be made in this unit for `/{locale}/duas`, `/{locale}/prayer-times`, or `/{locale}/calendar`. They remain deferred pending separate policy/authority reconciliation. No placeholder route may be silently added to the sitemap or silently assigned an index/noindex default merely because an implementation needs one.
+
+**Acceptance contract.** An implementation commit may be made only when the following are true, cited under the exact label `SEO FOUNDATION UNIT-1 ACCEPTANCE = PASS`:
+
+- **A. Localized metadata** — every authorized route has correct, distinct, localized `title`/`description`; no universal duplicate metadata remains on any authorized route. *(STATIC)*
+- **B. Canonical** — self-referencing canonical matches each route's own resolved locale path. *(STATIC / BUILD)*
+- **C. Language alternates** — reciprocal `ar`/`en` alternates exist for every authorized route pair. *(STATIC / BUILD)*
+- **D. Sitemap** — contains exactly the authorized indexable route set; excludes the deferred placeholders, `/search`, `/showcase`, and any internal/private/non-existent route; no fabricated `lastModified`. *(BUILD)*
+- **E. Robots** — valid robots output; no accidental site-wide `Disallow`; no policy invented for the deferred placeholders. *(BUILD)*
+- **F. Noindex** — `/search` and `/showcase` carry `noindex`; no other route is marked `noindex` by this unit. *(STATIC)*
+- **G. Dynamic routes** — metadata derives only from committed authoritative route data; malformed/missing params do not fabricate metadata and remain consistent with existing `notFound()` route truth. *(BUILD)*
+- **H. Locale** — Arabic/English parity across all authorized-route metadata; canonical and alternates use correct locale paths. *(STATIC / BUILD)*
+- **I. Security/privacy** — sitemap/metadata expose no admin, private, or internal identifier; no environment secret or environment-specific host leaks in. *(STATIC)*
+- **J. Quarantine** — zero quarantined Duas/Knowledge content adopted, staged, or modified by this unit. *(STATIC)*
+- **K. Gates** — `npm run typecheck`, `npm run lint`, targeted SEO tests, relevant committed regression tests, production build, and `git diff --check` all pass. *(BUILD)*
+
+**Evidence classification.** Criteria above are STATIC (verifiable by direct inspection of source/output), BUILD (verifiable by running the repository's own build/test/lint gates), or, where noted, RUNTIME (would require a real browser). **Actual search-engine crawl, index, or ranking behavior is CRAWLER_EXTERNAL and is never locally provable; it must never be reported as PASS by this gate or any implementation against it.**
+
+**Explicit future implementation boundary.** A later execution may touch only:
+
+```
+src/app/sitemap.ts                          (new)
+src/app/robots.ts                           (new)
+tests/<seo-contract-test-file(s)>.test.mjs  (new)
+src/app/[locale]/page.tsx
+src/app/[locale]/quran/page.tsx
+src/app/[locale]/quran/[surah]/page.tsx
+src/app/[locale]/adhkar/page.tsx
+src/app/[locale]/adhkar/[period]/page.tsx
+src/app/[locale]/duas/general/page.tsx
+src/app/[locale]/duas/general/[slug]/page.tsx
+src/app/[locale]/tasbeeh/page.tsx
+src/app/[locale]/search/page.tsx            (noindex only)
+src/app/[locale]/showcase/page.tsx          (noindex only)
+```
+
+and, only if genuinely necessary, exactly one new, narrowly-scoped canonical/alternate/metadata-URL-construction helper module. It may **not** touch `src/app/[locale]/duas/page.tsx` (currently quarantined/dirty and explicitly excluded above), `src/app/globals.css`, `src/lib/fixtures.ts`, `src/lib/i18n.ts`, any navigation or shell component, any layout composition file beyond the route files listed, or any database/schema/migration file.
+
+**PASS criteria.** `SEO FOUNDATION UNIT-1 ACCEPTANCE = PASS` — all acceptance-contract items above pass.
+
+**Handoff.** Completion of this unit does not authorize the deferred placeholder-indexability decisions, Open Graph/structured data, performance work, or any remaining Phase 11 category — each remains a separate, later, reviewable unit.
+
 ## Phase 12: Security hardening
 
 - Objective
