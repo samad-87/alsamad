@@ -166,6 +166,7 @@ As of 2026-08-08, the M6 architecture decision analysis covering REG-0001–REG-
 | REG-0016 | Editorial Identity Foundation prerequisite                                                 | Database, Security, Roadmap | DECIDED     | Registry + ADR (`ADR-0008`, Accepted)                                     |
 | REG-0017 | Typography Phase 1: Arabic UI and devotional-reading font roles                            | Product, Roadmap            | IMPLEMENTED | Registry only                                                             |
 | REG-0018 | Sakīnah Phase-1 visual foundation: palette, surfaces, elevation, radii, and state roles    | Product, Roadmap            | DECIDED     | Registry only                                                             |
+| REG-0019 | M6.0 Duas Mobile-First Foundation: narrow independence from the M5 production-activation dependency | Roadmap                     | DECIDED     | Registry only                                                             |
 
 ### REG-0001 — Editorial General Dua placement in the devotional physical model
 
@@ -626,5 +627,57 @@ Canonical Quran typography is a separate role represented by `--font-quran` and 
 **License-format reconciliation:** SIL OFL 1.1 permits redistribution and self-hosting of the original TTFs and the converted WOFF2 derivatives. Derived files remain under OFL 1.1 and must ship with the applicable copyright and complete license notice. Format conversion alone requires no family rename under the applicable Noto notice; ALSAMAD must preserve family metadata and must not imply upstream endorsement of its derived binaries.
 
 **Implementation evidence:** Typography Phase 1 implementation is **COMPLETE** at commit `ee0bed65e6999a6546ead663c027072dc427e831`; the applicable Roadmap gate is `TYPOGRAPHY PHASE-1 REAL-BROWSER ACCEPTANCE = PASS`. This citation records the later execution and passed acceptance of the original Roadmap authorization; it does not change the REG-0017 decision outcome or imply that the Registry decision itself performed implementation.
+
+**Supersedes / Superseded by:** None.
+
+### REG-0019 — M6.0 Duas Mobile-First Foundation: narrow independence from the M5 production-activation dependency
+
+**Category:** `Roadmap`.
+
+**Summary:** Whether `M6.0 Duas Mobile-First Foundation` — the schema-free, static-content-source Duas UI gate — may proceed independently of the phase-level `M5 Quran Import Activated` production-activation dependency that otherwise blocks all of Phase 6, given that M6.0 itself requires no database schema, no Quran provider access, and no new devotional content.
+
+**Committed evidence:** `ALSAMAD_IMPLEMENTATION_ROADMAP.md` line 1444 states the M6.0 gate "requires no database schema"; line 1470 confirms its content-source abstraction is "a static/honest-empty source"; the Phase 6 "Explicitly excluded scope" and M6.0's own "Prohibited work" clauses (lines 1357–1365, 1477) already forbid any database migration, Quran provider/import work, new devotional content, or Knowledge Engine work inside M6.0 — none of which this entry changes or adds. Line 1372 already records, without resolving, that commit `7cd72ee` (Adhkar mobile-first foundation) implemented equivalent devotional-domain UI scope before the M5 dependency was satisfied "without a recorded exception," and explicitly states that gap "only prevents repeating it for the remaining M6 units" — this entry is the first such recorded exception, deliberately scoped to prevent repeating the *unrecorded* version of that gap for M6.0, not to relax the underlying M5 requirement itself. `REG-0014` (Knowledge Engine Phase 1 / KE-1) is the repository's existing precedent for exactly this governance shape: a Registry-only decision that grants one named `M7.0-track` sub-unit independence from the same phase-level M5 dependency while leaving `M5`, `M6`, and every other unit's status unchanged.
+
+**Affected architecture:** None. This is a Roadmap-sequencing/gating decision only; it amends no Product, Database, Security, or other domain architecture document, and it does not alter M6.0's already-approved Included scope, Prohibited work, Acceptance gates, or PASS criteria (`ALSAMAD_IMPLEMENTATION_ROADMAP.md` lines 1462–1483), which remain exactly as previously approved.
+
+**Affected roadmap gate:** `M6.0 Duas Mobile-First Foundation Verified` only. Does not affect, and is independent of, `M6.1 Devotional Schema Foundation Verified`, `M6.2 Devotional Content Integration Verified`, `M5 Provider Import Dry Run Verified`, or `M5 Quran Import Activated`.
+
+**Opened:** 2026-08-20.
+
+**Tier rationale:** Registry only — a reversible Roadmap-sequencing/gating decision; no persisted physical representation, schema, migration, canonical-ownership change, or content-integrity decision of any kind. Reversal requires only reverting this entry's status and the full set of corresponding Roadmap updates listed in §"Roadmap operationalization" below — neither expensive nor dangerous. Fails `ALSAMAD_DECISION_REGISTRY.md` §7's ADR threshold on its second prong, exactly as `REG-0014` did for the analogous KE-1 exception. **ADR reference:** None (Registry-only tier).
+
+**Status:** `DECIDED` (2026-08-20).
+
+**Decision outcome:** Approves exactly one narrow exception: **`M6.0 Duas Mobile-First Foundation` does not require `M5 Quran Import Activated` to PASS before its own implementation may proceed**, provided M6.0 remains strictly within its already-committed Roadmap boundary — the Included scope, Prohibited work, Acceptance gates, and PASS criteria at `ALSAMAD_IMPLEMENTATION_ROADMAP.md` lines 1462–1483, unchanged by this entry. This decision authorizes nothing beyond removing that one dependency as it specifically applies to M6.0.
+
+**Roadmap operationalization.** Per `ALSAMAD_DECISION_REGISTRY.md` §2 item 4 and §10, this Registry entry alone does not authorize implementation — `ALSAMAD_IMPLEMENTATION_ROADMAP.md`'s own gate mechanism remains the exclusive authority for *when* implementation is authorized. This decision is operationalized by the following corresponding Roadmap updates, identified by stable section/paragraph reference rather than line number:
+
+*Operative amendments (change the M5-dependency semantics for gate 1 only):*
+
+1. Phase 6 "Dependencies" — the `M5, complete through its production activation gate (M5 Quran Import Activated)` bullet, amended to record this exception.
+2. Phase 6 "M6 acceptance and separated gates" — the sentence "no gate relaxes the M5 production-activation dependency above," amended to name gate 1 (`M6.0`) as the sole exception.
+3. `### M6.0 — Duas Mobile-First Foundation`'s own "Dependency position" sentence (originally "Still subject to the phase-level M5 production-activation dependency above"), amended to state the exemption directly. This is the core operative change; the other four locations only record or cross-reference it.
+
+*Consistency-only cross-references (no change to those sections' own substantive content or status claims — corrected only because this entry's existence made their prior unqualified "Duas governance is unchanged" wording stale):*
+
+4. `### M7-prerequisite / Editorial Identity Foundation`'s "Status and dependency truth" paragraph.
+5. `### Knowledge Engine governance track (M7.0-track)`'s "Status" paragraph.
+
+All five amendments carve out this one exception for gate 1 (`M6.0`) only, or note that this entry is unrelated to the section they appear in; gates 2 and 3 (`M6.1`, `M6.2`) and every other M5/M6 status statement anywhere in that document remain unchanged. A future reversal of this entry must reconsider all five locations above, not only the three operative amendments.
+
+**This entry explicitly does NOT mean, and does not approve:**
+
+- That `M6` as a whole is unblocked. `M6.1 Devotional Schema Foundation Verified` and `M6.2 Devotional Content Integration Verified` remain fully subject to the phase-level M5 production-activation dependency, exactly as before this entry.
+- That `M5 Quran Import Activated` is satisfied, waived, advanced, or reinterpreted in any way. `M5 Gate 3` remains `PARTIAL`; `M5 Provider Import Dry Run Verified` and `M5 Quran Import Activated` remain `NOT PASS`.
+- Any Quran provider credential use, network call, dry run, license/source approval, scholarly approval, or production activation.
+- Any database migration, schema change, or physical table — M6.0 already requires none, and this entry grants none.
+- Any Knowledge Engine (`M7.0-track`) implementation, runtime wiring, or adoption of `src/lib/knowledge/adapters/duas.ts` or any sibling Knowledge prototype file; that track's status and its own separate, unresolved governance are entirely unchanged by this entry.
+- Any new Editorial General Dua entry, devotional seed row, or content beyond what M6.0's own contract already authorizes (already zero, per line 1364).
+- That the existing working-tree Duas prototype (`src/lib/duas/**`, `src/components/duas/**`, `src/app/[locale]/duas/**` uncommitted changes, `tests/duas-*.test.mjs`) is thereby reviewed, accepted, adopted, correct, or authoritative. That prototype remains exactly as non-authoritative after this entry as before it. Every defect identified in the prior prototype reconciliation — including the `getCategoryItems("general")` availability/items mismatch and the collection-reader array-index/`order` inconsistency — remains an open finding to be resolved during the separately-reviewed M6.0 implementation unit, not settled or excused by this entry.
+- That this entry itself constitutes, stages, commits, or performs implementation. A separate implementation authorization/review against the unchanged M6.0 Roadmap contract remains required before any file may be staged or committed.
+
+**Independence from M5, M6.1, and M6.2.** This entry changes no other M5 or M6 status: `M5 Gate 3` remains `PARTIAL`; `M5 Provider Import Dry Run Verified` and `M5 Quran Import Activated` remain `NOT PASS`; `M6.1` and `M6.2` remain `BLOCKED`, each still fully subject to the unmet M5 production-activation dependency exactly as before this entry; the overall `M6` milestone (requiring all three gates) remains not fully passable until `M6.1` and `M6.2` separately clear that dependency. Only `M6.0`, and only `M6.0`, is exempted — precisely mirroring how `REG-0014` exempted only `KE-1` from the same phase-level dependency while leaving every other unit's M5/M6 status unchanged.
+
+**Implementation evidence:** None. This entry authorizes `M6.0` implementation to proceed independently of the M5 gate; it does not itself constitute, stage, or commit any implementation. No `src/lib/duas/**`, `src/components/duas/**`, Duas route, or `tests/duas-*.test.mjs` file is touched, staged, or committed by this entry.
 
 **Supersedes / Superseded by:** None.
