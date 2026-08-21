@@ -167,6 +167,7 @@ As of 2026-08-08, the M6 architecture decision analysis covering REG-0001–REG-
 | REG-0017 | Typography Phase 1: Arabic UI and devotional-reading font roles                            | Product, Roadmap            | IMPLEMENTED | Registry only                                                             |
 | REG-0018 | Sakīnah Phase-1 visual foundation: palette, surfaces, elevation, radii, and state roles    | Product, Roadmap            | DECIDED     | Registry only                                                             |
 | REG-0019 | M6.0 Duas Mobile-First Foundation: narrow independence from the M5 production-activation dependency | Roadmap                     | DECIDED     | Registry only                                                             |
+| REG-0020 | Quran.Foundation Arabic Quran text retention permission (M5 Gate 3 storage/retention sub-item)       | Roadmap, Security            | DECIDED     | Registry only                                                             |
 
 ### REG-0001 — Editorial General Dua placement in the devotional physical model
 
@@ -679,5 +680,35 @@ All five amendments carve out this one exception for gate 1 (`M6.0`) only, or no
 **Independence from M5, M6.1, and M6.2.** This entry changes no other M5 or M6 status: `M5 Gate 3` remains `PARTIAL`; `M5 Provider Import Dry Run Verified` and `M5 Quran Import Activated` remain `NOT PASS`; `M6.1` and `M6.2` remain `BLOCKED`, each still fully subject to the unmet M5 production-activation dependency exactly as before this entry; the overall `M6` milestone (requiring all three gates) remains not fully passable until `M6.1` and `M6.2` separately clear that dependency. Only `M6.0`, and only `M6.0`, is exempted — precisely mirroring how `REG-0014` exempted only `KE-1` from the same phase-level dependency while leaving every other unit's M5/M6 status unchanged.
 
 **Implementation evidence:** None. This entry authorizes `M6.0` implementation to proceed independently of the M5 gate; it does not itself constitute, stage, or commit any implementation. No `src/lib/duas/**`, `src/components/duas/**`, Duas route, or `tests/duas-*.test.mjs` file is touched, staged, or committed by this entry.
+
+**Supersedes / Superseded by:** None.
+
+### REG-0020 — Quran.Foundation Arabic Quran text retention permission (M5 Gate 3 storage/retention sub-item)
+
+**Category:** `Roadmap`, `Security`.
+
+**Summary:** Whether new written Quran Foundation Developer Support guidance grants Alsamad-specific, unmodified-text-only, long-term database retention permission for QF-provided Arabic Quran text, narrowing — without closing — the `M5` Gate 3 legal/license gate's outstanding storage/caching/retention sub-item, and whether Content Sync is currently required for that text.
+
+**Committed evidence:** `ALSAMAD_IMPLEMENTATION_ROADMAP.md` line 124 ("Quran.Foundation content retention follows the seven-day default unless written permission or independent licensing permits longer storage") and the M1 excluded-scope table ("Permanent Quran.Foundation storage without written permission | Prohibited; seven-day default applies") already define the exception mechanism this entry exercises. `ALSAMAD_SECURITY_ARCHITECTURE.md`'s "default seven-day legal retention ceiling" carries the same conditional framing. Phase 5's Gate 3 (legal/license gate) lists "storage, caching, and retention rights" among its named blocking sub-items, alongside in-application display rights, license/terms identity, attribution obligations, commercial-use classification, standalone redistribution classification, derivative/transformation limits, update/withdrawal/deletion/revocation obligations, and provider-exit/content-purge obligations. `REG-0009` already anticipated "Content Sync obligations where applicable" as a standing provider requirement. The new evidence is written correspondence from Quran Foundation Developer Support, retained outside the repository per the same non-reproduction convention `REG-0009` already established; no private correspondence or credential is reproduced here.
+
+**Affected architecture:** No architecture change. This is a Roadmap-gate evidence entry only, narrowing one named Gate 3 sub-item; it amends no Product, Database, or Security architecture document.
+
+**Affected roadmap gate:** `M5` Gate 3 (legal/license gate) only — its storage/caching/retention sub-item, for Arabic Quran text specifically. Does not affect, and is independent of, Gates 1, 2, 4, 5, 6, or 7, `M5 Provider Import Dry Run Verified`, or `M5 Quran Import Activated`.
+
+**Opened:** 2026-08-21.
+
+**Tier rationale:** Registry only. This is evidence toward an already-established gate mechanism (the M1/Security "written permission" exception), not a new architectural decision; it changes no persisted representation, canonical ownership, database, or difficult-to-reverse structure. Reversal, if the permission were later withdrawn, requires only reverting to the existing default seven-day rule already enforced as the baseline. Fails the §7 ADR threshold on its second prong. **ADR reference:** None (Registry-only tier).
+
+**Status:** `DECIDED` (2026-08-21).
+
+**Decision outcome:** Quran Foundation Developer Support has expressly confirmed, in writing and specific to Alsamad, that under Developer Terms §3.1(3)(a) Alsamad may retain a verified, unmodified copy of QF-provided Arabic Quran text in its database beyond the general one-week limit, for use within the Alsamad application. The general seven-day retention default accordingly does not apply to that specific Arabic Quran text under this express permission; it continues to apply, unchanged, to every other Quran.Foundation resource class (translations, tafsir, audio, or any other resource) absent a separate written permission of its own.
+
+Quran Foundation Developer Support has also confirmed that Arabic Quran text is not currently among the resource groups supported by Content Sync. Content Sync is therefore not currently required for Arabic Quran text. Once Quran Foundation adds Quran-text support to Content Sync, Alsamad must transition to using Content Sync for that data and follow its documented synchronization requirements; no timeline for that support is currently confirmed, and none is assumed or invented by this entry.
+
+This permission does **not** authorize: any modification, derivative, or transformation of the retained Arabic Quran text; sale, sublicensing, raw-data export, or redistribution as a separate content product (all remain expressly prohibited, consistent with `REG-0009`'s and `REG-0010`'s standing non-commercial/no-standalone-redistribution position); retention or use of any other Quran.Foundation resource class beyond Arabic Quran text; production import; `M5 Quran Import Activated`; scholarly approval; provider dry run; or source selection.
+
+This evidence resolves only the Gate 3 storage/caching/retention sub-item, and only for Arabic Quran text. `M5` Gate 3 remains `PARTIAL`: license/terms identity as a formally recorded decision, attribution obligations, derivative/transformation limits, update/withdrawal/deletion/revocation obligations, provider-exit/content-purge obligations, and storage/retention for every non-Quran-text resource class all remain unresolved. Gates 4 (source selection), 5 (scholarly approval), 6 (`M5 Provider Import Dry Run Verified`), and 7 (`M5 Quran Import Activated`) are unaffected and remain exactly as before this entry: Gate 4 NOT STARTED/incomplete, Gate 5 not done, Gate 6 NOT PASS, Gate 7 NOT PASS. `M6` remains `BLOCKED`.
+
+**Implementation evidence:** None. This entry records external licensing evidence only. It authorizes no Quran import, no database or schema change, no production activation, no provider dry run, no source-manifest change, no scholarly approval, and no M6/M7 work. A separate, later execution against the still-unmet Gate 3/4/5/6/7 requirements remains required before any of that work may proceed.
 
 **Supersedes / Superseded by:** None.
