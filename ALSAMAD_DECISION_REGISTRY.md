@@ -168,6 +168,7 @@ As of 2026-08-08, the M6 architecture decision analysis covering REG-0001–REG-
 | REG-0018 | Sakīnah Phase-1 visual foundation: palette, surfaces, elevation, radii, and state roles    | Product, Roadmap            | DECIDED     | Registry only                                                             |
 | REG-0019 | M6.0 Duas Mobile-First Foundation: narrow independence from the M5 production-activation dependency | Roadmap                     | DECIDED     | Registry only                                                             |
 | REG-0020 | Quran.Foundation Arabic Quran text retention permission (M5 Gate 3 storage/retention sub-item)       | Roadmap, Security            | DECIDED     | Registry only                                                             |
+| REG-0021 | Knowledge Engine Phase 2 (KE-2): implementation-authorization crossing ("Governance Unit 2")          | Roadmap                      | DECIDED     | Registry only                                                             |
 
 ### REG-0001 — Editorial General Dua placement in the devotional physical model
 
@@ -710,5 +711,45 @@ This permission does **not** authorize: any modification, derivative, or transfo
 This evidence resolves only the Gate 3 storage/caching/retention sub-item, and only for Arabic Quran text. `M5` Gate 3 remains `PARTIAL`: license/terms identity as a formally recorded decision, attribution obligations, derivative/transformation limits, update/withdrawal/deletion/revocation obligations, provider-exit/content-purge obligations, and storage/retention for every non-Quran-text resource class all remain unresolved. Gates 4 (source selection), 5 (scholarly approval), 6 (`M5 Provider Import Dry Run Verified`), and 7 (`M5 Quran Import Activated`) are unaffected and remain exactly as before this entry: Gate 4 NOT STARTED/incomplete, Gate 5 not done, Gate 6 NOT PASS, Gate 7 NOT PASS. `M6` remains `BLOCKED`.
 
 **Implementation evidence:** None. This entry records external licensing evidence only. It authorizes no Quran import, no database or schema change, no production activation, no provider dry run, no source-manifest change, no scholarly approval, and no M6/M7 work. A separate, later execution against the still-unmet Gate 3/4/5/6/7 requirements remains required before any of that work may proceed.
+
+**Supersedes / Superseded by:** None.
+
+### REG-0021 — Knowledge Engine Phase 2 (KE-2): implementation-authorization crossing ("Governance Unit 2")
+
+**Category:** `Roadmap`.
+
+**Summary:** Whether the M7.0-track's own precondition — that implementation requires a separate, later Decision Registry entry ("Governance Unit 2") explicitly recording (a) which phase is being authorized, (b) the exact scope and file boundary, and (c) confirmation of whether that scope stays Registry-only or crosses the ADR threshold — is now satisfied for KE-2, given that `REG-0015` and `ADR-0007` already answer (a), (b), and (c) in substance but, per `ALSAMAD_DECISION_REGISTRY.md` §2 item 5, cannot themselves constitute the implementation-authorization act.
+
+**Committed evidence:** `REG-0015` (`DECIDED`, `ADR-0007` Accepted) governance-approves in principle exactly the two-table KE-2 package and its exact implementation boundary. `ALSAMAD_KNOWLEDGE_ENGINE_ARCHITECTURE.md` §16 already labels Phase 2 "Governance approved; implementation NOT STARTED (`REG-0015`, `ADR-0007`)." `ALSAMAD_IMPLEMENTATION_ROADMAP.md`'s M7.0-track / KE-2 subsection already carries a complete Objective, Dependencies, exact future implementation boundary, implementation constraints, a 16-item acceptance contract, explicit exclusions, and completion-evidence contract. `REG-0015` itself states that its entry "does not authorize or claim a migration, schema/code/test change... Implementation is NOT STARTED until a separate execution satisfies every Roadmap acceptance condition." `ALSAMAD_DECISION_REGISTRY.md` §2 item 5 ("Neither a Registry entry nor an ADR independently authorizes implementation") and §10 (the Roadmap's gate mechanism is the exclusive authority for *when*) establish why a distinct crossing act is structurally required regardless of how complete `REG-0015`'s substance already is. `editorial_users` — a direct KE-2 foreign-key dependency for `created_by`, `approved_by`, `curated_by`, and `reviewed_by` — is implemented at commit `a2604ca`. KE-1 is complete and runtime-inert at commit `e073879`.
+
+**Affected architecture:** None. This entry redesigns nothing already frozen by `REG-0015` or `ADR-0007`; it performs only the authorization-crossing act those entries explicitly reserved for a later, separate decision.
+
+**Affected roadmap gate:** `M7.0-track / KE-2 — Controlled Topic Vocabulary and Content Assignment Foundation`. Independent of `M5 Gate 3`, `M5 Gate 4`, `M5 Gate 5`, `M5 Provider Import Dry Run Verified`, `M5 Quran Import Activated`, `M6`, `M6.1`, `M6.2`, `REG-0019`, `REG-0020`, and Phase 7.
+
+**Opened:** 2026-08-22.
+
+**Tier rationale:** Registry only. This entry introduces no new physical or architectural decision beyond what `ADR-0007` already covers; it fails §7's ADR threshold on its first prong, since nothing about it is newly material. Reversal is neither expensive nor dangerous — this entry can simply be superseded without touching any persisted state. **ADR reference:** None. The existing `ADR-0007` (Accepted) remains sufficient and unmodified; no new ADR is created.
+
+**Status:** `DECIDED` (2026-08-22).
+
+**Decision outcome:** This entry constitutes the `M7.0-track` Governance Unit 2 act named in the Roadmap's opening M7.0-track section. It records, without alteration:
+
+1. the authorized phase is exactly `M7.0-track / KE-2` — `ALSAMAD_KNOWLEDGE_ENGINE_ARCHITECTURE.md` §16 Phase 2, no other phase and no KE-3 or any later phase;
+2. the exact scope and file boundary is exactly `REG-0015`'s own "Implementation boundary" field, restated verbatim: `src/db/schema.ts`; one mechanically numbered `drizzle/*_ke2_topics.sql`; `src/lib/knowledge/topics.ts`; `src/lib/knowledge/topic-repository.ts`; `tests/knowledge-topic-layer.test.mjs`; and the KE-2 additions within `scripts/db-verify.mjs`;
+3. the scope remains `Registry + ADR` tier, already satisfied by the existing, unmodified `ADR-0007` (Accepted) — no new ADR is created or required by this entry.
+
+`M5 Gate 3` PASS is confirmed not required for this entry or for KE-2 implementation, exactly as `REG-0015` and the Roadmap's KE-2 Dependencies already state.
+
+This entry authorizes a future execution to begin work against the Roadmap's already-existing, unmodified 16-item KE-2 acceptance contract. It authorizes no migration, schema/code/test change, seed row, topic, religious-content assignment, runtime import, search integration, admin or editorial workflow, ingestion, embeddings, RAG, AI generation, public Knowledge UI, or deployment beyond what that existing contract already permits. It does not authorize KE-3 or any later Knowledge Engine phase. It does not authorize `M6.1`, `M6.2`, or any M5 gate.
+
+**Quarantine treatment:** `src/lib/knowledge/topics.ts` is currently an untracked, quarantined prototype file occupying the same path this entry authorizes for future implementation. Per `REG-0015`'s own unmodified rule, restated here for clarity: authorization attaches to the path and the future reviewed work, never to the file's current bytes. The existing prototype content carries no independent authority and does not become authorized merely because its path is authorized; a fully reviewed, conforming implementation must exist before any commit. Independent inspection at the time of this entry found the current `src/lib/knowledge/topics.ts` to be a pure, in-memory, non-persisted constructor (`createKnowledgeTopic`) carrying only `id` and `presentations` — structurally unrelated to the persisted, UUIDv7/lifecycle/foreign-key-bearing `topics` table `ADR-0007` actually specifies. This confirms the existing prototype requires substantial rework, not merely review, before any conformance determination could even be made. `src/lib/knowledge/collections.ts`, `src/lib/knowledge/references.ts`, and `src/lib/knowledge/adapters/duas.ts` remain outside any authorized path under this or any KE-2 entry, regardless of content.
+
+**Explicit exclusions:** Identical to `REG-0015`'s own list, restated verbatim, unmodified: collections, source references, generic `knowledge_edges`, Articles/Guides, Hadith, Talibeen, Duas, topic-to-topic edges, AI suggestions, semantic search, the AI Search Assistant, runtime search expansion, related-content UI, editorial/admin UI, seed data, provider/network/credential work, `M5 Gate 4/5`, canonical ownership changes, and every Knowledge Engine phase after Phase 2.
+
+**Roadmap operationalization.** Per `ALSAMAD_DECISION_REGISTRY.md` §2 item 5 and §10, this Registry entry alone does not authorize implementation — the Roadmap's own gate mechanism remains the exclusive authority for *when*. This decision is operationalized by exactly two Roadmap edits: (1) the M7.0-track opening section's "Implementation requires Governance Unit 2" paragraph, updated to record that this requirement is now satisfied by this entry; (2) the KE-2 subsection's "Governance status" line, updated to record that implementation is now authorized to begin — not that it is complete, since KE-2 implementation itself remains `NOT STARTED` until a future execution separately satisfies the full 16-item acceptance contract.
+
+**Independence from M5, M6, Duas, Editorial Identity, REG-0019, and REG-0020.** This entry changes no M5, M6, Duas, or Editorial Identity status. `M5 Gate 3` remains `PARTIAL`; `M5 Gates 4` and `5` remain `NOT PASS`; `M5 Provider Import Dry Run Verified` and `M5 Quran Import Activated` remain `NOT PASS`; `M6`, `M6.1`, and `M6.2` remain unaffected; `REG-0019` and `REG-0020` semantics are unchanged.
+
+**Implementation evidence:** None. This entry authorizes a future KE-2 implementation execution to begin; it does not itself constitute, stage, or commit any implementation. KE-2 implementation remains `NOT STARTED` until a separate execution satisfies every item of the Roadmap's existing 16-item acceptance contract. No `src/lib/knowledge/**` or `tests/knowledge-*.test.mjs` file is touched, staged, or committed by this entry.
 
 **Supersedes / Superseded by:** None.
