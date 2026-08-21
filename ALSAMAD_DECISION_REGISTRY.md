@@ -373,7 +373,7 @@ REG-0017 remains unchanged: Arabic UI is Noto Sans Arabic `v2.013`, devotional r
 
 **No implementation authorization:** This Registry decision does not modify CSS or source, redesign any page, shell, header, navigation, Quran chrome, utility surface, or dark-mode page, finalize brand/icon work, bind Quran typography, or adopt Duas/Knowledge prototypes.
 
-**Implementation evidence:** None. Governance is DECIDED; Sakīnah Visual Foundation Implementation is NOT STARTED.
+**Implementation evidence:** Implemented at commit `3f24396`, which touched exactly `src/app/globals.css` and `tests/visual-foundation.test.mjs` within the authorized implementation boundary above. Governance is DECIDED; Sakīnah Visual Foundation Implementation is implemented. This does not authorize or imply completion of any excluded/future visual work — page/shell/header/navigation/Quran-chrome redesign, brand/icon/logo finalization, motion tooling, component-library decisions, breakpoints, Latin font selection, exact high-contrast/Quran-night mappings, or Quran typography binding all remain separately unresolved.
 
 **Supersedes / Superseded by:** None.
 

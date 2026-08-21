@@ -1575,7 +1575,7 @@ Computed styles showed Arabic UI resolving to the locally served Noto Sans Arabi
 
 ### Sakīnah Visual Foundation Implementation
 
-**Governance status.** `REG-0018` decides the Quiet Editorial Sanctuary Phase-1 semantic palette, surface hierarchy, tonal-separation/border/elevation preference, `12 / 20 / 32px` radius scale, 4px spacing foundation, and compact state-role distinctions. Governance is COMPLETE; implementation is **NOT STARTED**. Registry entry required: YES. ADR required: NO.
+**Governance status.** `REG-0018` decides the Quiet Editorial Sanctuary Phase-1 semantic palette, surface hierarchy, tonal-separation/border/elevation preference, `12 / 20 / 32px` radius scale, 4px spacing foundation, and compact state-role distinctions. Governance is COMPLETE; implementation is **COMPLETE** at commit `3f24396`, which touched exactly `src/app/globals.css` and `tests/visual-foundation.test.mjs` within the exact future implementation boundary below. Registry entry required: YES. ADR required: NO.
 
 **Objective.** Implement only the governed semantic visual foundation so later page and shell redesign units consume one coherent token contract. This foundation reduces visible containers, keeps most sections unframed, favors flat or minimally outlined reading surfaces, uses grouped tone before border or shadow, reserves controlled elevation for actual floating layers, and prevents unrelated semantic objects from collapsing into one generic card or pill language.
 
