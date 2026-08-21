@@ -1927,3 +1927,37 @@ button.chip[aria-pressed="true"] {
 .adhkar-source-fields dd {
   margin: 0;
 }
+
+/* ==========================================================================
+   Duas foundation — reuses existing tokens, cards, chips and motion.
+   Authentic and editorial duas are never styled to look identical.
+   ========================================================================== */
+
+.dua-category-grid {
+  margin-block-start: 1.5rem;
+}
+.dua-collection {
+  display: grid;
+  gap: 1.25rem;
+  margin-block-start: 1.5rem;
+}
+.dua-source-panel {
+  padding: 1.25rem;
+  display: grid;
+  gap: 1rem;
+  margin-block: 1rem;
+}
+.dua-source-status {
+  margin-block: 1rem;
+}
+.dua-source-fields dt,
+.dua-source-fields dd {
+  margin: 0;
+}
+.dua-editorial-disclosure {
+  display: grid;
+  gap: 0.5rem;
+}
+.dua-editorial-disclosure p {
+  margin: 0;
+}

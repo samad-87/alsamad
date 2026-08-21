@@ -1,13 +1,15 @@
 import { notFound } from "next/navigation";
+import { DuaCategoryExplorer } from "@/components/duas/category-explorer";
 import {
-  ContentCard,
+  Breadcrumbs,
   Container,
   FixtureNotice,
   PageHeader,
   Section,
 } from "@/components/ui";
-import { duaFixtures, loc } from "@/lib/fixtures";
 import { isLocale, t } from "@/lib/i18n";
+import { listCategoryReaderData } from "@/lib/duas/content/reader-data";
+
 export default async function Page({
   params,
 }: {
@@ -16,56 +18,33 @@ export default async function Page({
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
   const c = t(locale);
+  const categories = await listCategoryReaderData();
+  const labels: Record<string, string> = {
+    general: c.duaCategoryGeneral,
+    family: c.duaCategoryFamily,
+    health: c.duaCategoryHealth,
+    provision: c.duaCategoryProvision,
+    travel: c.duaCategoryTravel,
+    forgiveness: c.duaCategoryForgiveness,
+    gratitude: c.duaCategoryGratitude,
+    protection: c.duaCategoryProtection,
+  };
+
   return (
     <Section>
       <Container>
+        <Breadcrumbs locale={locale} items={[{ label: c.duas }]} />
         <PageHeader
           eyebrow={c.categories}
           title={c.duas}
-          description={c.placeholderBody}
+          description={c.duaIndexBody}
         />
         <FixtureNotice locale={locale} />
-        <div className="general-dua-entry feature-surface">
-          <div>
-            <span className="general-dua-badge">General Dua</span>
-            <h2>{locale === "ar" ? "أدعية عامة" : "General Duas"}</h2>
-            <p className="muted">
-              {locale === "ar"
-                ? "أدعية إسلامية معاصرة يكتبها فريق الصمد، ومنفصلة بوضوح عن الأدعية الموثّقة."
-                : "Modern Islamic supplications written by the Alsamad team, clearly separated from authenticated duas."}
-            </p>
-          </div>
-          <a className="button button-primary" href={`/${locale}/duas/general`}>
-            {c.view}
-          </a>
-        </div>
-        <div className="filter-bar">
-          <label className="search-field">
-            <span className="sr-only">{c.search}</span>
-            <input placeholder={`${c.search}…`} readOnly />
-          </label>
-          {[
-            c.all,
-            locale === "ar" ? "الحياة اليومية" : "Daily life",
-            locale === "ar" ? "السفر" : "Travel",
-          ].map((x) => (
-            <button className="chip" key={x}>
-              {x}
-            </button>
-          ))}
-        </div>
-        <div className="grid-3">
-          {duaFixtures.map((d) => (
-            <ContentCard
-              key={d.slug}
-              eyebrow={loc(locale, d.category)}
-              title={loc(locale, d.title)}
-              body={loc(locale, d.context)}
-              href={`/${locale}/duas/${d.slug}`}
-              action={c.view}
-            />
-          ))}
-        </div>
+        <DuaCategoryExplorer
+          locale={locale}
+          categories={categories}
+          labels={labels}
+        />
       </Container>
     </Section>
   );
