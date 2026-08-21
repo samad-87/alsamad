@@ -581,13 +581,13 @@ Future authentication identity linking may map a provider/authentication identit
 
 **Implementation boundary:** A later execution is limited to `src/db/schema.ts`, one mechanically numbered `drizzle/*_editorial_identity_foundation.sql`, the single corresponding mechanical registration append in `drizzle/meta/_journal.json`, and the Editorial Identity additions within `scripts/db-verify.mjs`. The journal authorization permits only the entry required to register this one migration; every existing journal entry and migration remains unchanged. Migration `0010_devotional_content_foundation.sql` remains reserved for M6 and cannot be used, renamed, or displaced. The migration number is assigned from the authoritative repository state at execution; baseline observation that `0011` is currently lawful is context only, not a permanent preclaim.
 
-**No implementation/runtime authorization:** This governance entry and ADR do not themselves implement the table. Implementation remains `NOT STARTED` until a later execution satisfies the Roadmap gate. No production row, bootstrap identity, authentication, authorization, runtime import, API, route, component, UI, or workflow is authorized.
+**No implementation/runtime authorization:** This governance entry and ADR do not themselves implement the table. Implementation is now `IMPLEMENTED` at commit `a2604ca`, which satisfied the Roadmap gate. No production row, bootstrap identity, authentication, authorization, runtime import, API, route, component, UI, or workflow is authorized.
 
 **Explicit exclusions:** `editorial_role_grants`, `review_records`, `publication_events`, `audit_events`, any auth-link table, public `users`/`user_identities`, credentials/passwords/passkeys/MFA/recovery/sessions, roles/capabilities/scopes/grants, staff seeds/bootstrap accounts, Admin API/routes/pages/components/UI, editorial queues/workflows, topic-management UI, content review/publication workflows, KE-2 implementation, M6/`devotional_items`, Duas, Quran/provider work, M5 Gate 4/5, Phase 7 completion, and later Knowledge Engine phases.
 
 **Dependency truth:** This prerequisite is independent of M5 and M6 and changes no provider, Quran, Duas, or runtime status. It removes only the future `editorial_users` physical blocker once implemented. `devotional_items` remains an independent hard KE-2 blocker; KE-2 implementation remains NOT STARTED. KE-1 remains COMPLETE; KE-2 governance remains COMPLETE; M5 Gate 3 remains PARTIAL; M5 Provider Import Dry Run Verified and M5 Quran Import Activated remain NOT PASS; M6 remains BLOCKED.
 
-**Implementation evidence:** None. Governance is decided; Editorial Identity Foundation implementation remains NOT STARTED.
+**Implementation evidence:** Implemented at commit `a2604ca`, which added exactly the `editorial_users` table via `drizzle/0011_editorial_identity_foundation.sql` within the authorized implementation boundary above. Governance is decided; Editorial Identity Foundation is implemented.
 
 **Supersedes / Superseded by:** None.
 

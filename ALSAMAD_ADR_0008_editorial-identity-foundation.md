@@ -4,7 +4,7 @@
 
 ## Status
 
-Accepted — 2026-08-13. Implementation not started.
+Accepted — 2026-08-13. Implemented — commit `a2604ca`.
 
 This ADR fixes the durable internal staff identity representation for the independently executed `M7-prerequisite / Editorial Identity Foundation`. It authorizes no migration, schema/code change, row, authentication, authorization, runtime wiring, administration surface, Phase 7 workflow, KE-2 implementation, or provider integration by itself.
 
