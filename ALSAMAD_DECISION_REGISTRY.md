@@ -162,13 +162,14 @@ As of 2026-08-08, the M6 architecture decision analysis covering REG-0001–REG-
 | REG-0012 | License-version immutability and historical license evidence                               | Database                    | DECIDED     | Registry + ADR (`ADR-0005`, Accepted)                                     |
 | REG-0013 | Atomic Quran release selector and publication consistency                                  | Database                    | DECIDED     | Registry + ADR (`ADR-0006`, Accepted)                                     |
 | REG-0014 | Knowledge Engine Phase 1 (KE-1): entity/relationship/search unification                    | Roadmap                     | DECIDED     | Registry only                                                             |
-| REG-0015 | Knowledge Engine Phase 2 (KE-2): durable topic vocabulary and assignments                  | Database, Roadmap           | DECIDED     | Registry + ADR (`ADR-0007`, Accepted)                                     |
+| REG-0015 | Knowledge Engine Phase 2 (KE-2): durable topic vocabulary and assignments                  | Database, Roadmap           | SUPERSEDED  | Registry + ADR (`ADR-0007`, Accepted)                                     |
 | REG-0016 | Editorial Identity Foundation prerequisite                                                 | Database, Security, Roadmap | DECIDED     | Registry + ADR (`ADR-0008`, Accepted)                                     |
 | REG-0017 | Typography Phase 1: Arabic UI and devotional-reading font roles                            | Product, Roadmap            | IMPLEMENTED | Registry only                                                             |
 | REG-0018 | Sakīnah Phase-1 visual foundation: palette, surfaces, elevation, radii, and state roles    | Product, Roadmap            | DECIDED     | Registry only                                                             |
 | REG-0019 | M6.0 Duas Mobile-First Foundation: narrow independence from the M5 production-activation dependency | Roadmap                     | DECIDED     | Registry only                                                             |
 | REG-0020 | Quran.Foundation Arabic Quran text retention permission (M5 Gate 3 storage/retention sub-item)       | Roadmap, Security            | DECIDED     | Registry only                                                             |
-| REG-0021 | Knowledge Engine Phase 2 (KE-2): implementation-authorization crossing ("Governance Unit 2")          | Roadmap                      | DECIDED     | Registry only                                                             |
+| REG-0021 | Knowledge Engine Phase 2 (KE-2): implementation-authorization crossing ("Governance Unit 2")          | Roadmap                      | SUPERSEDED  | Registry only                                                             |
+| REG-0022 | Knowledge Engine Phase 2 (KE-2) architecture split: Topics Foundation (KE-2A) and Content Topic Assignments (KE-2B) | Database, Roadmap            | DECIDED     | Registry + ADR (`ADR-0009`, Accepted)                                     |
 
 ### REG-0001 — Editorial General Dua placement in the devotional physical model
 
@@ -533,7 +534,7 @@ This entry explicitly does **not** approve: `src/lib/knowledge/adapters/duas.ts`
 
 **Tier rationale:** Registry + ADR. The decision is architecturally material because it introduces persistent cross-module classification state, two physical tables, and a new `knowledge` ownership boundary. Reversal after stable topic IDs and curated religious-content assignments exist would be data-shaping, content-integrity sensitive, and require cross-module migration/reconstruction. Both prongs of §7 are met. `ADR-0007` records the physical rationale and rejected alternatives.
 
-**Status:** `DECIDED` (2026-08-13). **ADR reference:** `ADR-0007` (Accepted).
+**Status:** `SUPERSEDED` (2026-08-22). **ADR reference:** `ADR-0007` (Accepted).
 
 **Decision outcome:** Governance-approves in principle exactly KE-2's later additive, non-Release-1 two-table package:
 
@@ -554,7 +555,7 @@ The Devotional endpoint is constraint-trigger validated through `content_items` 
 
 **Implementation evidence:** None. Governance is decided; KE-2 implementation remains NOT STARTED.
 
-**Supersedes / Superseded by:** None.
+**Supersedes / Superseded by:** Superseded by `REG-0022`.
 
 ### REG-0016 — Editorial Identity Foundation prerequisite
 
@@ -730,7 +731,7 @@ This evidence resolves only the Gate 3 storage/caching/retention sub-item, and o
 
 **Tier rationale:** Registry only. This entry introduces no new physical or architectural decision beyond what `ADR-0007` already covers; it fails §7's ADR threshold on its first prong, since nothing about it is newly material. Reversal is neither expensive nor dangerous — this entry can simply be superseded without touching any persisted state. **ADR reference:** None. The existing `ADR-0007` (Accepted) remains sufficient and unmodified; no new ADR is created.
 
-**Status:** `DECIDED` (2026-08-22).
+**Status:** `SUPERSEDED` (2026-08-22).
 
 **Decision outcome:** This entry constitutes the `M7.0-track` Governance Unit 2 act named in the Roadmap's opening M7.0-track section. It records, without alteration:
 
@@ -752,4 +753,43 @@ This entry authorizes a future execution to begin work against the Roadmap's alr
 
 **Implementation evidence:** None. This entry authorizes a future KE-2 implementation execution to begin; it does not itself constitute, stage, or commit any implementation. KE-2 implementation remains `NOT STARTED` until a separate execution satisfies every item of the Roadmap's existing 16-item acceptance contract. No `src/lib/knowledge/**` or `tests/knowledge-*.test.mjs` file is touched, staged, or committed by this entry.
 
-**Supersedes / Superseded by:** None.
+**Supersedes / Superseded by:** Superseded by `REG-0022`.
+
+### REG-0022 — Knowledge Engine Phase 2 (KE-2) architecture split: Topics Foundation (KE-2A) and Content Topic Assignments (KE-2B)
+
+**Category:** `Database`, `Roadmap`.
+
+**Summary:** Whether the KE-2 governance package, previously governed by `REG-0015`/`ADR-0007` and implementation-authorized as one atomic two-table unit by `REG-0021`, may instead be delivered as two separately atomic, sequential implementation units — `KE-2A` (`topics`) and `KE-2B` (`content_topics`) — without altering the substantive physical data model those entries already approved.
+
+**Committed evidence:** `REG-0015` and `REG-0021` are `SUPERSEDED` by this entry; `ADR-0007` is `Superseded by ADR-0009`. `REG-0015`/`ADR-0007` governance-approved the `topics`/`content_topics` two-table package as one atomic migration, and `REG-0021` supplied the later Governance Unit 2 crossing for that now-obsolete combined execution unit. Independent feasibility review found `content_topics.devotional_item_id` has no live physical target — `devotional_items` does not exist in `src/db/schema.ts` and remains blocked on `M6.1`, itself blocked on `M5 Quran Import Activated` (`NOT PASS`) — while `topics` depends only on `locales` and `editorial_users`, both already physically present (`editorial_users` at commit `a2604ca`). Under the prior atomic package, this indefinitely delayed `topics` for a dependency `topics` itself does not have. `ALSAMAD_DATABASE_ARCHITECTURE.md` §10.1.3 and `ADR-0007` §4 previously required one joint migration with joint rollback; `ADR-0009` now records the sequencing decision that resolves this.
+
+**Affected architecture:** `ADR-0009`; `ALSAMAD_DATABASE_ARCHITECTURE.md` §10.1.3.
+
+**Affected roadmap gate:** `M7.0-track / KE-2A — Topics Foundation`; `M7.0-track / KE-2B — Content Topic Assignments`.
+
+**Opened:** 2026-08-22.
+
+**Tier rationale:** Registry + ADR. This entry changes an already-`Accepted` physical/procedural decision — the migration atomicity and rollback boundary — which independently meets §7's materiality prong regardless of the underlying table design being unchanged. Before either migration executes, reversal remains cheap (unexecuted-migration abandonment); the physical commitment being replaced is nonetheless the kind of frozen architectural decision §7 covers. **ADR reference:** `ADR-0009` (Accepted), superseding `ADR-0007`.
+
+**Status:** `DECIDED` (2026-08-22).
+
+**Decision outcome:**
+
+1. The KE-2 package and `REG-0021`'s implementation authorization for its former atomic two-table execution unit are replaced by two separately atomic, sequential implementation units: `KE-2A — Topics Foundation` and `KE-2B — Content Topic Assignments`. Neither split unit inherits the obsolete combined authorization.
+2. Each unit is a distinct atomic forward-only migration. A unit's migration failure rolls back only that unit's own tables, triggers, constraints, and indexes — never the other unit's.
+3. `KE-2A` dependencies: `locales`, `editorial_users` — both already physically exist. `KE-2A` does not depend on `quran_ayahs`, `devotional_items`, `content_topics`, `M5 Quran Import Activated`, or `M6.1`.
+4. `KE-2B` dependencies: `KE-2A` `COMPLETE`; `quran_ayahs` physically present (already exists); `devotional_items` physically present (does not yet exist); `content_items` physically present; `editorial_users`. `M5 Quran Import Activated` is not named as a direct `KE-2B` dependency; it enters only transitively, because `devotional_items` itself remains gated behind `M6.1`, which the Roadmap already requires `M5 Quran Import Activated` to satisfy before `M6.1` may implement.
+5. The substantive `topics`/`content_topics` physical data model — every column, type, default, check, trigger, index, and foreign key originally specified at `ADR-0007` §§2–3 and now binding through `ADR-0009`'s incorporation by reference — remains entirely unchanged. This entry redesigns none of it.
+6. `REG-0015`'s substantive architectural description (its Decision-outcome items 1–2 and descriptive paragraph covering the two tables' shape, lifecycle, concurrency, and canonical-owner rules) remains valid and is carried forward unchanged by this reference. Only `REG-0015`'s single-migration "Implementation boundary" and "Release-1 classification" fields — which assumed one atomic package — are replaced by the two-unit structure recorded here.
+
+**This entry does not authorize `KE-2A` implementation.** Per `ALSAMAD_DECISION_REGISTRY.md` §2 item 5 and §10, a separate, later Registry entry (`KE-2A`'s own Governance Unit 2 crossing) remains required before any migration execution, schema/code implementation, staging, commit, push, seed data, or runtime wiring is authorized. `KE-2A` implementation remains `NOT STARTED`. `KE-2B` implementation remains `NOT STARTED` and additionally `BLOCKED` pending `devotional_items`'s physical existence and its own later crossing.
+
+**Explicit exclusions:** Identical to `REG-0015`'s own list, restated verbatim, unmodified: collections, source references, generic `knowledge_edges`, Articles/Guides, Hadith, Talibeen, Duas, topic-to-topic edges, AI suggestions, semantic search, the AI Search Assistant, runtime search expansion, related-content UI, editorial/admin UI, seed data, provider/network/credential work, `M5 Gate 4/5`, canonical ownership changes, and every Knowledge Engine phase after Phase 2.
+
+**Independence from M5, M6, Duas, Editorial Identity, Sakīnah, `REG-0019`, and `REG-0020`.** This entry changes no M5, M6, Duas, Editorial Identity, or Sakīnah status. `M5 Gate 3` remains `PARTIAL`; `M5 Gates 4–7` remain `NOT PASS`; `M5 Quran Import Activated` remains `NOT PASS`; `M6.0` remains `COMPLETE`; `M6.1`/`M6.2` remain `BLOCKED`; `REG-0019` and `REG-0020` semantics are unchanged; Sakīnah Phase-1 and Editorial Identity Foundation status are unchanged. `KE-1` remains `COMPLETE` and runtime-inert. No `KE-3` or any later Knowledge Engine phase is authorized by this entry.
+
+**Quarantine treatment.** Unchanged from `REG-0021`'s finding: `src/lib/knowledge/topics.ts`, `collections.ts`, `references.ts`, and `adapters/duas.ts` remain untracked, non-authoritative prototype evidence. No prototype byte becomes authorized by this entry. `topics.ts` still requires a full conformance rewrite against the `topics` specification (originally recorded at `ADR-0007` §2, now binding through `ADR-0009`'s incorporation by reference) before any future `KE-2A` execution may include it.
+
+**Implementation evidence:** None. This entry authorizes no migration, schema/code/test change, seed row, topic, religious-content assignment, runtime import, search integration, admin or editorial workflow, or deployment.
+
+**Supersedes / Superseded by:** Supersedes `REG-0015` and `REG-0021`.

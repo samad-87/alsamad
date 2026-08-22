@@ -4,7 +4,7 @@
 
 ## Status
 
-Accepted — 2026-08-13. Implementation not started.
+Superseded by ADR-0009 — 2026-08-22.
 
 This ADR records the physical decision for `M7.0-track / KE-2`. It authorizes no migration, schema mapping, code, seed data, runtime wiring, search expansion, editorial UI, provider access, or later Knowledge Engine phase. Implementation remains gated by `REG-0015` and the Roadmap's `M7.0-track / KE-2` acceptance contract.
 
