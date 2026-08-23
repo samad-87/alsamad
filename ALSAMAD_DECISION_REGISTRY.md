@@ -170,6 +170,7 @@ As of 2026-08-08, the M6 architecture decision analysis covering REG-0001–REG-
 | REG-0020 | Quran.Foundation Arabic Quran text retention permission (M5 Gate 3 storage/retention sub-item)       | Roadmap, Security            | DECIDED     | Registry only                                                             |
 | REG-0021 | Knowledge Engine Phase 2 (KE-2): implementation-authorization crossing ("Governance Unit 2")          | Roadmap                      | SUPERSEDED  | Registry only                                                             |
 | REG-0022 | Knowledge Engine Phase 2 (KE-2) architecture split: Topics Foundation (KE-2A) and Content Topic Assignments (KE-2B) | Database, Roadmap            | DECIDED     | Registry + ADR (`ADR-0009`, Accepted)                                     |
+| REG-0023 | Knowledge Engine Phase 2A (KE-2A): Topics Foundation implementation-authorization crossing           | Roadmap                      | DECIDED     | Registry only                                                             |
 
 ### REG-0001 — Editorial General Dua placement in the devotional physical model
 
@@ -793,3 +794,47 @@ This entry authorizes a future execution to begin work against the Roadmap's alr
 **Implementation evidence:** None. This entry authorizes no migration, schema/code/test change, seed row, topic, religious-content assignment, runtime import, search integration, admin or editorial workflow, or deployment.
 
 **Supersedes / Superseded by:** Supersedes `REG-0015` and `REG-0021`.
+
+### REG-0023 — Knowledge Engine Phase 2A (KE-2A): Topics Foundation implementation-authorization crossing
+
+**Category:** `Roadmap`.
+
+**Summary:** Whether `KE-2A — Topics Foundation` may now satisfy its separate Governance Unit 2 crossing and become authorized to begin in a future implementation execution against its existing contract, without implementing KE-2A in this governance task, altering the architecture settled by `REG-0022`/`ADR-0009`, or authorizing `KE-2B` or any later Knowledge Engine work.
+
+**Committed evidence:** `REG-0022` (`DECIDED`) and `ADR-0009` (Accepted) are the current governing architecture and sequencing authority. They preserve the complete `topics` physical specification incorporated from historical/Superseded `ADR-0007` §2, split KE-2 into separately atomic `KE-2A` and `KE-2B` units, and explicitly reserve a separate Governance Unit 2 crossing for each. `ALSAMAD_IMPLEMENTATION_ROADMAP.md`'s `M7.0-track / KE-2A — Topics Foundation` subsection already records KE-2A's exact objective, dependencies, future file boundary, implementation constraints, and independently satisfiable share of the split 16-item acceptance contract. Its only physical dependencies, `locales` and `editorial_users`, exist. `KE-2B` remains separately blocked pending KE-2A COMPLETE, physical `devotional_items`, and its own later crossing.
+
+**Affected architecture:** None. This entry executes the Roadmap authorization crossing already required by `REG-0022`/`ADR-0009`; it changes no physical representation, data model, migration sequencing, canonical owner, cross-module boundary, or closed vocabulary.
+
+**Affected roadmap gate:** `M7.0-track / KE-2A — Topics Foundation` only.
+
+**Opened:** 2026-08-23.
+
+**Tier rationale:** Registry only. This entry introduces no new architectural decision and therefore fails §7's ADR threshold on its first prong. It authorizes execution only against the already-decided KE-2A contract; `REG-0022` remains `DECIDED`, `ADR-0009` remains Accepted and current, and no new ADR is required. **ADR reference:** None.
+
+**Status:** `DECIDED` (2026-08-23).
+
+**Decision outcome:** This entry satisfies the separate Governance Unit 2 crossing required for exactly `M7.0-track / KE-2A — Topics Foundation`. Together with the corresponding Roadmap status update, it authorizes a separate future implementation execution to begin only within KE-2A's existing boundary and only to satisfy every KE-2A requirement already governed by `REG-0022`, `ADR-0009`, `ALSAMAD_DATABASE_ARCHITECTURE.md` §10.1.1/§10.1.3, and the Roadmap's unchanged split acceptance contract.
+
+The authorized unit adds exactly the later-additive, non-Release-1 `topics` table and its governed repository/test/verification support. Its dependencies remain exactly `locales` and `editorial_users`. No architecture is redesigned: no `topics` column, type, default, check, index, trigger, foreign key, lifecycle, localization, active-actor, concurrency, or UUIDv7 rule changes. The existing KE-2A exact future implementation boundary and every `[A]`, `[A/B split]`, and `[A+B independent]` obligation assigned to KE-2A remain unchanged. KE-2A implementation is authorized to begin only in a later execution and remains `NOT STARTED`; this entry implements, stages, commits, or pushes no schema, migration, code, test, seed, or runtime work.
+
+No migration number is assigned, reserved, predicted, or pre-claimed for KE-2A. Migration `0010_devotional_content_foundation.sql` remains reserved for M6.1. A KE-2A number may be assigned only mechanically by the later implementation execution from the then-authoritative forward-only sequence.
+
+**Quarantine treatment:** `src/lib/knowledge/topics.ts` currently exists only as untracked, non-authoritative prototype evidence. This authorization attaches to the governed KE-2A path and boundary, not to the current prototype bytes; those bytes are not reviewed, adopted, or authorized by this entry. A later implementation may replace or rewrite that path only as required to conform to the authoritative KE-2A contract. `src/lib/knowledge/collections.ts`, `src/lib/knowledge/references.ts`, and `src/lib/knowledge/adapters/duas.ts` remain wholly outside KE-2A and outside this authorization.
+
+**This entry explicitly does NOT authorize:**
+
+- `KE-2B`, `content_topics`, content-to-topic assignments, assignment seeds, or any KE-2B migration; KE-2B remains `NOT STARTED / BLOCKED` and requires its own later Governance Unit 2 crossing;
+- `KE-3` or any later Knowledge Engine phase, collections, references, Duas adapters, generic `knowledge_edges`, entities, topic-to-topic edges, Articles/Guides, Hadith, or Talibeen;
+- runtime wiring, runtime imports, search expansion, related-content UI, editorial/Admin UI, provider/network/credential access, AI, embeddings, RAG, semantic search, or the AI Search Assistant;
+- topic seed data or any other seed authority; the governing KE-2A contract remains seed-free;
+- any M5 or M6 status change, M6.1 or M6.2 authorization, Quran import or activation, or any implication that an M5 gate has passed;
+- any migration-number assignment, reservation, prediction, pre-claim, or reuse/displacement of M6.1's reserved `0010`;
+- implementation by this governance write itself or adoption of any current quarantined prototype byte.
+
+**Roadmap operationalization:** Per §2 items 4–5 and §10, this Registry entry is operationalized by the corresponding minimal Roadmap updates that record KE-2A's crossing as satisfied and implementation as authorized to begin in a separate future execution while remaining `NOT STARTED`. The existing KE-2A boundary, dependencies, constraints, acceptance contract, exclusions, migration-number rule, and completion-evidence requirement remain unchanged. KE-2B's status and separate-crossing requirement remain unchanged.
+
+**Independence from protected status truths:** `M5 Gate 3` remains `PARTIAL`; M5 Gates 4–7, `M5 Provider Import Dry Run Verified`, and `M5 Quran Import Activated` remain `NOT PASS`; `M6.0` remains `COMPLETE`; `M6.1`/`M6.2` remain `BLOCKED`; `REG-0019` and `REG-0020` semantics are unchanged; Sakīnah and Editorial Identity Foundation status are unchanged; and KE-1 remains `COMPLETE` and runtime-inert. No KE-3 authorization exists.
+
+**Implementation evidence:** None. KE-2A implementation is `NOT STARTED`. A later implementation execution must satisfy every KE-2A acceptance requirement before implementation evidence or `IMPLEMENTED` status may be recorded.
+
+**Supersedes / Superseded by:** None.
