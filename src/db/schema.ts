@@ -716,6 +716,65 @@ export const editorialUsers = pgTable(
   ],
 );
 
+export const topics = pgTable(
+  "topics",
+  {
+    id: uuid("id").primaryKey(),
+    canonicalKey: varchar("canonical_key", { length: 160 }).notNull(),
+    localizedNames: jsonb("localized_names")
+      .$type<Record<string, string>>()
+      .notNull(),
+    status: varchar("status", { length: 16 }).notNull().default("draft"),
+    createdBy: uuid("created_by").notNull(),
+    approvedBy: uuid("approved_by"),
+    approvedAt: timestamp("approved_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    unique("uq_topics__canonical_key").on(table.canonicalKey),
+    check(
+      "ck_topics__id_uuidv7",
+      sql`(get_byte(uuid_send(${table.id}), 6) >> 4) = 7 and (get_byte(uuid_send(${table.id}), 8) & 192) = 128`,
+    ),
+    check(
+      "ck_topics__canonical_key",
+      sql`btrim(${table.canonicalKey}) <> '' and ${table.canonicalKey} = lower(${table.canonicalKey})`,
+    ),
+    check(
+      "ck_topics__localized_names",
+      sql`jsonb_typeof(${table.localizedNames}) = 'object' and ${table.localizedNames} <> '{}'::jsonb`,
+    ),
+    check(
+      "ck_topics__status",
+      sql`${table.status} in ('draft', 'approved', 'retired')`,
+    ),
+    check(
+      "ck_topics__approval_evidence",
+      sql`(${table.status} = 'draft' and ${table.approvedBy} is null and ${table.approvedAt} is null) or (${table.status} = 'approved' and ${table.approvedBy} is not null and ${table.approvedAt} is not null) or (${table.status} = 'retired' and ((${table.approvedBy} is null and ${table.approvedAt} is null) or (${table.approvedBy} is not null and ${table.approvedAt} is not null)))`,
+    ),
+    foreignKey({
+      name: "fk_topics__created_by",
+      columns: [table.createdBy],
+      foreignColumns: [editorialUsers.id],
+    })
+      .onUpdate("restrict")
+      .onDelete("restrict"),
+    foreignKey({
+      name: "fk_topics__approved_by",
+      columns: [table.approvedBy],
+      foreignColumns: [editorialUsers.id],
+    })
+      .onUpdate("restrict")
+      .onDelete("restrict"),
+    index("ix_topics__status").on(table.status),
+  ],
+);
+
 export const m5DomainTableCount = 6 as const;
 export const release1DomainTableCountAfterM5 = 16 as const;
 export const editorialIdentityFoundationTableCount = 1 as const;

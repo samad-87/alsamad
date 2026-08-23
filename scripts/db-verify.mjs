@@ -101,6 +101,7 @@ try {
       "quran_translation_editions",
       "quran_translation_texts",
       "source_references",
+      "topics",
       "works",
     ],
   );
@@ -309,11 +310,18 @@ try {
       [9, "0009_arc005_insert_activation_validation"],
     ],
   );
-  assert.deepEqual(journal.entries.at(-1), {
+  assert.deepEqual(journal.entries.at(-2), {
     idx: 10,
     version: "7",
     when: 1785796810000,
     tag: "0011_editorial_identity_foundation",
+    breakpoints: true,
+  });
+  assert.deepEqual(journal.entries.at(-1), {
+    idx: 11,
+    version: "7",
+    when: 1785796811000,
+    tag: "0012_ke2a_topics",
     breakpoints: true,
   });
 
@@ -2047,7 +2055,587 @@ try {
     );
   }
 
-  console.log("PASS schema tables: exactly 17 cumulative Release 1 tables");
+  // KE-2A Topics Foundation: synthetic, non-religious, rollback-scoped proof.
+  {
+    const topicColumns = await queryClient`
+      select column_name, data_type, character_maximum_length, is_nullable, column_default
+      from information_schema.columns
+      where table_schema='public' and table_name='topics'
+      order by ordinal_position
+    `;
+    assert.deepEqual(
+      topicColumns.map(({ column_name }) => column_name),
+      [
+        "id",
+        "canonical_key",
+        "localized_names",
+        "status",
+        "created_by",
+        "approved_by",
+        "approved_at",
+        "created_at",
+        "updated_at",
+      ],
+    );
+    assert.deepEqual(
+      topicColumns.map(({ data_type }) => data_type),
+      [
+        "uuid",
+        "character varying",
+        "jsonb",
+        "character varying",
+        "uuid",
+        "uuid",
+        "timestamp with time zone",
+        "timestamp with time zone",
+        "timestamp with time zone",
+      ],
+    );
+    assert.equal(topicColumns[1]?.character_maximum_length, 160);
+    assert.equal(topicColumns[3]?.character_maximum_length, 16);
+    assert.match(topicColumns[3]?.column_default ?? "", /draft/);
+    assert.equal(topicColumns[7]?.column_default, "CURRENT_TIMESTAMP");
+    assert.equal(topicColumns[8]?.column_default, "CURRENT_TIMESTAMP");
+
+    const topicConstraints = await queryClient`
+      select conname, contype
+      from pg_constraint
+      where conrelid='topics'::regclass
+      order by conname
+    `;
+    assert.deepEqual(
+      topicConstraints.map(({ conname }) => conname),
+      [
+        "ck_topics__approval_evidence",
+        "ck_topics__canonical_key",
+        "ck_topics__id_uuidv7",
+        "ck_topics__localized_names",
+        "ck_topics__status",
+        "ctr_topics__localized_names",
+        "fk_topics__approved_by",
+        "fk_topics__created_by",
+        "topics_pkey",
+        "uq_topics__canonical_key",
+      ],
+    );
+    assert.equal(
+      topicConstraints.filter(({ contype }) => contype === "f").length,
+      2,
+    );
+    assert.deepEqual(
+      (
+        await queryClient`
+          select indexname from pg_indexes
+          where schemaname='public' and tablename='topics'
+          order by indexname
+        `
+      ).map(({ indexname }) => indexname),
+      ["ix_topics__status", "topics_pkey", "uq_topics__canonical_key"],
+    );
+    assert.equal(
+      (await queryClient`select count(*)::int as count from topics`)[0]?.count,
+      0,
+    );
+
+    const actor = "0198a7b0-e300-7000-8000-000000000001";
+    const disabledActor = "0198a7b0-e300-7000-8000-000000000002";
+    const topic = "0198a7b0-e400-7000-8000-000000000001";
+    await queryClient
+      .begin(async (transaction) => {
+        await transaction`insert into editorial_users(id,status) values(${actor}::uuid,'active'),(${disabledActor}::uuid,'disabled')`;
+        await transaction`insert into topics(id,canonical_key,localized_names,created_by) values(${topic}::uuid,'synthetic-topic','{"en":"Synthetic topic"}'::jsonb,${actor}::uuid)`;
+        await transaction`set constraints all immediate`;
+        let row = (
+          await transaction`select * from topics where id=${topic}::uuid`
+        )[0];
+        assert.equal(row.status, "draft");
+        assert.equal(row.approved_by, null);
+        assert.equal(row.approved_at, null);
+        const createdAt = row.created_at;
+        const firstUpdatedAt = row.updated_at;
+
+        await transaction`update topics set localized_names='{"en":"Synthetic topic revised"}'::jsonb where id=${topic}::uuid`;
+        await transaction`set constraints all immediate`;
+        row = (
+          await transaction`select * from topics where id=${topic}::uuid`
+        )[0];
+        assert.ok(row.updated_at > firstUpdatedAt);
+
+        await transaction`update topics set status='approved',approved_by=${actor}::uuid where id=${topic}::uuid`;
+        row = (
+          await transaction`select * from topics where id=${topic}::uuid`
+        )[0];
+        assert.equal(row.status, "approved");
+        assert.equal(row.approved_by, actor);
+        assert.equal(
+          new Date(row.approved_at).getTime(),
+          new Date(row.updated_at).getTime(),
+        );
+        const approvedAt = row.approved_at;
+
+        await transaction`update topics set status='retired' where id=${topic}::uuid`;
+        row = (
+          await transaction`select * from topics where id=${topic}::uuid`
+        )[0];
+        assert.equal(row.status, "retired");
+        assert.equal(
+          new Date(row.approved_at).getTime(),
+          new Date(approvedAt).getTime(),
+        );
+        assert.equal(
+          new Date(row.created_at).getTime(),
+          new Date(createdAt).getTime(),
+        );
+        throw new Error("KE-2A positive fixture rollback");
+      })
+      .catch((error) =>
+        assert.equal(error.message, "KE-2A positive fixture rollback"),
+      );
+
+    const rejectTopicMutation = async (label, body) =>
+      expectDatabaseRejection(label, async (transaction) => {
+        await transaction`insert into editorial_users(id,status) values(${actor}::uuid,'active'),(${disabledActor}::uuid,'disabled')`;
+        await body(transaction);
+      });
+
+    await rejectTopicMutation(
+      "non-UUIDv7 topic id",
+      (transaction) =>
+        transaction`insert into topics(id,canonical_key,localized_names,created_by) values('0198a7b0-e400-4000-8000-000000000002'::uuid,'bad-id','{"en":"Synthetic"}'::jsonb,${actor}::uuid)`,
+    );
+    await rejectTopicMutation(
+      "uppercase canonical key",
+      (transaction) =>
+        transaction`insert into topics(id,canonical_key,localized_names,created_by) values('0198a7b0-e400-7000-8000-000000000003'::uuid,'Bad-Key','{"en":"Synthetic"}'::jsonb,${actor}::uuid)`,
+    );
+    await rejectTopicMutation(
+      "blank canonical key",
+      (transaction) =>
+        transaction`insert into topics(id,canonical_key,localized_names,created_by) values('0198a7b0-e400-7000-8000-000000000004'::uuid,'   ','{"en":"Synthetic"}'::jsonb,${actor}::uuid)`,
+    );
+    await rejectTopicMutation(
+      "empty localized names",
+      (transaction) =>
+        transaction`insert into topics(id,canonical_key,localized_names,created_by) values('0198a7b0-e400-7000-8000-000000000005'::uuid,'empty-names','{}'::jsonb,${actor}::uuid)`,
+    );
+    await rejectTopicMutation(
+      "non-string localized name",
+      async (transaction) => {
+        await transaction`insert into topics(id,canonical_key,localized_names,created_by) values('0198a7b0-e400-7000-8000-000000000006'::uuid,'bad-name','{"en":1}'::jsonb,${actor}::uuid)`;
+        await transaction`set constraints all immediate`;
+      },
+    );
+    await rejectTopicMutation("missing locale key", async (transaction) => {
+      await transaction`insert into topics(id,canonical_key,localized_names,created_by) values('0198a7b0-e400-7000-8000-000000000007'::uuid,'missing-locale','{"zz-ke2a":"Synthetic"}'::jsonb,${actor}::uuid)`;
+      await transaction`set constraints all immediate`;
+    });
+    await rejectTopicMutation(
+      "disabled creation actor",
+      (transaction) =>
+        transaction`insert into topics(id,canonical_key,localized_names,created_by) values('0198a7b0-e400-7000-8000-000000000008'::uuid,'disabled-actor','{"en":"Synthetic"}'::jsonb,${disabledActor}::uuid)`,
+    );
+    await rejectTopicMutation(
+      "missing creation actor",
+      (transaction) =>
+        transaction`insert into topics(id,canonical_key,localized_names,created_by) values('0198a7b0-e400-7000-8000-000000000009'::uuid,'missing-actor','{"en":"Synthetic"}'::jsonb,'0198a7b0-e300-7000-8000-000000000099'::uuid)`,
+    );
+    await rejectTopicMutation(
+      "duplicate canonical key",
+      async (transaction) => {
+        await transaction`insert into topics(id,canonical_key,localized_names,created_by) values('0198a7b0-e400-7000-8000-000000000010'::uuid,'duplicate-key','{"en":"Synthetic A"}'::jsonb,${actor}::uuid)`;
+        await transaction`insert into topics(id,canonical_key,localized_names,created_by) values('0198a7b0-e400-7000-8000-000000000011'::uuid,'duplicate-key','{"en":"Synthetic B"}'::jsonb,${actor}::uuid)`;
+      },
+    );
+
+    const lifecycleFailure = async (label, mutation) =>
+      rejectTopicMutation(label, async (transaction) => {
+        const id = "0198a7b0-e400-7000-8000-000000000020";
+        await transaction`insert into topics(id,canonical_key,localized_names,created_by) values(${id}::uuid,'lifecycle-fixture','{"en":"Synthetic"}'::jsonb,${actor}::uuid)`;
+        await mutation(transaction, id);
+      });
+    await lifecycleFailure(
+      "draft lifecycle no-op",
+      (transaction, id) =>
+        transaction`update topics set status='draft' where id=${id}::uuid`,
+    );
+    await lifecycleFailure(
+      "direct timestamp fabrication",
+      (transaction, id) =>
+        transaction`update topics set updated_at=updated_at+interval '1 second' where id=${id}::uuid`,
+    );
+    await lifecycleFailure(
+      "immutable topic id",
+      (transaction, id) =>
+        transaction`update topics set id='0198a7b0-e400-7000-8000-000000000021'::uuid where id=${id}::uuid`,
+    );
+    await lifecycleFailure(
+      "immutable canonical key",
+      (transaction, id) =>
+        transaction`update topics set canonical_key='changed-key' where id=${id}::uuid`,
+    );
+    await lifecycleFailure(
+      "immutable creator",
+      (transaction, id) =>
+        transaction`update topics set created_by=${disabledActor}::uuid where id=${id}::uuid`,
+    );
+    await lifecycleFailure(
+      "immutable created_at",
+      (transaction, id) =>
+        transaction`update topics set created_at=created_at+interval '1 second' where id=${id}::uuid`,
+    );
+    await lifecycleFailure(
+      "approval by disabled actor",
+      (transaction, id) =>
+        transaction`update topics set status='approved',approved_by=${disabledActor}::uuid where id=${id}::uuid`,
+    );
+    await lifecycleFailure("approved to draft", async (transaction, id) => {
+      await transaction`update topics set status='approved',approved_by=${actor}::uuid where id=${id}::uuid`;
+      await transaction`update topics set status='draft',approved_by=null where id=${id}::uuid`;
+    });
+    await lifecycleFailure(
+      "retired topic reactivation",
+      async (transaction, id) => {
+        await transaction`update topics set status='retired' where id=${id}::uuid`;
+        await transaction`update topics set status='draft' where id=${id}::uuid`;
+      },
+    );
+    await lifecycleFailure(
+      "retired topic hard delete",
+      async (transaction, id) => {
+        await transaction`update topics set status='retired' where id=${id}::uuid`;
+        await transaction`delete from topics where id=${id}::uuid`;
+      },
+    );
+    await rejectTopicMutation(
+      "unsupported isolation fails closed",
+      async (transaction) => {
+        await transaction`set transaction isolation level serializable`;
+        await transaction`insert into topics(id,canonical_key,localized_names,created_by) values('0198a7b0-e400-7000-8000-000000000030'::uuid,'serializable-topic','{"en":"Synthetic"}'::jsonb,${actor}::uuid)`;
+        await transaction`set constraints all immediate`;
+      },
+    );
+
+    // The shared global lock serializes opposite locale-key orders without deadlock.
+    await queryClient`insert into editorial_users(id,status) values(${actor}::uuid,'active') on conflict(id) do nothing`;
+    const connA = await queryClient.reserve();
+    const connB = await queryClient.reserve();
+    try {
+      await connA`begin`;
+      await connB`begin`;
+      await connA`insert into topics(id,canonical_key,localized_names,created_by) values
+        ('0198a7b0-e400-7000-8000-000000000041'::uuid,'lock-order-a1','{"ar":"A","en":"B"}'::jsonb,${actor}::uuid),
+        ('0198a7b0-e400-7000-8000-000000000042'::uuid,'lock-order-a2','{"en":"B","ar":"A"}'::jsonb,${actor}::uuid)`;
+      await connB`insert into topics(id,canonical_key,localized_names,created_by) values
+        ('0198a7b0-e400-7000-8000-000000000043'::uuid,'lock-order-b1','{"en":"B","ar":"A"}'::jsonb,${actor}::uuid),
+        ('0198a7b0-e400-7000-8000-000000000044'::uuid,'lock-order-b2','{"ar":"A","en":"B"}'::jsonb,${actor}::uuid)`;
+      await connA`set constraints all immediate`;
+      const bConstraints = connB`set constraints all immediate`;
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      await connA`commit`;
+      await bConstraints;
+      await connB`commit`;
+    } finally {
+      try {
+        await connA`rollback`;
+      } catch {}
+      try {
+        await connB`rollback`;
+      } catch {}
+      connA.release();
+      connB.release();
+    }
+    await queryClient`delete from topics where id in (
+      '0198a7b0-e400-7000-8000-000000000041'::uuid,
+      '0198a7b0-e400-7000-8000-000000000042'::uuid,
+      '0198a7b0-e400-7000-8000-000000000043'::uuid,
+      '0198a7b0-e400-7000-8000-000000000044'::uuid
+    )`;
+
+    const raceLocale = "ke2a-race";
+    const raceLocaleId = "0198a7b0-e500-7000-8000-000000000001";
+    await queryClient`insert into locales(id,code,language_tag,language_code,direction,display_name,native_name)
+      values(${raceLocaleId}::uuid,${raceLocale},'x-ke2a-race','xk','ltr','Synthetic race locale','Synthetic race locale')`;
+    await expectDatabaseRejection(
+      "referenced locale deletion",
+      async (transaction) => {
+        await transaction`insert into topics(id,canonical_key,localized_names,created_by) values('0198a7b0-e400-7000-8000-000000000050'::uuid,'referenced-locale','{"ke2a-race":"Synthetic"}'::jsonb,${actor}::uuid)`;
+        await transaction`set constraints all immediate`;
+        await transaction`delete from locales where code=${raceLocale}`;
+      },
+    );
+    await queryClient`delete from locales where code=${raceLocale}`;
+
+    // Topic validation owns the lock first: the concurrent locale delete waits,
+    // then fails after the topic commit becomes visible.
+    const topicFirstLocale = "ke2a-topic-first";
+    await queryClient`insert into locales(id,code,language_tag,language_code,direction,display_name,native_name)
+      values('0198a7b0-e500-7000-8000-000000000003'::uuid,${topicFirstLocale},'x-ke2a-topic-first','xt','ltr','Synthetic topic-first locale','Synthetic topic-first locale')`;
+    const topicFirstA = await queryClient.reserve();
+    const topicFirstB = await queryClient.reserve();
+    try {
+      await topicFirstA`begin`;
+      await topicFirstB`begin`;
+      await topicFirstA`insert into topics(id,canonical_key,localized_names,created_by)
+        values('0198a7b0-e400-7000-8000-000000000051'::uuid,'topic-first-race','{"ke2a-topic-first":"Synthetic"}'::jsonb,${actor}::uuid)`;
+      await topicFirstA`set constraints all immediate`;
+      const deletion =
+        topicFirstB`delete from locales where code=${topicFirstLocale}`
+          .then(() => ({ ok: true }))
+          .catch((error) => ({ ok: false, error }));
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      await topicFirstA`commit`;
+      const deletionResult = await deletion;
+      assert.equal(deletionResult.ok, false);
+      assert.match(deletionResult.error.message, /referenced by topics/);
+    } finally {
+      try {
+        await topicFirstA`rollback`;
+      } catch {}
+      try {
+        await topicFirstB`rollback`;
+      } catch {}
+      topicFirstA.release();
+      topicFirstB.release();
+    }
+    await queryClient`delete from topics where id='0198a7b0-e400-7000-8000-000000000051'::uuid`;
+    await queryClient`delete from locales where code=${topicFirstLocale}`;
+
+    // Locale deletion owns the lock first: the later topic validation waits,
+    // observes the committed deletion, and fails without a dangling key.
+    const localeFirstLocale = "k2-locale-first";
+    await queryClient`insert into locales(id,code,language_tag,language_code,direction,display_name,native_name)
+      values('0198a7b0-e500-7000-8000-000000000004'::uuid,${localeFirstLocale},'x-k2-locale-first','xl','ltr','Synthetic locale-first locale','Synthetic locale-first locale')`;
+    const localeFirstA = await queryClient.reserve();
+    const localeFirstB = await queryClient.reserve();
+    try {
+      await localeFirstA`begin`;
+      await localeFirstB`begin`;
+      await localeFirstA`delete from locales where code=${localeFirstLocale}`;
+      await localeFirstB`insert into topics(id,canonical_key,localized_names,created_by)
+        values('0198a7b0-e400-7000-8000-000000000052'::uuid,'locale-first-race','{"k2-locale-first":"Synthetic"}'::jsonb,${actor}::uuid)`;
+      const validation = localeFirstB`set constraints all immediate`
+        .then(() => ({ ok: true }))
+        .catch((error) => ({ ok: false, error }));
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      await localeFirstA`commit`;
+      const validationResult = await validation;
+      assert.equal(validationResult.ok, false);
+      assert.match(
+        validationResult.error.message,
+        /does not reference locales.code/,
+      );
+    } finally {
+      try {
+        await localeFirstA`rollback`;
+      } catch {}
+      try {
+        await localeFirstB`rollback`;
+      } catch {}
+      localeFirstA.release();
+      localeFirstB.release();
+    }
+    assert.equal(
+      (
+        await queryClient`select count(*)::int as count from topics where id='0198a7b0-e400-7000-8000-000000000052'::uuid`
+      )[0]?.count,
+      0,
+    );
+
+    const waitForAdvisoryWait = async (pid, label) => {
+      for (let attempt = 0; attempt < 100; attempt += 1) {
+        const activity = (
+          await queryClient`
+            select wait_event_type, wait_event
+            from pg_stat_activity
+            where pid = ${pid}
+          `
+        )[0];
+        if (
+          activity?.wait_event_type === "Lock" &&
+          activity?.wait_event === "advisory"
+        ) {
+          return;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      }
+      assert.fail(`${label} did not wait on the governed advisory lock`);
+    };
+
+    // Topic localized-name UPDATE owns the lock first: locale deletion waits,
+    // then fails after the committed update makes the locale referenced.
+    const updateFirstLocale = "ke2a-upd-first";
+    const updateFirstTopic = "0198a7b0-e400-7000-8000-000000000053";
+    await queryClient`insert into locales(id,code,language_tag,language_code,direction,display_name,native_name)
+      values('0198a7b0-e500-7000-8000-000000000005'::uuid,${updateFirstLocale},'x-ke2a-update-first','xu','ltr','Synthetic update-first locale','Synthetic update-first locale')`;
+    await queryClient`insert into topics(id,canonical_key,localized_names,created_by)
+      values(${updateFirstTopic}::uuid,'update-first-race','{"en":"Synthetic"}'::jsonb,${actor}::uuid)`;
+    const updateFirstA = await queryClient.reserve();
+    const updateFirstB = await queryClient.reserve();
+    try {
+      await updateFirstA`begin`;
+      await updateFirstB`begin`;
+      const updateFirstBPid = (
+        await updateFirstB`select pg_backend_pid()::int as pid`
+      )[0].pid;
+      await updateFirstA`update topics
+        set localized_names=jsonb_build_object('en','Synthetic',${updateFirstLocale}::text,'Synthetic update locale')
+        where id=${updateFirstTopic}::uuid`;
+      await updateFirstA`set constraints all immediate`;
+      const deletion =
+        updateFirstB`delete from locales where code=${updateFirstLocale}`
+          .then(() => ({ ok: true }))
+          .catch((error) => ({ ok: false, error }));
+      await waitForAdvisoryWait(
+        updateFirstBPid,
+        "locale deletion behind localized-name update",
+      );
+      await updateFirstA`commit`;
+      const deletionResult = await deletion;
+      assert.equal(deletionResult.ok, false);
+      assert.match(deletionResult.error.message, /referenced by topics/);
+    } finally {
+      try {
+        await updateFirstA`rollback`;
+      } catch {}
+      try {
+        await updateFirstB`rollback`;
+      } catch {}
+      updateFirstA.release();
+      updateFirstB.release();
+    }
+    await queryClient`delete from topics where id=${updateFirstTopic}::uuid`;
+    await queryClient`delete from locales where code=${updateFirstLocale}`;
+
+    // Locale deletion owns the lock first: the localized-name UPDATE waits,
+    // then deferred validation observes the deletion and rejects the update.
+    const deleteFirstUpdateLocale = "ke2a-del-upd";
+    const deleteFirstUpdateTopic = "0198a7b0-e400-7000-8000-000000000054";
+    await queryClient`insert into locales(id,code,language_tag,language_code,direction,display_name,native_name)
+      values('0198a7b0-e500-7000-8000-000000000006'::uuid,${deleteFirstUpdateLocale},'x-ke2a-delete-first-update','xd','ltr','Synthetic delete-first update locale','Synthetic delete-first update locale')`;
+    await queryClient`insert into topics(id,canonical_key,localized_names,created_by)
+      values(${deleteFirstUpdateTopic}::uuid,'delete-first-update-race','{"en":"Synthetic"}'::jsonb,${actor}::uuid)`;
+    const deleteFirstUpdateA = await queryClient.reserve();
+    const deleteFirstUpdateB = await queryClient.reserve();
+    try {
+      await deleteFirstUpdateA`begin`;
+      await deleteFirstUpdateB`begin`;
+      const deleteFirstUpdateBPid = (
+        await deleteFirstUpdateB`select pg_backend_pid()::int as pid`
+      )[0].pid;
+      await deleteFirstUpdateA`delete from locales where code=${deleteFirstUpdateLocale}`;
+      await deleteFirstUpdateB`update topics
+        set localized_names=jsonb_build_object('en','Synthetic',${deleteFirstUpdateLocale}::text,'Synthetic deleted locale')
+        where id=${deleteFirstUpdateTopic}::uuid`;
+      const validation = deleteFirstUpdateB`set constraints all immediate`
+        .then(() => ({ ok: true }))
+        .catch((error) => ({ ok: false, error }));
+      await waitForAdvisoryWait(
+        deleteFirstUpdateBPid,
+        "localized-name update behind locale deletion",
+      );
+      await deleteFirstUpdateA`commit`;
+      const validationResult = await validation;
+      assert.equal(validationResult.ok, false);
+      assert.match(
+        validationResult.error.message,
+        /does not reference locales.code/,
+      );
+    } finally {
+      try {
+        await deleteFirstUpdateA`rollback`;
+      } catch {}
+      try {
+        await deleteFirstUpdateB`rollback`;
+      } catch {}
+      deleteFirstUpdateA.release();
+      deleteFirstUpdateB.release();
+    }
+    assert.deepEqual(
+      (
+        await queryClient`select localized_names from topics where id=${deleteFirstUpdateTopic}::uuid`
+      )[0]?.localized_names,
+      { en: "Synthetic" },
+    );
+    await queryClient`delete from topics where id=${deleteFirstUpdateTopic}::uuid`;
+
+    const unreferencedLocale = "ke2a-free";
+    await queryClient`insert into locales(id,code,language_tag,language_code,direction,display_name,native_name)
+      values('0198a7b0-e500-7000-8000-000000000002'::uuid,${unreferencedLocale},'x-ke2a-free','xf','ltr','Synthetic free locale','Synthetic free locale')`;
+    await queryClient`delete from locales where code=${unreferencedLocale}`;
+    assert.equal(
+      (
+        await queryClient`select count(*)::int as count from locales where code=${unreferencedLocale}`
+      )[0]?.count,
+      0,
+    );
+
+    await queryClient.begin(async (transaction) => {
+      const before = (
+        await transaction`select count(*)::int as count from pg_locks where locktype='advisory' and pid=pg_backend_pid()`
+      )[0].count;
+      await transaction`select id from topics limit 1`;
+      const after = (
+        await transaction`select count(*)::int as count from pg_locks where locktype='advisory' and pid=pg_backend_pid()`
+      )[0].count;
+      assert.equal(
+        after,
+        before,
+        "ordinary topic read acquires no advisory lock",
+      );
+    });
+    const proveAdvisoryRelease = async (ending) => {
+      const owner = await queryClient.reserve();
+      const contender = await queryClient.reserve();
+      try {
+        await owner`begin`;
+        await contender`begin`;
+        await owner`select pg_advisory_xact_lock(hashtextextended('alsamad:ke2:locale-integrity',0))`;
+        assert.equal(
+          (
+            await contender`select pg_try_advisory_xact_lock(hashtextextended('alsamad:ke2:locale-integrity',0)) as acquired`
+          )[0].acquired,
+          false,
+          `competing connection cannot acquire before ${ending}`,
+        );
+        if (ending === "commit") {
+          await owner`commit`;
+        } else {
+          await owner`rollback`;
+        }
+        assert.equal(
+          (
+            await contender`select pg_try_advisory_xact_lock(hashtextextended('alsamad:ke2:locale-integrity',0)) as acquired`
+          )[0].acquired,
+          true,
+          `competing connection acquires after ${ending}`,
+        );
+        await contender`rollback`;
+      } finally {
+        try {
+          await owner`rollback`;
+        } catch {}
+        try {
+          await contender`rollback`;
+        } catch {}
+        owner.release();
+        contender.release();
+      }
+    };
+    await proveAdvisoryRelease("commit");
+    await proveAdvisoryRelease("rollback");
+
+    await queryClient`delete from editorial_users where id=${actor}::uuid`;
+    assert.equal(
+      (await queryClient`select count(*)::int as count from topics`)[0]?.count,
+      0,
+      "KE-2A verification leaves zero topic rows",
+    );
+    console.log(
+      "PASS KE-2A: exact topics schema, lifecycle, active actors, timestamps, locale integrity, advisory locking, synthetic rollback fixtures, and zero seeds",
+    );
+  }
+
+  console.log("PASS schema tables: exactly 17 Release 1 tables plus topics");
   console.log(
     "PASS Editorial Identity Foundation: exact four-column table, UUIDv7/variant and lifecycle enforcement, zero rows, synthetic fixtures rolled back",
   );
