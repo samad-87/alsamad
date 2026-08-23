@@ -170,7 +170,8 @@ As of 2026-08-08, the M6 architecture decision analysis covering REG-0001–REG-
 | REG-0020 | Quran.Foundation Arabic Quran text retention permission (M5 Gate 3 storage/retention sub-item)       | Roadmap, Security            | DECIDED     | Registry only                                                             |
 | REG-0021 | Knowledge Engine Phase 2 (KE-2): implementation-authorization crossing ("Governance Unit 2")          | Roadmap                      | SUPERSEDED  | Registry only                                                             |
 | REG-0022 | Knowledge Engine Phase 2 (KE-2) architecture split: Topics Foundation (KE-2A) and Content Topic Assignments (KE-2B) | Database, Roadmap            | DECIDED     | Registry + ADR (`ADR-0009`, Accepted)                                     |
-| REG-0023 | Knowledge Engine Phase 2A (KE-2A): Topics Foundation implementation-authorization crossing           | Roadmap                      | DECIDED     | Registry only                                                             |
+| REG-0023 | Knowledge Engine Phase 2A (KE-2A): Topics Foundation implementation-authorization crossing           | Roadmap                      | SUPERSEDED  | Registry only                                                             |
+| REG-0024 | KE-2A corrected implementation authorization: journal boundary and topic lifecycle/repository contract | Database, Roadmap            | DECIDED     | Registry + ADR (`ADR-0010`, Accepted)                                     |
 
 ### REG-0001 — Editorial General Dua placement in the devotional physical model
 
@@ -811,7 +812,7 @@ This entry authorizes a future execution to begin work against the Roadmap's alr
 
 **Tier rationale:** Registry only. This entry introduces no new architectural decision and therefore fails §7's ADR threshold on its first prong. It authorizes execution only against the already-decided KE-2A contract; `REG-0022` remains `DECIDED`, `ADR-0009` remains Accepted and current, and no new ADR is required. **ADR reference:** None.
 
-**Status:** `DECIDED` (2026-08-23).
+**Status:** `SUPERSEDED` (2026-08-23).
 
 **Decision outcome:** This entry satisfies the separate Governance Unit 2 crossing required for exactly `M7.0-track / KE-2A — Topics Foundation`. Together with the corresponding Roadmap status update, it authorizes a separate future implementation execution to begin only within KE-2A's existing boundary and only to satisfy every KE-2A requirement already governed by `REG-0022`, `ADR-0009`, `ALSAMAD_DATABASE_ARCHITECTURE.md` §10.1.1/§10.1.3, and the Roadmap's unchanged split acceptance contract.
 
@@ -837,4 +838,56 @@ No migration number is assigned, reserved, predicted, or pre-claimed for KE-2A. 
 
 **Implementation evidence:** None. KE-2A implementation is `NOT STARTED`. A later implementation execution must satisfy every KE-2A acceptance requirement before implementation evidence or `IMPLEMENTED` status may be recorded.
 
-**Supersedes / Superseded by:** None.
+**Supersedes / Superseded by:** Superseded by `REG-0024`.
+
+### REG-0024 — KE-2A corrected implementation authorization: journal boundary and topic lifecycle/repository contract
+
+**Category:** `Database`, `Roadmap`.
+
+**Summary:** Whether `KE-2A — Topics Foundation` may retain implementation authorization under a corrected exact boundary that includes its mechanical Drizzle journal registration, and under an exact minimal lifecycle, timestamp, active-editor, repository-operation, collision, and error contract that removes the implementation ambiguities left by superseded `REG-0023` without changing the `topics` columns/types or the `KE-2A`/`KE-2B` split.
+
+**Committed evidence:** `REG-0022` (`DECIDED`) and `ADR-0009` (Accepted) remain the current A/B-split and migration-sequencing authority. `REG-0023` authorized KE-2A against a six-file boundary but omitted `drizzle/meta/_journal.json`, although every committed Drizzle migration is registered there, `scripts/db-verify.mjs` verifies that journal, and the Editorial Identity precedent expressly authorized its single mechanical append. The incorporated `topics` contract fixed the three status values and approval-evidence pairing but did not completely settle the allowed transition graph, strict timestamp behavior, minimum repository operations, or stable error categories. Those omissions prevent implementation without boundary expansion and behavior inference.
+
+**Affected architecture:** `ALSAMAD_DATABASE_ARCHITECTURE.md` §10.1.1; supplemental `ADR-0010`. `ADR-0009` remains current and unchanged in its substantive split/sequencing decision.
+
+**Affected roadmap gate:** `M7.0-track / KE-2A — Topics Foundation` only.
+
+**Opened:** 2026-08-23.
+
+**Tier rationale:** Registry + ADR. The journal correction is implementation bookkeeping and boundary metadata only, but the exact terminal topic lifecycle, evidence preservation, and timestamp enforcement shape persistent historical state. They are architecturally material and data-shaping/content-integrity sensitive under §7. **ADR reference:** `ADR-0010` (Accepted), supplementing rather than superseding `ADR-0009`.
+
+**Status:** `DECIDED` (2026-08-23).
+
+**Decision outcome:** This entry supersedes `REG-0023` and constitutes the corrected Governance Unit 2 crossing for exactly `M7.0-track / KE-2A — Topics Foundation`. It authorizes a separate future KE-2A implementation execution against `REG-0022`, `ADR-0009`, supplemental `ADR-0010`, `ALSAMAD_DATABASE_ARCHITECTURE.md` §10.1.1/§10.1.3, and the synchronized Roadmap contract. KE-2A implementation remains `NOT STARTED`; this governance decision implements, stages, commits, or pushes no schema, migration, journal entry, code, test, seed, or runtime work.
+
+**Corrected exact implementation boundary:**
+
+1. `src/db/schema.ts`;
+2. one `drizzle/<mechanically-assigned-forward-number>_ke2a_topics.sql` assigned only during implementation;
+3. `drizzle/meta/_journal.json`, limited to exactly one mechanical registration append for that migration;
+4. `src/lib/knowledge/topics.ts`;
+5. `src/lib/knowledge/topic-repository.ts`;
+6. `tests/knowledge-topic-layer.test.mjs`;
+7. KE-2A additions only within `scripts/db-verify.mjs`.
+
+Every pre-existing migration and journal entry remains byte-unchanged. The appended journal entry may contain only the next journal index, the established version/breakpoint fields, a mechanically monotonic timestamp, and the tag derived exactly from the implementation-time migration filename. Governance assigns, reserves, predicts, or pre-claims no KE-2A migration number. `0010_devotional_content_foundation.sql` remains reserved for M6.1. At the 2026-08-23 baseline, `0011` exists and `0012` is only the observed mechanically lawful result if execution began from that unchanged baseline; implementation must recompute from its then-authoritative state.
+
+**Lifecycle and evidence contract:** Allowed transitions are only `draft → approved`, `draft → retired`, and `approved → retired`. `approved → draft`, `retired → draft`, `retired → approved`, `retired → retired`, and every retired-topic reactivation are forbidden. Retirement is terminal. Retiring an approved topic preserves `approved_by` and `approved_at` unchanged; retiring a draft topic leaves both null; retirement never fabricates approval evidence. Canonical-key correction never mutates `canonical_key`: one atomic repository operation retires the old draft/approved topic and creates a replacement with a new application-generated UUIDv7, its own `created_by`, `status = 'draft'`, and null approval evidence.
+
+**Timestamp contract:** `created_at` and initial `updated_at` are database-generated by the existing `current_timestamp` defaults; `created_at` is immutable. `approved_at` is database-generated during approval. Each actual localized-name update, approval, or retirement uses one database-owned lifecycle-event timestamp and strictly advances `updated_at`; approval assigns that same event timestamp to `approved_at` and `updated_at`. No-op mutations are rejected and advance nothing. Retirement advances only `updated_at` and preserves approval evidence. The database-owned event timestamp is exactly `GREATEST(clock_timestamp(), OLD.updated_at + interval '1 microsecond')`, the smallest PostgreSQL-native increment at the repository's `timestamptz` precision that guarantees `NEW.updated_at > OLD.updated_at` when the clock has not advanced. Application-supplied lifecycle timestamps are not accepted.
+
+**Active-editor and transaction contract:** Every create, localized-name update, approval, retirement, and canonical-key replacement verifies the required `editorial_users` actor has `status = 'active'` inside the same repository-owned `READ COMMITTED` transaction as the mutation. Lifecycle mutations lock the target topic row before state validation. Ordinary read-by-ID requires no actor and acquires no advisory lock. This applies the existing Editorial Identity consumer rule and redesigns no identity state.
+
+**Minimum repository contract:** The persisted model is named `TopicRecord`, never a second persisted `KnowledgeTopic`. Required operations are: create a draft from application UUIDv7/canonical key/complete localized-name map/`createdBy`; read any-state topic by ID returning `TopicRecord` or absence; replace the complete localized-name map for draft/approved only and only on actual change; approve draft only; retire draft/approved only; and atomically correct canonical identity by retiring the old topic and creating a new draft replacement. Generic unrestricted CRUD, arbitrary patch/update, canonical-key/identity/creator/`created_at` mutation, ordinary hard delete, a generic status setter, retired-row resurrection, list/search/runtime APIs, and every application/runtime import are forbidden.
+
+**Minimum error contract:** One KE-2A-specific typed error contract uses stable categories `validation`, `not_found`, `invalid_transition`, `canonical_key_conflict`, `inactive_editorial_actor`, and `database_invariant`. Pure input failure maps to `validation`; a missing mutation target to `not_found`; a forbidden transition or lifecycle no-op to `invalid_transition`; canonical-key uniqueness collision to `canonical_key_conflict`; a missing/disabled required actor to `inactive_editorial_actor`; and deferred-locale, unsupported-isolation, locking/concurrency, or unexpected governed-constraint failure to `database_invariant`. Read-by-ID absence returns absence rather than `not_found`. Deterministically mappable raw database errors do not leak; an unexpected underlying cause may be retained internally by `database_invariant`. No global error framework is authorized.
+
+**KE-1 and quarantine treatment:** `src/lib/knowledge/types.ts` remains untouched and its existing KE-1 `KnowledgeTopic` remains presentation-only. The KE-2A persisted shape is `TopicRecord`. The current untracked `src/lib/knowledge/topics.ts` and its `createKnowledgeTopic` function remain non-authoritative prototype evidence and are not adopted; that path may be fully rewritten only during the later KE-2A implementation. `collections.ts`, `references.ts`, and `adapters/duas.ts` remain outside KE-2A. KE-1 remains COMPLETE and runtime-inert.
+
+**This entry explicitly does NOT authorize:** `KE-2B`, `content_topics`, KE-3 or later Knowledge work, collections, references, Duas adapters, generic `knowledge_edges`, runtime/search/UI/provider/network/credential/AI work, seed data, M5/M6 work, or any current prototype byte. `KE-2B` remains `NOT STARTED / BLOCKED` and requires its own later crossing.
+
+**Independence from protected status truths:** `REG-0022` and ADR-0009 remain current for the split/sequencing decision. `M5 Gate 3` remains `PARTIAL`; M5 Gates 4–7, `M5 Provider Import Dry Run Verified`, and `M5 Quran Import Activated` remain `NOT PASS`; `M6.0` remains `COMPLETE`; `M6.1`/`M6.2` remain `BLOCKED`; `REG-0019`, `REG-0020`, Sakīnah, and Editorial Identity semantics/statuses remain unchanged. No KE-3 authorization exists.
+
+**Implementation evidence:** None. KE-2A implementation remains `NOT STARTED` until a separate implementation execution satisfies the corrected Roadmap acceptance contract.
+
+**Supersedes / Superseded by:** Supersedes `REG-0023`.
