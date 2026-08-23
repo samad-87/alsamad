@@ -4,7 +4,7 @@
 
 ## Status
 
-Accepted — 2026-08-22. Implementation not started.
+Accepted — 2026-08-22. KE-2A implementation is complete at commit `c1757790f579fd34838d9136c9420aa8168e9a2a`; KE-2B implementation remains not started, blocked, and unauthorized.
 
 This ADR supersedes `ADR-0007` in whole, per `ALSAMAD_DECISION_REGISTRY.md` §11's append-only, never-rewritten-in-place rule. `ADR-0007`'s §§1–3 physical data-model text is unmodified. `ADR-0007` is itself superseded and retained only for history; this ADR (`ADR-0009`) is the current governing document for `topics` and `content_topics`, and it incorporates `ADR-0007` §§1–3 by reference as unchanged, binding normative specification. Only `ADR-0007` §4's single-migration/joint-rollback rule is replaced. This ADR authorizes no migration, schema mapping, code, seed data, runtime wiring, search expansion, editorial UI, provider access, or later Knowledge Engine phase. `REG-0024`/supplemental `ADR-0010` supersede historical `REG-0023` and satisfy KE-2A's corrected separate Registry crossing without changing this ADR's split/sequencing decision; KE-2B remains gated by its own future, separate crossing.
 
@@ -24,11 +24,11 @@ This ADR supersedes `ADR-0007` in whole, per `ALSAMAD_DECISION_REGISTRY.md` §11
 
 ### 3. `KE-2B` — Content Topic Assignments
 
-`KE-2B` delivers exactly the `content_topics` table (specification incorporated from `ADR-0007` §3, unchanged) as a later, separate atomic, empty, forward-only migration. Its dependencies are `KE-2A` complete; `quran_ayahs` physically present (already exists); `devotional_items` physically present (does not yet exist); `content_items` physically present; and `editorial_users`. Migration failure rolls back only the `content_topics` table, its triggers, constraints, and indexes — it does not reopen or roll back `topics`. `KE-2B` may not begin execution before `devotional_items` physically exists.
+`KE-2B` delivers exactly the `content_topics` table (specification incorporated from `ADR-0007` §3, unchanged) as a later, separate atomic, empty, forward-only migration. Its dependencies are `KE-2A` complete (now satisfied by commit `c1757790f579fd34838d9136c9420aa8168e9a2a`); `quran_ayahs` physically present (already exists); `devotional_items` physically present (does not yet exist); `content_items` physically present; and `editorial_users`. Migration failure rolls back only the `content_topics` table, its triggers, constraints, and indexes — it does not reopen or roll back `topics`. `KE-2B` may not begin execution before `devotional_items` physically exists and remains unauthorized pending its own later crossing.
 
 ### 4. Migration numbering
 
-Each unit's migration number is assigned mechanically at that unit's own execution, from the then-authoritative forward-only sequence — exactly as `ADR-0007` §4 and `REG-0015` already required for the single migration they governed. This ADR does not assign, freeze, or pre-claim a number for either unit. `0010` remains reserved for `M6.1`'s `devotional_content_foundation` migration and may not be taken by either `KE-2A` or `KE-2B`. Prior migrations `0000`–`0009` and `0011` remain byte-unchanged.
+Each unit's migration number is assigned mechanically at that unit's own execution, from the then-authoritative forward-only sequence — exactly as `ADR-0007` §4 and `REG-0015` already required for the single migration they governed. This ADR did not assign, freeze, or pre-claim a number for either unit. KE-2A execution mechanically assigned and committed `drizzle/0012_ke2a_topics.sql`; KE-2B remains unnumbered until its own authorized execution. `0010` remains reserved for `M6.1`'s `devotional_content_foundation` migration and may not be taken by either `KE-2A` or `KE-2B`. Prior migrations `0000`–`0009` and `0011` remain byte-unchanged.
 
 ## Why alternatives were rejected
 
@@ -42,4 +42,4 @@ This ADR changes an already-`Accepted` physical/procedural commitment (the migra
 
 ## Explicit exclusions
 
-Any redesign of `topics` or `content_topics` columns, triggers, indexes, foreign keys, review-state, canonical-owner-eligibility, UUIDv7, localization, or weight rules beyond supplemental `ADR-0010`'s exact KE-2A lifecycle/timestamp clarification; `KE-2B` implementation authorization; assignment of either unit's migration number; reassignment of `0010`; `KE-3` or any later Knowledge Engine phase; collections, references, Duas adapters, generic `knowledge_edges`; and every exclusion already listed in `ADR-0007`'s own "Explicit exclusions" section remain unauthorized. KE-2A's corrected implementation authorization is recorded separately by `REG-0024`/`ADR-0010` and does not arise from or modify this ADR's split/sequencing decision.
+Any redesign of `topics` or `content_topics` columns, triggers, indexes, foreign keys, review-state, canonical-owner-eligibility, UUIDv7, localization, or weight rules beyond supplemental `ADR-0010`'s exact KE-2A lifecycle/timestamp clarification; `KE-2B` implementation authorization or migration-number assignment; governance-time preassignment of a future migration number; reassignment of `0010`; `KE-3` or any later Knowledge Engine phase; collections, references, Duas adapters, generic `knowledge_edges`; and every exclusion already listed in `ADR-0007`'s own "Explicit exclusions" section remain unauthorized. KE-2A's corrected implementation authorization and completed execution are recorded separately by `REG-0024`/`ADR-0010` and commit `c1757790f579fd34838d9136c9420aa8168e9a2a`; neither arises from nor modifies this ADR's split/sequencing decision.

@@ -4,7 +4,7 @@
 
 ## Status
 
-Accepted — 2026-08-23. Implementation not started.
+Accepted — 2026-08-23. Implemented at commit `c1757790f579fd34838d9136c9420aa8168e9a2a`; the architecture decision remains unchanged.
 
 This ADR supplements `ADR-0009`; it does not supersede it. `REG-0022`/`ADR-0009` remain the current authority for the KE-2A/KE-2B split, sequencing, dependency, migration-atomicity, and rollback decision. Historical/Superseded `ADR-0007` §§1–3 remain incorporated through `ADR-0009`. This ADR makes only previously unspecified KE-2A lifecycle, timestamp, active-editor, repository-operation, collision, and error behavior exact. It changes no `topics` column/type/default/FK/index/localization/UUIDv7 rule, no KE-2B or `content_topics` rule, and no migration number.
 

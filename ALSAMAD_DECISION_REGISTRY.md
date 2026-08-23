@@ -171,7 +171,7 @@ As of 2026-08-08, the M6 architecture decision analysis covering REG-0001–REG-
 | REG-0021 | Knowledge Engine Phase 2 (KE-2): implementation-authorization crossing ("Governance Unit 2")          | Roadmap                      | SUPERSEDED  | Registry only                                                             |
 | REG-0022 | Knowledge Engine Phase 2 (KE-2) architecture split: Topics Foundation (KE-2A) and Content Topic Assignments (KE-2B) | Database, Roadmap            | DECIDED     | Registry + ADR (`ADR-0009`, Accepted)                                     |
 | REG-0023 | Knowledge Engine Phase 2A (KE-2A): Topics Foundation implementation-authorization crossing           | Roadmap                      | SUPERSEDED  | Registry only                                                             |
-| REG-0024 | KE-2A corrected implementation authorization: journal boundary and topic lifecycle/repository contract | Database, Roadmap            | DECIDED     | Registry + ADR (`ADR-0010`, Accepted)                                     |
+| REG-0024 | KE-2A corrected implementation authorization: journal boundary and topic lifecycle/repository contract | Database, Roadmap            | IMPLEMENTED | Registry + ADR (`ADR-0010`, Accepted)                                     |
 
 ### REG-0001 — Editorial General Dua placement in the devotional physical model
 
@@ -856,7 +856,7 @@ No migration number is assigned, reserved, predicted, or pre-claimed for KE-2A. 
 
 **Tier rationale:** Registry + ADR. The journal correction is implementation bookkeeping and boundary metadata only, but the exact terminal topic lifecycle, evidence preservation, and timestamp enforcement shape persistent historical state. They are architecturally material and data-shaping/content-integrity sensitive under §7. **ADR reference:** `ADR-0010` (Accepted), supplementing rather than superseding `ADR-0009`.
 
-**Status:** `DECIDED` (2026-08-23).
+**Status:** `IMPLEMENTED` (2026-08-23; decision recorded 2026-08-23).
 
 **Decision outcome:** This entry supersedes `REG-0023` and constitutes the corrected Governance Unit 2 crossing for exactly `M7.0-track / KE-2A — Topics Foundation`. It authorizes a separate future KE-2A implementation execution against `REG-0022`, `ADR-0009`, supplemental `ADR-0010`, `ALSAMAD_DATABASE_ARCHITECTURE.md` §10.1.1/§10.1.3, and the synchronized Roadmap contract. KE-2A implementation remains `NOT STARTED`; this governance decision implements, stages, commits, or pushes no schema, migration, journal entry, code, test, seed, or runtime work.
 
@@ -888,6 +888,6 @@ Every pre-existing migration and journal entry remains byte-unchanged. The appen
 
 **Independence from protected status truths:** `REG-0022` and ADR-0009 remain current for the split/sequencing decision. `M5 Gate 3` remains `PARTIAL`; M5 Gates 4–7, `M5 Provider Import Dry Run Verified`, and `M5 Quran Import Activated` remain `NOT PASS`; `M6.0` remains `COMPLETE`; `M6.1`/`M6.2` remain `BLOCKED`; `REG-0019`, `REG-0020`, Sakīnah, and Editorial Identity semantics/statuses remain unchanged. No KE-3 authorization exists.
 
-**Implementation evidence:** None. KE-2A implementation remains `NOT STARTED` until a separate implementation execution satisfies the corrected Roadmap acceptance contract.
+**Implementation evidence:** `KE-2A Topics Foundation Verified = PASS` in `ALSAMAD_IMPLEMENTATION_ROADMAP.md`, implemented by commit `c1757790f579fd34838d9136c9420aa8168e9a2a` (`feat(knowledge): implement KE-2A topics foundation`). This records the later implementation and passed Roadmap acceptance of the existing authorization; it does not alter the historical decision outcome or authorize KE-2B, runtime integration, or later Knowledge Engine work.
 
 **Supersedes / Superseded by:** Supersedes `REG-0023`.
