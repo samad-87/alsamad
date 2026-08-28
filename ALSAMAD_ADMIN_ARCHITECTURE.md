@@ -1292,9 +1292,9 @@ A restore is not accepted until:
 
 ---
 
-## 35. Future Talibeen Administration — Approved Later Module
+## 35. Talibeen Expanded V1 Administration — Separately Feature-Gated Governance Design
 
-Talibeen is a separately authorized privacy-first bounded context.
+`REG-0025` promotes Talibeen to an ALSAMAD Expanded V1 separately feature-gated governance-design track outside frozen Core Release 1. Talibeen remains a privacy-first bounded context, but `TALIBEEN IMPLEMENTATION = BLOCKED / NOT AUTHORIZED`. This section describes future administrative responsibilities only; it authorizes no admin runtime, role, queue, moderation UI, API, identity access, or real-user processing.
 
 Potential administration includes:
 
@@ -1328,13 +1328,11 @@ Talibeen staff do not receive general access to Quran/editorial administration m
 
 Subscription administration supports approved plan terms, entitlements, provider events, reconciliation, refunds, cancellations, and customer support without storing raw card data.
 
-### 36.1 Approved Talibeen launch terms to preserve
+### 36.1 Historical Talibeen launch terms — Superseded by REG-0025
 
-- 14-day free trial;
-- payment card required;
-- no charge before trial expiry;
-- USD 7 covering the first two months after the trial;
-- standard monthly price remains TBD.
+The former Talibeen direction prescribed a 14-day card-backed trial, no charge before trial expiry, USD 7 covering the first two months after the trial, and a then-TBD standard monthly price. These terms remain historical evidence only and are no longer current launch terms.
+
+The current direction is Free/Plus entitlement architecture, with higher Premium deferred to V2. Free remains genuinely usable; payment cannot buy ranking, compatibility, identity verification, safety, moderation immunity, religious or moral status, or preferential marriage opportunity. Payment activation, exact/localized pricing, provider, taxes/VAT, app-store billing, trial, renewal, cancellation, refunds, cooling-off, administration, and implementation remain separately gated and unresolved.
 
 ### 36.2 Administrative controls
 

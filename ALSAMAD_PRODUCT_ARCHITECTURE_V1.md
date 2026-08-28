@@ -8,6 +8,7 @@
 ## Capability status vocabulary
 
 - **Release 1:** Included in the initial trustworthy daily-companion delivery.
+- **Expanded V1:** A separately feature-gated product track promoted into the V1 program without changing the frozen Core Release 1 daily-companion scope, table count, gates, or completion state.
 - **Prepared:** Architectural or technical foundation exists, but public exposure is optional for Release 1.
 - **Approved Later Module:** Approved product architecture on a separate release track.
 - **Future / Research:** Gated capability requiring evidence, evaluation, licensing, safety, or further design.
@@ -140,9 +141,9 @@ This section is authoritative for the Core Release 1 daily companion. Approved L
 - Social feed, comments, likes, and public social profiles. Talibeen's controlled private marriage profiles are not public social profiles.
 - Fatwa generation or personalized religious rulings
 - User-submitted religious content without moderation
-- Commerce and advertising in the Core Release 1 daily companion. This does not alter Talibeen Al-Halal's separately approved subscription model.
+- Commerce and advertising in the Core Release 1 daily companion. This does not alter Talibeen Al-Halal's separately feature-gated Expanded V1 Free/Plus commercial architecture or authorize its monetization.
 - Full hadith corpus and Islamic courses are **Approved Later Module** capabilities until licensing and review pipelines are ready.
-- Talibeen Al-Halal is an **Approved Later Module** on a separate release track.
+- Talibeen Al-Halal is an **Expanded V1 separately feature-gated product track** outside the frozen Core Release 1 daily companion. Its governance promotion does not authorize implementation or change Core Release 1 scope, tables, gates, or completion.
 - The Qibla Engine is an **Approved Later Module** unless separately scheduled.
 
 ## 5. Release 1 information architecture
@@ -553,7 +554,65 @@ Approve navigation, page hierarchy, reading experience, Arabic typography, desig
 
 # Talibeen Al-Halal / طالبين الحلال
 
-**Capability status:** **Approved Later Module** on a separate release track from the Core Release 1 daily companion.
+**Capability status:** **ALSAMAD Expanded V1 — separately feature-gated product track**, promoted by `REG-0025`. It remains outside the frozen Core Release 1 daily companion. This classification authorizes governance design only: implementation remains blocked until the Roadmap records and passes the required identity, product, privacy, safety, legal, security, data, API, administration, feature-flag, and exact-unit crossings.
+
+## Expanded V1 Governance Boundary
+
+Talibeen is one logical product and privacy-first bounded domain with multiple possible clients. The initial intended client is an ALSAMAD Web Talibeen section. A standalone Talibeen website and Talibeen iOS/Android applications are V2/deferred clients, intentionally suitable for a future Owner-directed local-AI training/build program. Every future client must reuse the same authoritative Talibeen domain, ALSAMAD-account relationship, private marriage profile, verification state, introduction state, conversations, entitlements, privacy state, and success state. This requires client-independent domain boundaries, not speculative microservices, a second database, a second authentication system, or implementation of any future client now.
+
+Talibeen is **global-by-design**: localization-ready, time-zone-aware, currency/localized-pricing-ready, and capable of jurisdiction-aware policy controls that restrict or disable registration, verification, monetization, or specific features. Ordinary marriage discovery uses coarse user-selected location and has no exact-GPS dependency. Global-by-design is not a claim of legal compliance or launch approval in every country. Each public jurisdiction remains gated by applicable legal, privacy, safety, identity-verification, consumer, payment, and operational requirements.
+
+### Eligibility and marriage-candidate invariant
+
+Expanded V1 is adults-only (`18+`). Minors are ineligible for Talibeen marriage discovery or contact. A checkbox alone is not accepted as proof of legally sufficient age assurance, and date of birth does not become public profile data by implication. Exact age assurance, suspected-minor handling, evidence minimization, appeals, and jurisdiction-specific requirements remain future Privacy/Safety/Legal/Security contract work.
+
+Talibeen is an Islamic marriage product, not dating or generic social discovery. For marriage-candidate discovery, a man may receive women and a woman may receive men; a man must not receive male marriage candidates, a woman must not receive female marriage candidates, and there is no same-sex or generic “seeking anyone” marriage-candidate mode. Future implementation must enforce this invariant through authoritative backend/data/domain rules, never only UI filtering. Terminology and physical representation remain for later ADR, Database, and API contracts.
+
+### Shared identity and private profile
+
+One ALSAMAD account represents the person; Talibeen must not create a duplicate independent account. Talibeen marriage data is nevertheless a private, isolated bounded context linked to that stable ALSAMAD identity root. A Talibeen marriage profile is not an ordinary ALSAMAD public/social profile, religious or devotional content, Knowledge Engine data, or editorial identity data. Talibeen-sensitive data remains isolated from those stores, unrelated analytics, general editorial administration, and unrelated staff access. Editorial Identity Foundation is not public Talibeen identity authority. Public ALSAMAD identity/account activation is a hard dependency before any Talibeen foundation implementation involving real identity.
+
+Talibeen may expose a user-controlled marriage display identity distinct from base-account presentation. Identity verification is separate from display name, paid membership, Plus status, compatibility, religious status, and generalized trustworthiness. A future `Identity Verified` state means only that the governed assurance process passed; it implies no moral superiority, religious authority, compatibility, payment, or public legal-name disclosure. Display modes, change limits, uniqueness, provider, assurance level, and evidence retention remain unresolved.
+
+An authenticated ALSAMAD user may enter and understand or explore Talibeen without completing a long marriage profile. Progressively stronger eligibility, profile-completion, verification, and safety gates may apply before discoverability, sending or accepting an introduction, and private messaging. Exact predicates, percentages, required fields, and state machines are not settled here and require later Product/API/Identity/Privacy decisions.
+
+### Commercial architecture
+
+`REG-0025` supersedes the historical Talibeen commercial direction below that prescribed a 14-day card-backed trial and USD 7 first-two-month launch offer. That historical direction is retained for audit history but is no longer normative.
+
+Expanded V1 supports **Free** and **Plus** entitlement architecture; a higher **Premium** tier is V2. Free remains genuinely usable. Paid membership may provide governed conveniences, tools, or entitlements, but payment never purchases discovery ranking, compatibility, identity verification, safety, moderation immunity, religious or moral status, or preferential marriage opportunity. A Plus indicator, if later approved, must not imply trust, piety, compatibility, or superiority. Identity verification remains independent of membership.
+
+Localized prices and currencies are the approved direction. High-purchasing-power markets may later use approximately a USD 10-equivalent reference tier, while other markets may use purchasing-power-sensitive local prices; this is directional context, not a frozen country price. Payment activation, provider, taxes/VAT, app-store billing, trials, renewal, cancellation, refunds, cooling-off, and final pricing remain future Commerce/Legal/Roadmap contracts.
+
+### Private contact, introductions, and conversation
+
+Marriage profiles do not expose phone numbers, email addresses, WhatsApp, Telegram, Instagram, Snapchat, other social handles, external URLs, QR codes, or deliberately obfuscated contact information as ordinary discovery content. The intended future path is an accepted introduction, private Talibeen conversation, then an optional explicit per-person grant for a chosen contact method. Acceptance never automatically reveals contact information. Revocation may end future Talibeen display but cannot promise recovery of information already viewed or copied. Safe contact-sharing controls are available independent of paid membership.
+
+The high-level interaction is: `Marriage Profile → Introduction Request → Recipient Decision → Mutual Accepted State → Private Talibeen Conversation → optional controlled contact sharing → optional later family/wali step → Closure / Success`. Arbitrary mass messaging of discovery profiles is forbidden; private conversation requires the governed mutual-introduction state. Blocking and reporting are mandatory. Last Seen, Online status, and read receipts are not public/default assumptions. Exact messaging, retention, evidence, edit/deletion, moderator-access, and legal-hold behavior remain later contracts.
+
+### Privacy, safety, photos, and family
+
+Photo behavior is privacy-first. Later contracts may define hidden, approved discovery visibility, and later reveal/share states. Talibeen photo consent is not public, social-media, Social Reach, or unrelated-AI consent. Media storage, moderation, grants, deletion, and abuse handling require later Media/Privacy/Safety governance.
+
+Wali/family participation remains optional and user-controlled; association never grants automatic private-conversation access. Advanced family workflows default to V1.1 unless later governance promotes a smaller safe subset.
+
+Safety and moderation are mandatory infrastructure before any public discovery, contact, or messaging release and are never Premium privileges. Future reporting must cover abusive language, harassment, repeated unwanted contact, inappropriate sexual content or requests, threats, blackmail/extortion, suspicious money or financial-assistance requests, fraud/scams, fake identity, impersonation, suspicious off-platform migration, non-consensual sharing of contact/image/private information, stalking, doxxing, block evasion, spam, suspected minors, stolen/inappropriate imagery, and other safety concerns. Mentioning money alone does not prove fraud. Automation or AI may assist only under later governance and cannot independently become final authority for serious sanctions without a governed human-review policy. Blocking provides immediate protection; report-and-block is required; paid users receive no moderation immunity. Moderation states, evidence, purpose-bound access, audit, sanctions, appeals, repeat offenders, severity, legal hold, escalation, and staffing/SLAs remain required pre-launch contracts.
+
+### Notifications, SEO, closure, and release decomposition
+
+Expanded V1’s intended outcome includes separable Talibeen notification preferences, in-app and email capability, and future mobile push. Candidate events include introduction requests/decisions, private-message notices, controlled contact sharing, safety/account actions, appropriate report status, success confirmation, and security events. Notifications are calm and non-manipulative; sensitive previews minimize data. Non-security Talibeen notifications support independent mute/Quiet Mode. Email does not send one message per chat event, supports later batching/digests, and separates optional marketing/discovery mail from necessary account/security notices. Exact events, consent, templates, delivery, batching, and exceptions require a later Notification/Privacy contract.
+
+**Private Talibeen marriage profiles are non-public and `noindex` by default.** A separately gated public SEO layer may later serve legitimate marriage-search intent without exposing private people or profiles. It must resist enumeration and low-count re-identification, prevent uncontrolled thin/doorway generation, use quality-controlled content, and follow locale/canonical/indexing governance. A future standalone Talibeen Web client may become the primary marriage SEO authority; ALSAMAD and that future domain must not create duplicate competing authority. Exact ownership, thresholds, canonicals, locales, structured data, aggregation, and migration rules require a dedicated SEO/Security/Privacy contract.
+
+Exit With Dignity remains normative: a user may rapidly leave marriage discovery and close the Talibeen profile without deleting the wider ALSAMAD account. Exact profile, photo, conversation, report, moderation/fraud evidence, legal-hold, and backup retention requires later Privacy/Legal/Database contracts; no duration is inferred here.
+
+Expanded V1 includes a minimal success/closure lifecycle. “Found someone” or “relationship progressed” is not “marriage confirmed.” A marriage counted as confirmed by both parties requires mutual participant confirmation; ordinary Expanded V1 does not require marriage certificates. Successful closure removes the profile from discovery while preserving the ALSAMAD account. Public success stories default to V1.1/V2 and require both participants’ explicit consent plus separate photo and public/social consent. Success metrics favor successful exits rather than time spent or message volume.
+
+The **Expanded V1 outcome** is the shared account relationship, adults-only eligibility, private profile, backend-enforced marriage-candidate invariant, verification-state architecture, private fields and photo capability, purposeful discovery, saved profiles, introductions, private conversation after mutual acceptance, controlled contact sharing, blocking/reporting/moderation and evidence/appeal foundations, core notification preferences and email capability, Exit With Dignity, minimal success lifecycle, Free/Plus entitlement architecture, private-profile noindex, separately gated public SEO capability, and necessary administration/safety tooling. This is an overall outcome, never one implementation unit.
+
+**V1.1 by default:** detailed Profile Visits; `وقفة طيبة` / Intentional Discovery Breaks; richer notifications and email/digests; advanced wali/family workflows; public success stories; deeper chat, Plus, and discovery refinements. Profile Visits never become formal interest, ranking, trending, or a leaderboard. Intentional Discovery Breaks remain user-optional, non-punitive, session-local/non-persistent unless later approved, and have no religious judgment, XP, streak, reward, ranking, compatibility, payment, worship-profile, or exact-GPS effect.
+
+**V2/deferred:** higher Premium; Social Reach Cards; standalone website; iOS/Android applications; optional AI; advanced family tools; and any formal-document marriage-verification state. Social Reach requires later explicit opt-in, exact preview, separate photo/channel consent, no external contact on the card, controlled return into Talibeen, removal workflow, screenshot/repost warning, moderation, and no internal ranking boost. AI is unnecessary for minimum Expanded V1 and receives no unrestricted Highly Restricted data; private-profile/message AI requires a later purpose-bound Privacy/Security/AI crossing. Charitable campaigns / `حملة الخير والبر` remain independent and fully deferred to V2/V3.
 
 Talibeen Al-Halal is a premium Islamic marriage service within the Alsamad ecosystem. It is not a dating platform. It is designed for serious intentions, privacy, dignity, and marriage—not entertainment.
 
@@ -623,7 +682,9 @@ The profile is built gradually. Initial onboarding should collect only what is n
 
 ## Subscription and Alsamad Balance
 
-### Talibeen Subscription Model
+### Historical Talibeen Subscription Model — Superseded by REG-0025
+
+The following launch terms are retained as historical approved architecture and are superseded by the Expanded V1 Free/Plus commercial architecture above. They are not current billing authority and never authorized payment implementation.
 
 Talibeen Al-Halal offers a **14-day free trial**.
 

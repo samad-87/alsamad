@@ -2,7 +2,7 @@
 
 **Version:** 1.0 — Long-term visual, interaction, accessibility, and interface architecture  
 **Status:** Proposed architecture baseline  
-**Scope:** Public experiences, Quran reading, devotional content, prayer and Hijri, search, future AI, future Talibeen, administration, print, PWA, and future native applications  
+**Scope:** Public experiences, Quran reading, devotional content, prayer and Hijri, search, future AI, separately feature-gated Talibeen governance, administration, print, PWA, and future native applications
 **Implementation stance:** Technology-independent; this document defines design contracts, not code, UI files, components, or assets
 
 The Sakīnah Design System is the permanent design language of Alsamad. It exists to make religious content clear, dignified, accessible, calm, trustworthy, and globally usable.
@@ -48,7 +48,7 @@ This architecture does not:
 - choose CSS technology;
 - create UI components;
 - create application code;
-- authorize Talibeen, subscriptions, or future AI as Release 1;
+- authorize Talibeen implementation, fold Talibeen into frozen Core Release 1, or authorize subscriptions or future AI;
 - replace content, API, security, admin, or AI governance.
 
 ## 2. Design Constitutional Principles
@@ -1562,7 +1562,9 @@ flowchart LR
 - no likes/followers;
 - no popularity ranking;
 - no addictive feed;
-- no public indexing;
+- no public indexing of private Talibeen marriage profiles or sensitive discovery projections;
+- no design implication that a private profile is a public SEO page;
+- a separate public Talibeen SEO/content layer may exist only after explicit SEO/Security/Privacy/Roadmap authority and must expose no private profile or identity; `REG-0025` authorizes no such implementation;
 - no casual dating visual language.
 
 ### Onboarding
@@ -2022,7 +2024,7 @@ The following decisions remain unresolved and must not be guessed:
 20. Whether transliteration is enabled by locale or content availability.
 21. Exact high-contrast theme mappings.
 22. Offline caching policy for Quran and devotional content.
-23. Screenshot/watermark policy for future Talibeen.
+23. Screenshot/watermark policy for the separately feature-gated, not-yet-implemented Talibeen media boundary.
 24. Admin comparison/diff rendering technology.
 
 The Phase-1 semantic palette, surfaces, elevation preference, radius scale, spacing foundation, and state-role distinctions are decided by REG-0018. Final brand identity, exact high-contrast mappings, and later sub-product/theme palettes remain open.

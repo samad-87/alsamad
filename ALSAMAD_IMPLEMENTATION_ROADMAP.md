@@ -97,7 +97,7 @@ Freeze the exact Release 1 product, module, provider, authentication, database, 
 | Streaks and worship scoring                                   | Prohibited                                                 |
 | QuranReflect social features                                  | Later or Future; no Release 1 social surface               |
 | Rooms, posts, comments, public notes, and community features  | Excluded                                                   |
-| Talibeen                                                      | Approved Later Module                                      |
+| Talibeen                                                      | Expanded V1 separately feature-gated track; excluded from frozen Core Release 1 |
 | Subscriptions, payments, and Alsamad Balance                  | Approved Later Module                                      |
 | Full Hadith corpus                                            | Approved Later Module                                      |
 | Runtime generative religious AI                               | Future / Research; prohibited in Release 1 runtime answers |
@@ -1994,6 +1994,40 @@ and, only if genuinely necessary, exactly one new, narrowly-scoped canonical/alt
 - Rollback/recovery
 - Release status
 
+## Talibeen Expanded V1 governance-design track
+
+**Governance status.** `REG-0025` promotes Talibeen Al-Halal / طالبين الحلال from Approved Later Module into an **ALSAMAD Expanded V1 separately feature-gated product track**. This is governance design only. Talibeen remains outside the frozen Core Release 1 daily companion and changes no Core scope, 30-table count, gate, acceptance, completion, or current implementation status. `TALIBEEN IMPLEMENTATION = BLOCKED / NOT AUTHORIZED`.
+
+**Architectural outcome.** Talibeen is one logical, global-by-design, privacy-first domain. The initial intended client is an ALSAMAD Web Talibeen section. Standalone web and iOS/Android clients are V2/deferred and must later reuse the same authoritative domain and ALSAMAD-account relationship without requiring speculative microservices, a second database, a second authentication system, or duplicate domain logic. Global-by-design means localization/time-zone/currency readiness and jurisdiction-aware restriction controls, not legal compliance or launch approval in every country.
+
+**Expanded V1 outcome, not one implementation unit.** Shared ALSAMAD-account relationship; adults-only (`18+`) eligibility; private Talibeen profile; authoritative backend/domain enforcement of the man/woman marriage-candidate invariant; verification-state architecture; private fields and privacy-first photos; purposeful discovery and saved profiles; introduction requests; private conversation only after governed mutual acceptance; explicit per-person contact sharing; blocking/reporting/moderation and evidence/appeal foundations; separable Talibeen notification preferences and email capability; Exit With Dignity; minimal success lifecycle; Free/Plus entitlement architecture; private-profile `noindex`; a separately gated public SEO capability; and necessary administration/safety tooling. None is authorized for implementation by listing it here.
+
+**Release decomposition.** V1.1 by default: detailed Profile Visits; `وقفة طيبة` / Intentional Discovery Breaks; richer notification/email, wali/family, public-success-story, chat, Plus, and discovery behavior. V2/deferred: higher Premium, Social Reach Cards, standalone website, iOS/Android applications, optional AI, advanced family tools, and any formal-document marriage-verification state. Charitable campaigns / `حملة الخير والبر` remain independent and deferred to V2/V3.
+
+**Hard dependencies before any Talibeen implementation involving real identity or persistent state:**
+
+1. public ALSAMAD identity/account activation, including authentication/session/recovery scope, through its own authorized gate;
+2. exact Talibeen Product, Privacy, Safety, Legal, and Security contracts, including jurisdictions, `18+` assurance, suspected-minor handling, identity verification, display identity, profile-completion gates, data purposes, consent, and launch approval;
+3. later ADR review for the persistent ALSAMAD-user relationship, candidate eligibility/direction, private-profile/discovery/contact/conversation state, evidence, retention/deletion/legal hold, and multi-client domain boundary;
+4. an exact Database Architecture contract for the isolated Highly Restricted bounded context, followed only later by separately authorized migration work;
+5. exact API and Admin/moderation contracts, purpose-bound staff authorization, audit, sanctions, appeals, incident severity, escalation, staffing, and SLAs;
+6. default-off feature flag, environment/cohort/jurisdiction controls, kill switch, staged-release, rollback, and acceptance contracts;
+7. a later Roadmap Governance Unit 2 crossing naming one exact implementation unit and exact file boundary.
+
+**Feature-specific dependencies.** Messaging requires introduction/conversation, evidence, moderation-access, retention, deletion, and legal-hold contracts. Notifications/email require event, consent, privacy, batching/digest, template, quiet-mode, transactional/marketing, and delivery contracts. Photos/media require storage, visibility grant, consent, moderation, deletion, and abuse contracts. Monetization requires entitlement, provider, tax/VAT, localized pricing, trial/renewal/cancellation/refund/cooling-off, reconciliation, and consumer-law contracts. Public SEO requires ownership, privacy aggregation/low-count, anti-enumeration, content-quality, locale/canonical/structured-data, future-domain, and indexing contracts. Analytics requires a minimized event catalog, purpose, aggregation, prohibited-metric, retention, and access contract. AI remains V2/deferred and requires a separate purpose-bound Privacy/Security/AI crossing.
+
+**Unresolved details.** No authority is inferred for an identity- or age-assurance provider; profile fields or completion predicates; display-name modes; photo/introduction/message state machines; retention durations; deletion/legal-hold mechanics; moderation SLAs, appeals, or staff matrix; launch jurisdictions, beta cohort, or final locales; country prices, provider, tax, billing, trial, refund, or cancellation; SEO thresholds/canonicals; notification templates/provider; visit telemetry; or public-success publication. External legal/privacy/safety research and approval remain required before real-user processing, beta, monetization, SEO exposure, or public launch.
+
+**Current implementation boundary.** No application, route, UI, component, schema, migration, API, authentication, account/data, discovery, messaging, notification, payment, SEO, analytics, AI, standalone client, Social Reach, or charitable-campaign implementation is authorized. No physical field, enum, state machine, table, constraint, migration number, provider, deployment, or future-client file is assigned here.
+
+### Future blocked candidate — TALIBEEN FOUNDATION
+
+`TALIBEEN FOUNDATION` is documented only as a possible later first unit. It remains `BLOCKED / NOT AUTHORIZED`. A later crossing may consider a runtime-inert, schema-free, default-off, no-real-data contract for stable domain vocabulary, the ALSAMAD identity relationship, fail-closed `18+` eligibility, marriage-candidate direction, private/public profile separation, membership/verification independence, and feature state. It would include no route, UI, schema, data, discovery, messaging, payment, notification, SEO, analytics, AI, or Social Reach work. Its exact file list, tests, rollback, and acceptance must be authorized later and are deliberately not assigned here.
+
+**Independence and protected status truth.** This track has no dependency on Quran provider selection, `devotional_items`, KE runtime, or Knowledge tables. Independence is not implementation authority. `M5 Gate 3` remains `PARTIAL`; M5 Gates 4–7, `M5 Provider Import Dry Run Verified`, and `M5 Quran Import Activated` remain `NOT PASS`; `M6.0` remains `COMPLETE`; `M6.1`/`M6.2` remain `BLOCKED`; KE-1 remains COMPLETE/runtime-inert; KE-2A remains COMPLETE; KE-2B remains `NOT STARTED / BLOCKED`; combined KE-2 remains incomplete; and no KE-3 implementation authority exists.
+
+**Release status.** Governance promotion `DECIDED` under `REG-0025`. Architecture contracts incomplete. Implementation `BLOCKED / NOT AUTHORIZED`. No acceptance gate has passed and no implementation evidence exists.
+
 ## Phase 18: Approved Later Modules
 
 - Objective
@@ -2035,7 +2069,7 @@ and, only if genuinely necessary, exactly one new, narrowly-scoped canonical/alt
 ## Release 1 Scope
 
 Arabic/English public experience, Quran, translations, duas, adhkar, prayer, Hijri, tasbeeh, deterministic search, provenance, editorial workflows, accessibility, SEO, performance, security, monitoring, minimal analytics.
-Excluded: Talibeen, subscriptions, payments, Hadith corpus, runtime generative AI, semantic search, advanced notifications, community, GPU, multi-region.
+Excluded from the frozen Core Release 1 daily companion: Talibeen (now an independent Expanded V1 separately feature-gated governance-design track), subscriptions, payments, Hadith corpus, runtime generative AI, semantic search, advanced notifications, community, GPU, multi-region. Talibeen's promotion changes no Core Release 1 scope or status and authorizes no implementation.
 
 ## Database Sequence
 

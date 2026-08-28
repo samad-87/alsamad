@@ -1,7 +1,7 @@
 # Alsamad — Security Architecture
 
 **Status:** Approved architecture; documentation only  
-**Release model:** Release 1 / Prepared / Approved Later Module / Future–Research  
+**Release model:** Core Release 1 / Expanded V1 separately feature-gated / Prepared / Approved Later Module / Future–Research
 **Authority:** Product, Database, Admin, AI, Sakinah, Infrastructure, Observability, QA, Analytics, and Roadmap architecture documents.
 
 This document defines Alsamad's permanent security, privacy, content-integrity, resilience, and recovery architecture. It authorizes no code, UI, migration, provider, deployment, or later module.
@@ -12,7 +12,7 @@ This document defines Alsamad's permanent security, privacy, content-integrity, 
 
 Alsamad protects people, canonical religious content, editorial decisions, private data, availability, and institutional trust. Security is an architectural property of identity, authorization, data ownership, content lifecycle, APIs, infrastructure, delivery, observability, recovery, and future AI.
 
-Canonical Quran text, authenticated Sunnah evidence, editions, licenses, sources, classifications, translations, review decisions, publication history, corrections, and withdrawals are high-integrity assets even when publicly readable. Future Talibeen identity, discovery, safety, block, conversation, and retention data are Highly Restricted.
+Canonical Quran text, authenticated Sunnah evidence, editions, licenses, sources, classifications, translations, review decisions, publication history, corrections, and withdrawals are high-integrity assets even when publicly readable. Talibeen identity, private profiles, discovery, safety, block, conversation, contact-sharing, verification, media, and retention data are Highly Restricted regardless of its Expanded V1 governance classification.
 
 # 2. Permanent Principles
 
@@ -50,7 +50,7 @@ Drafting, source verification, language review, religious review, publication, p
 
 ## 2.9 Minimize Blast Radius
 
-Separate environments, credentials, roles, providers, data classes, modules, deployments, and future Talibeen/AI boundaries. Assume components can fail or be compromised.
+Separate environments, credentials, roles, providers, data classes, modules, deployments, and separately gated Talibeen/future-AI boundaries. Assume components can fail or be compromised.
 
 ## 2.10 Secure Failure and Reversibility
 
@@ -70,11 +70,11 @@ Material exceptions require owner, reason, compensating controls, expiry, and re
 | Internal          | Non-sensitive operations                                      | Authenticated, least privilege                      |
 | Confidential      | Drafts, reviews, staff/provider details                       | Encrypted, scoped                                   |
 | Restricted        | Sessions, credentials, security evidence, precise preferences | Narrow access; prohibited from ordinary logs        |
-| Highly Restricted | Future Talibeen/safety/conversations, sensitive AI traces     | Isolated, purpose-bound, heightened audit/retention |
+| Highly Restricted | Talibeen/safety/conversations, sensitive AI traces            | Isolated, purpose-bound, heightened audit/retention |
 
 # 4. Threat Model
 
-Threat actors include bots, credential attackers, abusive scrapers, malicious/compromised staff, compromised dependencies/CI/providers/workstations, hostile imports, religious-text tampering, future prompt/corpus injection, future Talibeen stalkers/scammers/extortionists/enumerators, and accidental operator/configuration failure.
+Threat actors include bots, credential attackers, abusive scrapers, malicious/compromised staff, compromised dependencies/CI/providers/workstations, hostile imports, religious-text tampering, future prompt/corpus injection, Talibeen stalkers/scammers/extortionists/enumerators, and accidental operator/configuration failure.
 
 | Threat                       | Target                  | Principal controls                                                      |
 | ---------------------------- | ----------------------- | ----------------------------------------------------------------------- |
@@ -85,7 +85,7 @@ Threat actors include bots, credential attackers, abusive scrapers, malicious/co
 | Exfiltration                 | Restricted data         | Minimization, isolation, encryption, access detection                   |
 | Supply-chain compromise      | Build/deploy            | Pinning, provenance, scans, signed artifacts, protected CI              |
 | AI injection/poisoning       | Future AI               | Trusted corpus, retrieval isolation, policy/citation validation         |
-| Enumeration/stalking         | Future Talibeen         | Opaque IDs, anti-enumeration, privacy discovery, blocks                 |
+| Enumeration/stalking         | Talibeen Expanded V1    | Opaque IDs, anti-enumeration, privacy discovery, blocks                 |
 | Destructive admin/ransomware | Production/backups      | Segmentation, immutable backups, dual control, restore drills           |
 | Availability abuse           | Public service          | CDN/WAF, limits, graceful degradation, capacity alerts                  |
 
@@ -140,7 +140,7 @@ Editorial General Dua retains structural classification, language review, religi
 
 # 6. Identity, MFA, Passkeys, Recovery, Sessions
 
-Core Release 1 public reading remains guest-first. Staff identity is separate from optional public accounts. Future Talibeen context is not a public-profile extension.
+Core Release 1 public reading remains guest-first. Staff identity is separate from optional public accounts. The separately feature-gated Talibeen context is not a public-profile extension.
 
 - Passkeys/WebAuthn are preferred.
 - Staff MFA is mandatory; high-impact roles require phishing-resistant methods where available.
@@ -166,7 +166,7 @@ Authorization evaluates subject, capability, owner, resource, content class, loc
 | Publication      | Publish/correct/withdraw     | Strong auth and completed gates              |
 | Security admin   | Grants/sessions/incidents    | Strong auth and strict audit                 |
 | Infrastructure   | Deploy/secrets/database      | Workload/user identity and environment scope |
-| Talibeen later   | Safety/support/moderation    | Purpose, case, heightened audit              |
+| Talibeen Expanded V1 | Safety/support/moderation | Purpose, case, heightened audit              |
 
 Direct cross-module table writes are denied. Row-level security may reinforce private modules but never replaces ownership/use-case testing.
 
@@ -229,12 +229,12 @@ Required controls:
 
 No launch before threat model, corpus approval, adversarial/citation/refusal evaluation, privacy review, red-team, monitoring, incident response, rollback, and qualified human approval pass.
 
-# 12. Talibeen Heightened Privacy and Isolation
+# 12. Talibeen Expanded V1 Heightened Privacy and Isolation
 
-Talibeen is an Approved Later Module with zero Release 1 tables and needs separate Privacy, Safety, Legal, Security, and launch approval.
+`REG-0025` promotes Talibeen to an Expanded V1 separately feature-gated governance-design track outside frozen Core Release 1. It still has zero Core Release 1 tables and no implementation authority. Real-user processing, beta, monetization, SEO exposure, and public launch require the applicable separate Privacy, Safety, Legal, Security, identity, data, consumer, operational, and launch approvals. Every capability is default-off until its own staged-release gate passes.
 
 - Dedicated owner and schema/data boundary; separate service role/encryption context where practical.
-- No public indexing, session replay, general admin browsing, AI training, or public-profile joins.
+- No public indexing of private marriage profiles or sensitive discovery projections; no session replay, general admin browsing, unrestricted AI access/training, or public-profile joins. A non-personal public SEO layer remains separately gated and receives no private-profile authority.
 - Minimized discovery projections; source profiles private.
 - Field visibility, coarse location by default, and no exact location absent a later essential protected use.
 - Opaque IDs, anti-enumeration responses, rate-limited discovery, no bulk export/scraping.
@@ -243,7 +243,19 @@ Talibeen is an Approved Later Module with zero Release 1 tables and needs separa
 - Separate retention for deletion, blocks, abuse evidence, legal hold, and safety cases.
 - Minimal isolated safety retention, never reused for engagement.
 - Rapid removal from discovery and documented erasure/anonymization timeline.
-- Minors excluded unless independently approved legal/safety architecture says otherwise.
+- Adults only (`18+`); minors are ineligible for marriage discovery/contact. Date of birth is not public by implication, and exact assurance, suspected-minor handling, minimized evidence, and appeals remain later jurisdiction-aware contracts.
+- One ALSAMAD identity root with an isolated private Talibeen bounded context; no duplicate Talibeen account, public/social-profile conversion, religious/devotional/Knowledge/editorial storage, or Editorial Identity reinterpretation.
+- Identity verification is separate from display identity, membership/payment, compatibility, religious status, and generalized trust claims.
+- External contact information is not ordinary discovery-profile content. Later sharing requires an explicit per-person grant after the governed relationship state; acceptance never reveals it automatically, and revocation cannot promise recovery of information already viewed/copied.
+- Authoritative domain/backend enforcement, not UI-only filtering, must preserve the governed man/woman marriage-candidate invariant before discovery activation.
+- Private conversation requires the governed mutual-introduction state; arbitrary mass messaging is prohibited.
+- Blocking provides immediate protection. Report-and-block, trained human moderation, purpose-bound evidence access, sanctions, appeals, repeat-offender/block-evasion handling, severity, legal hold, emergency escalation, and staffing/SLAs are required before public discovery/contact/messaging.
+- Payment grants no ranking, compatibility, verification, safety, moderation immunity, religious/moral status, or preferential marriage opportunity.
+- Photos remain governed Highly Restricted media. In-product consent never implies public, social-media, Social Reach, or unrelated-AI consent.
+- Talibeen notification preferences are separable from religious/content notifications; previews minimize sensitive marriage data, non-security notifications are independently mutable/quiet, and marketing remains distinct from account/security notices.
+- Feature and jurisdiction controls fail closed, support staged cohorts and a kill switch, and do not treat global-by-design as global legal approval.
+
+Before real-user processing or public release, maintained data-flow/threat models and reviewed contracts must cover age and identity assurance, lawful bases, sensitive-data purposes and fields, consent, transfers/subprocessors, user rights, retention/deletion/legal hold/backups, staff access, moderation/evidence duties, harassment, sexual content, threats, extortion, financial solicitation, fraud/scams, impersonation, stalking/doxxing, block evasion, image abuse, incident response, notification consent, and operational escalation. Monetization additionally requires reviewed consumer-subscription, localized-price, tax/payment, cancellation/refund/renewal, and provider obligations. Public SEO additionally requires aggregation/re-identification, low-count, anti-enumeration, content-quality, canonical/locale, and future-domain review. This architecture makes no jurisdictional compliance claim and selects no provider or cryptographic implementation.
 
 | Actor             |              Own profile | Discovery projection | Other private profile |  Safety evidence |
 | ----------------- | -----------------------: | -------------------: | --------------------: | ---------------: |
@@ -314,7 +326,7 @@ Never log passwords, passkeys, recovery codes, tokens, cookies, keys, full autho
 
 Append-only audit covers privileged mutations, grants, reviews, publication/correction/withdrawal, configuration, secret/admin access, export, recovery, break glass, incident actions, and future sensitive support. Record actor, action, target, time, outcome, required reason, correlation, and safe references—not duplicated secret/content payload. Audit access is restricted and audited.
 
-Detection covers auth/recovery anomalies; new factors/privileges; unusual staff access/export; anomalous publication/withdrawal; checksum mismatch; disabled checks/audit gaps; secret anomalies; unexpected database writes; artifact/provenance mismatch; critical dependencies; WAF/availability anomalies; backup/restore failure; future AI citation/refusal regressions; and future Talibeen scraping/enumeration/safety signals. Every alert has owner, severity, runbook, escalation, deduplication, and test cadence.
+Detection covers auth/recovery anomalies; new factors/privileges; unusual staff access/export; anomalous publication/withdrawal; checksum mismatch; disabled checks/audit gaps; secret anomalies; unexpected database writes; artifact/provenance mismatch; critical dependencies; WAF/availability anomalies; backup/restore failure; future AI citation/refusal regressions; and staged Talibeen scraping/enumeration/safety signals. Every alert has owner, severity, runbook, escalation, deduplication, and test cadence.
 
 # 19. Incident Response
 
@@ -332,7 +344,7 @@ stateDiagram-v2
 
 Priority: protect people and prevent misinformation/exposure; preserve controlled evidence; contain credentials/services/providers/content/deployments; restore known-good state and verify; communicate as required; complete root cause and corrective-action verification.
 
-Playbooks cover canonical integrity/mistaken publication, staff takeover, secret exposure, personal-data breach, ransomware/destructive database action, CI/dependency compromise, provider failure, future AI harm/poisoning, and future Talibeen safety incidents. A content-integrity event may require withdrawal, CDN/cache purge, search rebuild, corpus disablement, public correction, and qualified review before restoration.
+Playbooks cover canonical integrity/mistaken publication, staff takeover, secret exposure, personal-data breach, ransomware/destructive database action, CI/dependency compromise, provider failure, future AI harm/poisoning, and Talibeen safety incidents before any staged real-user release. A content-integrity event may require withdrawal, CDN/cache purge, search rebuild, corpus disablement, public correction, and qualified review before restoration.
 
 # 20. Backup and Recovery Security
 
@@ -343,7 +355,7 @@ Playbooks cover canonical integrity/mistaken publication, staff takeover, secret
 - Scheduled restore into isolation.
 - Verify counts, constraints, checksums, canonical religious integrity, publication/audit continuity, and application smoke tests.
 - Restore never republishes withdrawn/superseded content.
-- Future Talibeen deletion/retention reconciles with backups.
+- Talibeen deletion/retention reconciles with backups before staged real-user activation.
 - An untested backup is not an accepted control.
 
 # 21. Availability and Continuity
@@ -372,7 +384,7 @@ Each finding has owner, deadline, fix/mitigation, verification, and exception ex
 | Recovery          | Encrypted restore and canonical checksum verification                |
 | Privacy           | Inventory, minimization, export/deletion, log inspection             |
 | AI later          | Injection, poisoning, citations, refusal, leakage, tool abuse, drift |
-| Talibeen later    | Enumeration, scraping, visibility, block, deletion, safety access    |
+| Talibeen Expanded V1 | Enumeration, scraping, visibility, contact containment, block, deletion, evidence/legal hold, safety access |
 
 Tests run in CI where appropriate, pre-production, after material change, and periodically. High-risk modules require independent penetration testing. Scan completion is not acceptance; findings must be verified closed.
 
@@ -394,7 +406,7 @@ Exports exclude internal security signals and others' data. Deletion distinguish
 | Supply chain      | Pin, review, signed artifact                    | Scan/provenance mismatch            | Stop/rebuild trusted chain              |
 | Availability      | CDN, limits, capacity                           | SLO/attack alerts                   | Degrade/fail over/restore               |
 | AI later          | Trusted corpus/tools/validator                  | Citation/policy regression          | Kill switch/model-corpus rollback       |
-| Talibeen later    | Isolation/privacy discovery/blocks              | Scraping/safety signals             | Freeze/protect/preserve scoped evidence |
+| Talibeen Expanded V1 | Isolation/private discovery/contact containment/blocks | Scraping, enumeration and safety signals | Freeze/protect/preserve scoped evidence |
 
 # 26. Release Classification
 
@@ -402,13 +414,17 @@ Exports exclude internal security signals and others' data. Deletion distinguish
 
 Threat modeling; guest-core security; staff identity/MFA/session/capabilities/separation; religious content integrity and audited publication/correction/withdrawal; API, database, infrastructure, secrets, encryption, supply chain, CI/CD, telemetry, incident response, backups/restores, testing, and security release gate.
 
+## Expanded V1 — Separately Feature-Gated
+
+Talibeen governance design under `REG-0025`, outside frozen Core Release 1. Public identity activation; isolated Highly Restricted data contracts; Privacy/Safety/Legal/Security approval; exact discovery/contact/messaging/media/notification/payment/SEO/analytics consumer contracts; purpose-bound administration; default-off feature and staged-release gates; and one exact later Roadmap implementation crossing remain required. Classification does not authorize activation.
+
 ## Prepared
 
 Public identity/passkeys/sync/bookmarks if not activated; correction intake; media/audio; notification preferences; event/outbox/webhook foundations after a consumer is approved.
 
 ## Approved Later Module
 
-Hadith additions; Talibeen isolation/privacy/safety; subscriptions/payments; immutable Balance ledger; notification delivery; advanced moderation.
+Hadith additions; subscriptions/payments outside separately gated Talibeen contracts; immutable Balance ledger; notification delivery outside separately gated Talibeen contracts; advanced moderation outside separately gated Talibeen contracts.
 
 ## Future/Research
 
@@ -429,7 +445,7 @@ Production requires current threat/data-flow model; no unresolved blocking findi
 - Exact Quran/translation editions, durable-storage rights, attribution, quotas, and artifact-signing approach; Quran.Foundation is the approved primary Quran provider.
 - Later public-authentication activation requirements; public authentication remains Prepared in Release 1.
 - Key hierarchy, rotation, emergency recovery custody.
-- Talibeen jurisdiction, age policy, safety operation, and isolation before approval.
+- Talibeen initial jurisdictions, age-assurance method/provider for the settled `18+` boundary, identity verification, safety operation, isolation details, staff-access model, retention/legal hold, beta cohort, and staged public-launch approval.
 - AI provider terms, data handling, evaluation thresholds, and red-team governance before approval.
 
 # 29. Final Validation
@@ -441,6 +457,6 @@ Quran.Foundation app secrets, access tokens, refresh tokens, and confidential cr
 Provider payloads are untrusted structured input: validate schema and checksums, sanitize translation/tafsir markup, allowlist media/snapshot hosts and schemes, and translate provider errors. Enforce the default seven-day legal retention ceiling, private `no-store` User API responses, deletion/withdrawal events, revocation, incident notification, and provider termination. Expired QF content cannot be served merely because the provider is unavailable.
 
 - Security by Design, Privacy by Design, Least Privilege, Defense in Depth, Default Deny, and Content Integrity Protection are first-class.
-- Threat model covers external, insider, provider/build, content, future AI, and future Talibeen risks.
+- Threat model covers external, insider, provider/build, content, future AI, and separately feature-gated Talibeen risks.
 - Quran/Sunnah integrity, identity/MFA/passkeys/recovery/sessions, capability authorization, admin/API/app security, AI/RAG, Talibeen isolation, secrets/encryption, supply chain/CI/CD, logging/audit/detection/response, backup/recovery, vulnerabilities, testing, release classification, open decisions, Mermaid diagrams, and matrices are complete.
 - Release 1 remains minimal and future evolution additive.

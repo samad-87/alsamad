@@ -94,7 +94,7 @@ gRPC may serve measured internal throughput needs. Protobuf maps to application 
 | Publication and audit events                            | Audit/Publication   | Release 1             |
 | Accounts, sessions, preferences, saved items            | Identity            | Prepared              |
 | Hadith                                                  | Hadith              | Approved Later Module |
-| Talibeen                                                | Talibeen            | Approved Later Module |
+| Talibeen                                                | Talibeen            | Expanded V1 separately feature-gated; implementation blocked |
 | Subscriptions, payments, Balance                        | Commerce/Ledger     | Approved Later Module |
 | AI answers, semantic retrieval, Knowledge Graph         | AI/Knowledge Engine | Future/Research       |
 
@@ -309,7 +309,7 @@ Breaking change requires an architecture decision, migration guide, client inven
 
 # 22. Security and Privacy Contract
 
-TLS and HSTS protect network boundaries. Cookie mutations use CSRF defense. CORS uses a strict allowlist. Controls cover injection, SSRF, XSS, request smuggling, mass assignment, path traversal, unsafe deserialization, and body exhaustion. Response fields are allowlisted. Sensitive exports are encrypted, expiring, scoped, and audited. Future Talibeen APIs use isolation, anti-enumeration, privacy-preserving discovery, heightened retention, and purpose-bound access.
+TLS and HSTS protect network boundaries. Cookie mutations use CSRF defense. CORS uses a strict allowlist. Controls cover injection, SSRF, XSS, request smuggling, mass assignment, path traversal, unsafe deserialization, and body exhaustion. Response fields are allowlisted. Sensitive exports are encrypted, expiring, scoped, and audited. `REG-0025` places Talibeen in an Expanded V1 governance-design track, but authorizes no API implementation or contract. Later client-independent Talibeen domain/API boundaries may serve ALSAMAD Web and deferred standalone web/mobile clients only after separate authority; they require isolation, anti-enumeration, privacy-preserving discovery, heightened retention, and purpose-bound access. No route, endpoint, schema, version, transport, service, or future client is selected here.
 
 # 23. Contract and Release Verification
 
@@ -326,7 +326,7 @@ Each endpoint class requires schema/golden contract tests; authorization allow/d
 | Audio catalog, correction intake, notification preferences          | Prepared                   |
 | GraphQL, gRPC, outbox, broker, webhooks                             | Prepared after proven need |
 | Hadith                                                              | Approved Later Module      |
-| Talibeen                                                            | Approved Later Module      |
+| Talibeen                                                            | Expanded V1 separately feature-gated; implementation blocked |
 | Subscription, payment, Balance                                      | Approved Later Module      |
 | Runtime AI, semantic search, Knowledge Graph, recommendations       | Future/Research            |
 
