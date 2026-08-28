@@ -173,6 +173,7 @@ As of 2026-08-08, the M6 architecture decision analysis covering REG-0001–REG-
 | REG-0023 | Knowledge Engine Phase 2A (KE-2A): Topics Foundation implementation-authorization crossing           | Roadmap                      | SUPERSEDED  | Registry only                                                             |
 | REG-0024 | KE-2A corrected implementation authorization: journal boundary and topic lifecycle/repository contract | Database, Roadmap            | IMPLEMENTED | Registry + ADR (`ADR-0010`, Accepted)                                     |
 | REG-0025 | Talibeen Al-Halal promotion to Expanded V1 separately feature-gated governance-design track           | Product, Security, Roadmap   | DECIDED     | Registry only; later persistent contracts require separate ADR review     |
+| REG-0026 | Talibeen Foundation narrow runtime-inert domain-contract boundary                                    | Roadmap                      | DECIDED     | Registry only; implementation remains blocked pending a later Roadmap crossing |
 
 ### REG-0001 — Editorial General Dua placement in the devotional physical model
 
@@ -943,3 +944,39 @@ Every pre-existing migration and journal entry remains byte-unchanged. The appen
 **Implementation evidence:** None. `TALIBEEN IMPLEMENTATION = BLOCKED / NOT AUTHORIZED`.
 
 **Supersedes / Superseded by:** Supersedes no prior Registry entry. Supersedes only the historical Talibeen Approved-Later release classification and historical Talibeen trial/launch-offer direction now preserved and labeled in affected architecture.
+
+### REG-0026 — Talibeen Foundation narrow runtime-inert domain-contract boundary
+
+**Category:** `Roadmap`.
+
+**Summary:** Define the maximum reversible boundary of a possible future `TALIBEEN FOUNDATION` implementation unit without authorizing that unit, activating Talibeen, or deciding any persistent, real-identity, user-facing, provider, or operational contract.
+
+**Committed evidence:** `REG-0025` remains the controlling Talibeen product-classification and high-level invariant authority. `ALSAMAD_IMPLEMENTATION_ROADMAP.md` records `TALIBEEN FOUNDATION` only as a future blocked candidate and requires a later exact-unit crossing. Public ALSAMAD identity/account architecture remains Prepared and inactive; no Talibeen schema, API, Admin runtime, route, UI, real-data path, or consumer contract exists.
+
+**Affected architecture:** `ALSAMAD_IMPLEMENTATION_ROADMAP.md` Talibeen Expanded V1 governance-design track only. No Product, Security, Database, API, Admin, notification, payment, SEO, media, analytics, AI, or ADR contract is changed or supplied by this decision.
+
+**Affected roadmap gate:** Future `TALIBEEN FOUNDATION` exact-unit authorization. This decision defines its maximum boundary but does not open or pass that gate.
+
+**Opened:** 2026-08-29.
+
+**Tier rationale:** Registry only. The contemplated unit is schema-free, synthetic-only, runtime-inert, default-off, local, and reversible. It creates no physical representation, persistent lifecycle, real identity relationship, external contract, runtime surface, or difficult-to-reverse privacy/security boundary, so the §7 ADR threshold is not met. ADR review becomes mandatory before persistent identity linkage or a persistent private Talibeen domain is designed; a possible later coherent subject is `Talibeen Persistent Identity and Private Domain Boundary`, whose outcome and physical representation are not decided here.
+
+**Status:** `DECIDED` (2026-08-29). Governance boundary only. `TALIBEEN FOUNDATION = NOT STARTED / BLOCKED / NOT YET AUTHORIZED`.
+
+**Decision outcome:** A future `TALIBEEN FOUNDATION` unit may be considered only as isolated domain code and tests for: stable Talibeen vocabulary; an opaque conceptual ALSAMAD identity reference using synthetic/test values only; adults-only (`18+`) and missing/invalid-data fail-closed eligibility semantics; the man-to-woman and woman-to-man marriage-candidate direction invariant with same-sex, generic, and unknown directions rejected; private Talibeen profile versus public/base ALSAMAD profile separation; verification-state independence from Free/Plus membership; Free/Plus semantic distinction, with Premium named only as V2/deferred if required for completeness; default-off/no-production-composition semantics; and neutral multi-client-ready vocabulary that binds to no standalone-client runtime.
+
+The conceptual identity reference binds to no `users` table, account row, provider subject, OAuth/Google/email/magic-link/passkey identity, session, cookie, middleware, production user ID, Editorial Identity, or real verification evidence. One ALSAMAD account remains the conceptual person root and a duplicate Talibeen account remains prohibited. Persistent linkage requires later public-account activation, architecture contracts, ADR review, and Roadmap authority.
+
+**Absolute exclusions:** No database/schema/migration/ORM/repository/filesystem persistence; real user data or production identity/auth/session/account activation; route/page/UI/component; API endpoint or contract; discovery/candidate retrieval/location filtering; introduction/request/messaging/conversation/contact sharing; media/photo; moderation/Admin runtime; notification/email/push; payment/billing/pricing implementation; analytics/telemetry/Profile Visits; public SEO/metadata/sitemap/structured data; Intentional Discovery Breaks; success-story publication; AI; Social Reach; standalone web/mobile runtime; charitable campaigns; devotional, Quran, or Knowledge Engine integration; network/provider call; secret; production side effect; or production composition-root import.
+
+**Privacy/security boundary:** Talibeen remains a Highly Restricted private bounded context. This possible unit uses synthetic values only and has no telemetry, persistence, user-like sensitive logging, staff/Admin access path, AI access, network call, or secret. It does not solve persistent privacy architecture. Exact inventory, purposes, minimization, visibility, coarse location, consent, deletion, retention, backups, legal hold, access/export, staff access, audit, and AI restrictions remain later contracts.
+
+**Deferred crossings:** Public identity/account activation; persistent linkage; profile fields/completion; age and identity assurance providers; Database/migrations; API; discovery; introductions; messaging/contact grants; media; moderation operations; retention/deletion/legal hold; notifications/email; payments/pricing; analytics/Profile Visits; public SEO; Intentional Discovery Breaks; public success stories; standalone clients; AI; and Social Reach all remain blocked beyond Foundation. External legal/operational research is not required for the synthetic runtime-inert unit but remains required before the applicable real-data, identity, discovery/contact/messaging, moderation, jurisdiction-launch, monetization, SEO, notification, or sensitive-processing phase.
+
+**Implementation authority:** None. The Roadmap remains exclusive implementation authority. A separate Owner-reviewed Roadmap crossing must later authorize the exact unit before any Foundation file is created or changed.
+
+**Independence from protected status truths:** Core Release 1 scope and table count are unchanged. `M5 Gate 3` remains `PARTIAL`; M5 Gates 4–7, `M5 Provider Import Dry Run Verified`, and `M5 Quran Import Activated` remain `NOT PASS`; `M6.0` remains `COMPLETE`; `M6.1`/`M6.2` remain `BLOCKED`; KE-1 remains COMPLETE/runtime-inert; KE-2A remains COMPLETE; KE-2B remains `NOT STARTED / BLOCKED`; combined KE-2 remains incomplete; and no KE-3 implementation authority exists.
+
+**Implementation evidence:** None. `TALIBEEN FOUNDATION = NOT STARTED / BLOCKED / NOT YET AUTHORIZED`.
+
+**Supersedes / Superseded by:** Supersedes no Registry decision. Narrows only the future blocked Foundation candidate already contemplated by `REG-0025`.

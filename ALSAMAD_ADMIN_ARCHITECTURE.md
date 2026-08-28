@@ -1518,7 +1518,7 @@ This architecture retains only operational choices that remain unresolved; M0.5 
 - production hosting and recovery objectives;
 - moderation staffing and appeal SLAs;
 - AI provider/model/search architecture if research is authorized;
-- standard Talibeen monthly price after the approved launch terms.
+- Talibeen exact pricing and payment activation; the former 14-day card-backed trial and USD 7 first-two-month offer remain historical/superseded evidence, Free/Plus is the current entitlement direction, Premium remains V2, and provider, localized pricing, tax/VAT, trial, renewal, cancellation, refunds, cooling-off, app-store billing, and other commerce mechanics remain separately governed and unresolved.
 
 No administrative workflow should guess these decisions.
 
