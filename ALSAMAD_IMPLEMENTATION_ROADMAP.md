@@ -1996,7 +1996,7 @@ and, only if genuinely necessary, exactly one new, narrowly-scoped canonical/alt
 
 ## Talibeen Expanded V1 governance-design track
 
-**Governance status.** `REG-0025` promotes Talibeen Al-Halal / طالبين الحلال from Approved Later Module into an **ALSAMAD Expanded V1 separately feature-gated product track**. This is governance design only. Talibeen remains outside the frozen Core Release 1 daily companion and changes no Core scope, 30-table count, gate, acceptance, completion, or current implementation status. `TALIBEEN IMPLEMENTATION = BLOCKED / NOT AUTHORIZED`.
+**Governance status.** `REG-0025` promotes Talibeen Al-Halal / طالبين الحلال from Approved Later Module into an **ALSAMAD Expanded V1 separately feature-gated product track**. Talibeen remains outside the frozen Core Release 1 daily companion and changes no Core scope, 30-table count, gate, acceptance, or completion. All Talibeen implementation remains `BLOCKED / NOT AUTHORIZED` except the exact schema-free, runtime-inert Foundation unit separately authorized under `REG-0027`; that narrow exception changes no broader Talibeen status.
 
 **Architectural outcome.** Talibeen is one logical, global-by-design, privacy-first domain. The initial intended client is an ALSAMAD Web Talibeen section. Standalone web and iOS/Android clients are V2/deferred and must later reuse the same authoritative domain and ALSAMAD-account relationship without requiring speculative microservices, a second database, a second authentication system, or duplicate domain logic. Global-by-design means localization/time-zone/currency readiness and jurisdiction-aware restriction controls, not legal compliance or launch approval in every country.
 
@@ -2018,17 +2018,17 @@ and, only if genuinely necessary, exactly one new, narrowly-scoped canonical/alt
 
 **Unresolved details.** No authority is inferred for an identity- or age-assurance provider; profile fields or completion predicates; display-name modes; photo/introduction/message state machines; retention durations; deletion/legal-hold mechanics; moderation SLAs, appeals, or staff matrix; launch jurisdictions, beta cohort, or final locales; country prices, provider, tax, billing, trial, refund, or cancellation; SEO thresholds/canonicals; notification templates/provider; visit telemetry; or public-success publication. External legal/privacy/safety research and approval remain required before real-user processing, beta, monetization, SEO exposure, or public launch.
 
-**Current implementation boundary.** No application, route, UI, component, schema, migration, API, authentication, account/data, discovery, messaging, notification, payment, SEO, analytics, AI, standalone client, Social Reach, or charitable-campaign implementation is authorized. No physical field, enum, state machine, table, constraint, migration number, provider, deployment, or future-client implementation is assigned. The prospective Foundation file boundary below is contract definition only and grants no permission to create or change those files.
+**Current implementation boundary.** Only the exact schema-free, runtime-inert Talibeen Foundation unit below is authorized to begin in a separate execution under `REG-0027`; no route, UI, component, schema, migration, API, authentication, account/data, discovery, messaging, notification, payment, SEO, analytics, AI, standalone client, Social Reach, charitable-campaign, or other Talibeen implementation is authorized. No physical field, enum, state machine, table, constraint, migration number, provider, deployment, or future-client implementation is assigned.
 
-### Future exact unit contract — TALIBEEN FOUNDATION
+### Authorized exact unit contract — TALIBEEN FOUNDATION
 
-**Governance status.** `REG-0026` defines the maximum narrow boundary of this possible first unit. `TALIBEEN FOUNDATION = NOT STARTED / BLOCKED / NOT YET AUTHORIZED`. This contract does not permit implementation to begin. A separate Owner-reviewed Roadmap authorization must explicitly open the unit before any listed file is created or changed.
+**Governance status.** `REG-0026` defines the maximum narrow boundary and `REG-0027` records the Owner-reviewed crossing. `TALIBEEN FOUNDATION = AUTHORIZED TO IMPLEMENT / NOT STARTED`. Implementation may begin only in a separate write confined to the exact three-file boundary below. Authorization is not implementation, acceptance, completion, staging, commit, or push; completion requires all evidence and a separate completion review.
 
 **Objective.** Establish isolated, runtime-inert Talibeen domain semantics only: stable vocabulary; an opaque conceptual ALSAMAD identity reference using synthetic/test values; adults-only (`18+`) and missing/invalid-data fail-closed eligibility; man-to-woman and woman-to-man marriage-candidate direction with same-sex, generic, and unknown directions rejected; private Talibeen versus public/base profile separation; verification independence from membership; Free/Plus distinction, with Premium only as V2/deferred vocabulary if needed; default-off/no-production-composition semantics; and client-neutral vocabulary. One ALSAMAD account remains the conceptual person root; no duplicate Talibeen account is permitted.
 
-**Dependencies.** `REG-0025` and `REG-0026` DECIDED; Product Architecture and Security Architecture Talibeen invariants unchanged; public identity remains Prepared/inactive; no real identity or persistent state is consumed. External legal/operational research is not required for this synthetic runtime-inert boundary. A later Owner-reviewed implementation authorization remains unsatisfied.
+**Dependencies.** `REG-0025`, `REG-0026`, and `REG-0027` DECIDED; the Owner-reviewed implementation-authorization dependency is satisfied only for this exact unit. Product Architecture and Security Architecture Talibeen invariants remain unchanged; public identity remains Prepared/inactive; no real identity or persistent state may be consumed. External legal/operational research is not required for this synthetic runtime-inert boundary.
 
-**Exact future allowed-file boundary:**
+**Exact authorized implementation file boundary:**
 
 ```text
 src/lib/talibeen/contracts.ts
@@ -2036,13 +2036,13 @@ src/lib/talibeen/eligibility.ts
 tests/talibeen-foundation.test.mjs
 ```
 
-No directory index or export barrel is authorized, preventing accidental production composition. The two TypeScript files must be pure domain code with no I/O. The Node test follows the repository's existing `node --import tsx --test` convention. Listing these files defines only a future boundary and does not authorize creating them now.
+No other file may be created or changed. No directory index/export barrel, fixture, package/config change, or additional test is authorized. The two TypeScript files must be pure domain code with no I/O. The Node test follows the repository's existing `node --import tsx --test` convention. This governance write authorizes the bounded unit but creates none of these files; implementation occurs only in a later separate write.
 
 **Identity and privacy boundary.** The identity reference is opaque, conceptual, and synthetic-only. It binds to no `users` table, account row, production user ID, provider subject, OAuth/Google/email/magic-link/passkey identity, session, cookie, auth middleware, Editorial Identity, or real verification evidence. Talibeen remains a Highly Restricted private bounded context, but the unit contains no real data, telemetry, persistence, user-like sensitive logs, staff/Admin access, AI access, network/provider call, secret, or production side effect. Persistent identity/private-domain design requires later public-account activation, exact contracts, and ADR review.
 
 **Absolute exclusions.** Database/schema/migration/ORM/repository/filesystem persistence; real users/data; authentication/session/account activation; routes/pages/UI/components; API endpoint/contract; discovery/candidate retrieval/location filtering; introductions/requests/messaging/conversations/contact sharing; media/photos; moderation/Admin runtime; notifications/email/push; payments/billing/pricing implementation; analytics/telemetry/Profile Visits; public SEO/metadata/sitemap/structured data; Intentional Discovery Breaks; success-story publication; AI; Social Reach; standalone web/mobile runtime; charitable campaigns; devotional/Quran/Knowledge Engine integration; external calls; secrets; runtime activation; and any production composition-root import.
 
-**Acceptance contract for a later authorized implementation:**
+**Acceptance contract for the authorized implementation:**
 
 1. **Adults-only:** the exact adult boundary passes; under-18 fails; missing, malformed, non-finite, non-integer, or otherwise invalid eligibility input fails closed without inferring assurance or legal sufficiency.
 2. **Candidate direction:** man-to-woman and woman-to-man pass; man-to-man, woman-to-woman, generic/any, and unknown/invalid directions fail closed. The contract represents product/domain semantics only and creates no physical field or schema.
@@ -2054,13 +2054,13 @@ No directory index or export barrel is authorized, preventing accidental product
 8. **External isolation:** no network/provider call, environment secret, analytics, telemetry, AI, notification, or external dependency exists.
 9. **Scope and verification:** only the three exact allowed files differ in the future unit. `npm run typecheck`, `npm run lint`, `npm run format:check`, and the repository test command pass; the dedicated test exercises every rule above; review evidence includes a scoped diff, dependency/import search, and confirmation that tracked quarantine is not adopted.
 
-**Completion evidence.** None. The unit may be marked COMPLETE only after a later authorization, an implementation commit limited to the exact boundary, all acceptance evidence passing, and a reviewed Roadmap status update. Contract definition is not completion evidence.
+**Completion evidence.** None. The unit remains NOT STARTED. It may be marked COMPLETE only after an implementation commit limited to the exact boundary, all acceptance evidence passing, and a separate reviewed Roadmap completion/status update. Authorization and contract definition are not completion evidence.
 
-**Rollback/recovery.** A future authorized implementation rolls back by reverting/removing only its isolated three-file unit. There is no migration rollback, user-data migration, provider cleanup, runtime-route rollback, API compatibility obligation, external revocation, or data recovery because the unit is schema-free, synthetic-only, runtime-inert, and externally disconnected.
+**Rollback/recovery.** The authorized implementation rolls back by reverting/removing only its isolated three-file unit. There is no migration rollback, user-data migration, provider cleanup, runtime-route rollback, API compatibility obligation, external revocation, or data recovery because the unit is schema-free, synthetic-only, runtime-inert, and externally disconnected.
 
 **Deferred beyond Foundation.** Public account activation/authentication; persistent user linkage; profile fields/completion; age/identity-assurance providers; Database/migrations; API; discovery/location; introductions; messaging/contact grants; media/photos; moderation operations; retention/deletion/legal hold; notifications/email; payments/pricing; analytics/Profile Visits; public SEO; Intentional Discovery Breaks; public success stories; standalone clients; AI; and Social Reach remain blocked. Their applicable privacy, safety, legal, security, consumer, provider, and operational research/contracts remain required before those later phases.
 
-**Release status.** `NOT STARTED / BLOCKED / NOT YET AUTHORIZED`. No Foundation file exists by authority of this governance write, no acceptance gate has passed, and implementation must not begin.
+**Release status.** `AUTHORIZED TO IMPLEMENT / NOT STARTED`. The exact three-file unit may begin only in a later implementation write. No Foundation file is created by this authorization write, no implementation evidence exists, no acceptance gate has passed, and the unit is not COMPLETE.
 
 **Independence and protected status truth.** This track has no dependency on Quran provider selection, `devotional_items`, KE runtime, or Knowledge tables. Independence is not implementation authority. `M5 Gate 3` remains `PARTIAL`; M5 Gates 4–7, `M5 Provider Import Dry Run Verified`, and `M5 Quran Import Activated` remain `NOT PASS`; `M6.0` remains `COMPLETE`; `M6.1`/`M6.2` remain `BLOCKED`; KE-1 remains COMPLETE/runtime-inert; KE-2A remains COMPLETE; KE-2B remains `NOT STARTED / BLOCKED`; combined KE-2 remains incomplete; and no KE-3 implementation authority exists.
 
