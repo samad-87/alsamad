@@ -174,7 +174,7 @@ As of 2026-08-08, the M6 architecture decision analysis covering REG-0001–REG-
 | REG-0024 | KE-2A corrected implementation authorization: journal boundary and topic lifecycle/repository contract | Database, Roadmap            | IMPLEMENTED | Registry + ADR (`ADR-0010`, Accepted)                                     |
 | REG-0025 | Talibeen Al-Halal promotion to Expanded V1 separately feature-gated governance-design track           | Product, Security, Roadmap   | DECIDED     | Registry only; later persistent contracts require separate ADR review     |
 | REG-0026 | Talibeen Foundation narrow runtime-inert domain-contract boundary                                    | Roadmap                      | DECIDED     | Registry only; implementation remains blocked pending a later Roadmap crossing |
-| REG-0027 | Talibeen Foundation owner-reviewed exact-unit implementation authorization                          | Roadmap                      | DECIDED     | Registry only; operationalized only by the corresponding Roadmap status   |
+| REG-0027 | Talibeen Foundation owner-reviewed exact-unit implementation authorization                          | Roadmap                      | IMPLEMENTED | Registry only; implemented by the corresponding Roadmap PASS              |
 
 ### REG-0001 — Editorial General Dua placement in the devotional physical model
 
@@ -998,7 +998,7 @@ The conceptual identity reference binds to no `users` table, account row, provid
 
 **Tier rationale:** Registry only. This crossing authorizes implementation of the already-settled, local, reversible, schema-free, synthetic-only, runtime-inert boundary and creates no new physical representation or difficult-to-reverse decision. No ADR is required for this unit. ADR review remains mandatory before persistent identity linkage or persistent private-domain design.
 
-**Status:** `DECIDED` (2026-08-29). Owner-reviewed authorization only. Implementation is authorized to begin in a separate execution and remains `NOT STARTED`; it is not COMPLETE.
+**Status:** `IMPLEMENTED` (2026-08-30; decision recorded 2026-08-29). The exact authorized Foundation unit is COMPLETE under the corresponding Roadmap PASS. This lifecycle transition records accepted implementation evidence only and changes none of the original decision semantics or broader Talibeen authority.
 
 **Decision outcome:** The corresponding Roadmap crossing authorizes creation or modification of exactly:
 
@@ -1014,12 +1014,12 @@ Authority is limited to the `REG-0026` semantics: stable Talibeen vocabulary; an
 
 **Identity and persistence boundary:** The authorized reference is conceptual, opaque, and synthetic only. It binds to no persistent user, provider subject, email, Google identity, session, account row, Editorial Identity, verification provider, or production identity. Persistent identity linkage remains blocked pending later public-identity, Database, Privacy/Security, ADR, and Roadmap authority.
 
-**Roadmap operationalization:** Per §2 items 4–5 and §10, this Registry entry does not independently authorize implementation. The corresponding Roadmap status records that this exact unit is `AUTHORIZED TO IMPLEMENT / NOT STARTED`. Completion requires an implementation commit confined to the exact boundary, all acceptance and validation evidence, and a separate completion review. Any expansion requires a new Roadmap crossing.
+**Roadmap operationalization:** Per §2 items 4–5 and §10, this Registry entry did not independently authorize implementation. The corresponding Roadmap now records `TALIBEEN FOUNDATION = COMPLETE` and `Talibeen Foundation Verified = PASS` after the exact implementation commit, acceptance evidence, and separate completion review passed. Any expansion still requires a new Roadmap crossing; no next Talibeen unit is authorized.
 
 **External research and ADR status:** No external/legal/operational research or new ADR is required for this synthetic runtime-inert implementation. Applicable research and ADR review remain required before later persistent, real-user, public, identity, moderation, monetization, SEO, notification, or sensitive-data phases.
 
 **Independence from protected status truths:** Core Release 1 scope and table count are unchanged. `M5 Gate 3` remains `PARTIAL`; M5 Gates 4–7, `M5 Provider Import Dry Run Verified`, and `M5 Quran Import Activated` remain `NOT PASS`; `M6.0` remains `COMPLETE`; `M6.1`/`M6.2` remain `BLOCKED`; KE-1 remains COMPLETE/runtime-inert; KE-2A remains COMPLETE; KE-2B remains `NOT STARTED / BLOCKED`; combined KE-2 remains incomplete; and no KE-3 implementation authority exists.
 
-**Implementation evidence:** None. Authorization is not implementation or completion.
+**Implementation evidence:** `Talibeen Foundation Verified = PASS` in `ALSAMAD_IMPLEMENTATION_ROADMAP.md`, implemented by commit `c7ba024d0d19c31c4c46ff027531d504e17bc01f` (`feat: implement Talibeen Foundation contracts`) in exactly `src/lib/talibeen/contracts.ts`, `src/lib/talibeen/eligibility.ts`, and `tests/talibeen-foundation.test.mjs`. Acceptance evidence: dedicated Foundation tests 11/11 PASS; repository tests 497/497 PASS; TypeScript typecheck PASS; scoped lint PASS; scoped Prettier check PASS; whitespace/diff check PASS; and import/dependency, runtime-isolation, persistence-isolation, external-isolation, and exact-scope reviews PASS. This marks only the schema-free, synthetic-only, runtime-inert Foundation unit COMPLETE. Broader Talibeen remains `BLOCKED / NOT AUTHORIZED` and persistent identity/private-domain work still requires separate ADR/materiality and Roadmap review.
 
 **Supersedes / Superseded by:** Supersedes no decision. Satisfies only the separate implementation-authorization requirement recorded by `REG-0026` and the Roadmap.
