@@ -178,6 +178,8 @@ Release 1 staff APIs use an approved provider-independent identity adapter and r
 
 Under `REG-0028` and `ADR-0011`, Public ALSAMAD Identity is a provider-neutral Expanded V1 prerequisite architecture track. Authentication may later establish control of a credential or provider identity and resolve it to one stable ALSAMAD account subject; the credential/provider identity, session, and recovery mechanism never become that durable account identity. Recovery restores access to the same account rather than silently creating a duplicate, and account-state changes may require session invalidation. These are conceptual boundaries only: no endpoint, route, version, request/response schema, transport, token format, cookie, provider, account/session store, implementation, or real-user processing is authorized. Preferences and saved items remain Prepared/deferred.
 
+`REG-0029`/`ADR-0012` approve only a negative API contract for the possible future runtime-inert `users` root. The persistence root is internal, unreachable from public or staff APIs and routes, absent from request/response contracts and public identifiers, never serialized to a client, and unavailable through REST, GraphQL, RPC, server actions, account services, repositories, or other runtime consumers. No endpoint, path, version, schema, handler, route, service, repository, import, account operation, or implementation is created or authorized. A later API/privacy/Security/Roadmap crossing is required before any external representation or operation.
+
 Services use workload identity or short-lived signed credentials. Shared permanent internal API keys are prohibited.
 
 # 10. Capability-Based Authorization

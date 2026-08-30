@@ -878,7 +878,7 @@ The prior five-table package remains useful Prepared evidence, but is no longer 
 
 | Conceptual candidate | Current classification | Purpose / boundary |
 | -------------------- | ---------------------- | ------------------ |
-| `users`              | Expanded V1 architecture only; physical contract blocked | Candidate durable shared account root; exact identifier, fields, states, deletion representation, and constraints require a later Database/ADR/Roadmap crossing. |
+| `users`              | Expanded V1 physical contract approved; implementation blocked | Durable shared account root fixed by `REG-0029`/`ADR-0012`; implementation still requires a later exact Roadmap crossing. |
 | `user_identities`    | Expanded V1 architecture only; physical contract blocked | Candidate provider-neutral authentication link; an external subject is never the durable ALSAMAD account identity. |
 | `user_sessions`      | Expanded V1 architecture only; physical contract blocked | Candidate independently revocable session representation; storage and transport remain unresolved. |
 | `user_preferences`   | Prepared/deferred | Optional synchronized locale, theme, reading, and prayer choices; outside the first Public Identity boundary. |
@@ -888,7 +888,26 @@ Recovery is an architecture boundary, not an approved table: it must restore acc
 
 Future private modules may reference the shared account only after their own governance. Account deletion must not blindly cascade into, orphan, or silently retain dependent private-module records; each module must first define its ownership, deletion, retention, legal/safety, and cleanup contract. No Talibeen persistence or retention rule is created here.
 
-The Core Release 1 physical count remains exactly 30. A later exact Database contract must determine the smallest physical identity package and its additive migration boundary before implementation; the historical projection from 30 to 35 is not current implementation authority or a frozen activation count.
+The Core Release 1 physical count remains exactly 30. The approved Expanded V1 physical contract is one `users` root only; the historical projection from 30 to 35 is not current implementation authority or a frozen activation count. `user_identities`, `user_sessions`, `user_preferences`, and `user_saved_items` remain outside that root.
+
+## 9.1 Approved Public ALSAMAD durable account-root physical contract
+
+`REG-0029` and accepted `ADR-0012`, dependent on `REG-0028`/`ADR-0011`, approve the smallest provider-neutral physical contract while `PUBLIC ALSAMAD IDENTITY IMPLEMENTATION = BLOCKED / NOT AUTHORIZED`. This section freezes future shape only; it creates no table, ORM schema, migration, row, API, repository, service, runtime consumer, or implementation authority.
+
+The exact physical root is `users`, consistent with the established conceptual candidate and plural `snake_case` convention. It has exactly four columns:
+
+| Column | PostgreSQL type | Nullability and default | Physical contract |
+| --- | --- | --- | --- |
+| `id` | `uuid` | `PRIMARY KEY NOT NULL`; no database default | Application-generated UUIDv7; opaque, ALSAMAD-owned, immutable, provider/client/module independent, never derived from contact/provider data, and never reused. |
+| `status` | `varchar(24)` | `NOT NULL DEFAULT 'active'` | Closed values `active`, `disabled`, `deletion_pending`, `deleted`; root lifecycle only. |
+| `created_at` | `timestamptz` | `NOT NULL DEFAULT current_timestamp` | Immutable UTC creation evidence. |
+| `updated_at` | `timestamptz` | `NOT NULL DEFAULT current_timestamp` | UTC lifecycle evidence; changes only with a real status transition and must strictly increase. |
+
+`id` is the primary key and the only index. `ck_users__status` enforces the closed status vocabulary. A future trigger `trg_users__lifecycle_integrity` must reject mutation of `id` or `created_at`; timestamp-only and no-op updates; a status change without a strictly later `updated_at`; entry to `deleted` from any state other than `deletion_pending`; and every transition out of `deleted`. Other transition, reactivation, grace, appeal, retention, legal-hold, hard-delete, and anonymization policies remain unresolved. The four-state representation preserves usable, restricted/disabled, deletion-in-progress, and terminal-completion semantics without choosing the eventual disposition of a terminal row.
+
+The root's sole purpose is stable shared ALSAMAD account identity. It contains no contact, username, display, avatar, locale, provider, credential, session, recovery, preference, saved-item, bookmark, reading-position, private-routine, profile, marketing, analytics, engagement, Editorial, Talibeen, or other module field/reference. It has no outgoing or dependent foreign key and no cascade. `user_identities` and `user_sessions` remain conceptual/deferred; preferences and saved items remain Prepared/deferred.
+
+A later implementation authorization may name one isolated additive migration for `users` only and the minimum established schema/journal/verification files. No filename is assigned here. The migration must contain no seed, backfill, real row, dependent FK, provider/auth/session/recovery data, or runtime composition. Before any consumer or row exists, rollback is reversion/removal of that isolated unused unit, with no data migration, provider cleanup, session revocation, API compatibility, route cleanup, or module cleanup. Exact schema, constraint, zero-row, scope, and rollback evidence is mandatory at later acceptance.
 
 # 10. Additive Expansion Path
 
@@ -1026,7 +1045,7 @@ The opposite risk is larger: speculative tables create conflicting truth, broade
 - Content type, verification, publication, and review remain independent even when expressed as constrained columns.
 - Search is deterministic, source-aware, and derived from canonical content.
 - Prayer times, Hijri display dates, event occurrences, and tasbeeh state are not unnecessarily persisted.
-- Public Identity architecture is OPEN / APPROVED under `REG-0028`/`ADR-0011`; authentication/account implementation remains additive, physically unresolved, BLOCKED / NOT AUTHORIZED, and inactive in Release 1. Preferences and saved items remain Prepared/deferred.
+- Public Identity architecture is OPEN / APPROVED under `REG-0028`/`ADR-0011`, and the minimal `users` durable account-root physical contract is APPROVED under `REG-0029`/`ADR-0012`; the `users` table, migration, ORM schema, repository/service, API/runtime, real-account, and personal-data implementation remains additive, inactive in Release 1, and BLOCKED / NOT AUTHORIZED. Authentication linkage and `user_identities` remain conceptual/deferred; sessions and `user_sessions` remain conceptual/deferred; recovery persistence remains unresolved; provider selection remains deferred; and preferences and saved items remain Prepared/deferred.
 - Quran.Foundation integration preserves the approved 30-table boundary; it adds provider mappings and provenance within existing bounded structures, not an optional 31st table.
 - Every table has one owning module and a stable identifier strategy.
 - No giant unconstrained polymorphic table, premature event sourcing, premature partitioning, or speculative integration table is introduced.

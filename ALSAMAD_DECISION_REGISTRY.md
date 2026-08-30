@@ -1058,3 +1058,39 @@ The first architecture boundary contains only the durable account root, authenti
 **Implementation evidence:** None.
 
 **Supersedes / Superseded by:** Supersedes no Registry decision. Promotes and narrows previously Prepared architecture material without rewriting its historical status or authorizing its physical candidates.
+
+### REG-0029 — Public ALSAMAD durable account-root minimal physical contract
+
+**Category:** `Database`, `Security`, `API`, `Roadmap`.
+
+**Summary:** Whether to approve the smallest provider-neutral physical persistence contract for the shared Public ALSAMAD durable account root while keeping every implementation, authentication, provider, runtime, API, real-data, and dependent-module capability blocked.
+
+**Committed evidence:** `REG-0028` and accepted `ADR-0011` establish the shared durable account boundary, provider neutrality, authentication/session/recovery separation, Editorial Identity separation, multi-client reuse, and safe dependent-module deletion boundary. The Public Identity implementation-crossing audit determined that exact Database and Security/privacy contracts must precede authorization and recommended a runtime-inert durable root only. Database conventions establish plural `snake_case`, application-generated UUIDv7 business identifiers, UTC `timestamptz`, and checked text for small closed vocabularies. `ADR-0012` records the material physical decision.
+
+**Affected architecture:** `ALSAMAD_DATABASE_ARCHITECTURE.md` §9.1; `ALSAMAD_SECURITY_ARCHITECTURE.md` §6; `ALSAMAD_API_ARCHITECTURE.md` §9; `ALSAMAD_IMPLEMENTATION_ROADMAP.md` Public ALSAMAD Identity architecture-track dependency status; `ADR-0012`.
+
+**Affected roadmap gate:** Physical-contract prerequisite only. `DURABLE ACCOUNT ROOT PHYSICAL CONTRACT = APPROVED`; `PUBLIC ALSAMAD IDENTITY IMPLEMENTATION = BLOCKED / NOT AUTHORIZED`. No implementation unit or acceptance PASS exists.
+
+**Opened:** 2026-08-30.
+
+**Tier rationale:** Registry + ADR. The physical identifier, lifecycle representation, constraints, and deletion boundary become data-shaping and difficult to reverse after authentication identities, clients, or modules reference the root. The decision therefore meets both §7 ADR conditions. **ADR references:** `ADR-0011` (Accepted architectural dependency) and `ADR-0012` (Accepted physical contract).
+
+**Status:** `DECIDED` (2026-08-30). Physical contract approved; not implemented and no implementation is authorized.
+
+**Decision outcome:** The future root is exactly `users` with exactly four columns: application-generated UUIDv7 `id` (`uuid PRIMARY KEY NOT NULL`, no database default); `status` (`varchar(24) NOT NULL DEFAULT 'active'`) checked to `active`, `disabled`, `deletion_pending`, or `deleted`; immutable `created_at` (`timestamptz NOT NULL DEFAULT current_timestamp`); and lifecycle-only `updated_at` (`timestamptz NOT NULL DEFAULT current_timestamp`). The primary key is the only index. `ck_users__status` closes the vocabulary. Future trigger `trg_users__lifecycle_integrity` rejects identity/creation mutation, timestamp-only/no-op updates, non-increasing lifecycle timestamps, entry to `deleted` except from `deletion_pending`, and transition out of `deleted`.
+
+The root's sole purpose is stable shared ALSAMAD account identity. It is opaque, provider/client/module independent, never derived from contact or provider identity, immutable, and never reused. It contains no credentials, secrets, provider identity, session, recovery, contact, presentation/profile, preference, saved-item, Editorial, Talibeen, marketing, analytics, engagement, or other module data. Exact reactivation, grace, appeal, retention, legal hold, hard-delete, and anonymization policy remains later authority; the physical representation preserves the lifecycle distinctions without selecting terminal disposition.
+
+**Runtime, API, and data boundary:** A possible future implementation must be runtime-inert and create zero seed, backfill, real, or production rows; zero runtime readers or writers; no repository/service/provider/import/route/UI/server-action/background-job/composition-root consumer; and no dependent FK or cascade. The root is internal and absent from APIs, public identifiers, request/response contracts, serialization, REST, GraphQL, RPC, routes, and clients. It is personal-data-capable architecture, but real-user activation requires separate privacy/legal/security/provider/operational governance.
+
+**Migration and rollback boundary:** A later Owner-reviewed Roadmap crossing may name one isolated additive migration for `users` only and the minimum schema/journal/verification files. No filename or file boundary is assigned here. Before any consumer or row exists, the isolated unused unit must be removable without data migration, provider cleanup, session revocation, API compatibility, route cleanup, module cleanup, or user-data recovery.
+
+**Deferred boundaries:** Authentication linkage and `user_identities`; provider/mechanism selection; credentials; sessions and `user_sessions`; recovery persistence/workflows; preferences and saved items; repositories/services; API/UI; real-user activation; privacy notice/lawful basis/retention/deletion completion/access/export/backups/audit/provider metadata/subprocessors/transfers/support/jurisdictions; and all Talibeen linkage/persistence remain deferred and require their own crossings.
+
+**Absolute non-authorization:** **THIS DECISION DOES NOT AUTHORIZE IMPLEMENTATION.** It authorizes no table creation, ORM schema, migration, journal edit, test, seed, row, provider integration, credential, auth link, session, recovery record, repository/service, API/route/UI, signup/login, real account/personal data, Talibeen linkage, deployment, staging, commit, or push. The Roadmap remains exclusive implementation authority.
+
+**Independence from protected status truths:** Core Release 1 remains guest-first and exactly 30 tables. `M5 Gate 3` remains `PARTIAL`; M5 Gates 4–7 and `M5 Quran Import Activated` remain `NOT PASS`; `M6.1`/`M6.2` remain `BLOCKED`; KE-1 remains COMPLETE/runtime-inert; KE-2A remains COMPLETE; KE-2B remains `NOT STARTED / BLOCKED`; combined KE-2 remains incomplete; and no KE-3 authority exists. `TALIBEEN FOUNDATION = COMPLETE` and `Talibeen Foundation Verified = PASS`; broader Talibeen remains `BLOCKED / NOT AUTHORIZED` with no next unit authorized.
+
+**Implementation evidence:** None.
+
+**Supersedes / Superseded by:** Does not supersede `REG-0028`; it operationalizes only the previously unresolved minimal physical-root contract under `REG-0028`/`ADR-0011`.
