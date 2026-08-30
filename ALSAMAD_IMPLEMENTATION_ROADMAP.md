@@ -116,7 +116,7 @@ All capabilities classified as Prepared, Approved Later Module, or Future / Rese
 2. No optional 31st table is authorized.
 3. Additional tables require a post-M1 architecture decision. This freeze supersedes any earlier allowance to vary the Release 1 count during implementation; the approved 30-table catalog remains authoritative.
 4. Staff authentication is mandatory for Release 1 administration.
-5. Public-user authentication remains Prepared and excluded from Release 1.
+5. Public Identity architecture is OPEN / APPROVED under `REG-0028`/`ADR-0011`; public-user authentication implementation remains BLOCKED / NOT AUTHORIZED and excluded from Release 1.
 6. Quran.Foundation is the primary Quran provider behind provider-independent adapters.
 7. ALSAMAD canonical identifiers and public contracts remain provider-independent.
 8. Quran audio is conditionally in scope and must ship disabled if licensing or technical gates do not pass.
@@ -153,7 +153,7 @@ All capabilities classified as Prepared, Approved Later Module, or Future / Rese
 - The only authorized Release 1 physical database boundary is the 30-table catalog in `ALSAMAD_DATABASE_ARCHITECTURE.md`: 2 Global and locales, 8 Content integrity, 6 Quran, 4 Devotional content and translation, 3 Editorial, 5 Prayer and calendar configuration, and 2 Audit and publication history tables.
 - Views, materialized views, indexes, constraints, and derived projections do not authorize an additional canonical physical table.
 - Deterministic search owns zero physical Release 1 tables. A physical `search_documents` table is not authorized by M1.
-- Public identity and synchronized-preference tables remain Prepared and inactive.
+- Public Identity architecture is OPEN / APPROVED under `REG-0028`/`ADR-0011`, while every identity table/implementation remains BLOCKED / NOT AUTHORIZED and inactive; synchronized-preference tables remain Prepared/deferred.
 - Conditional Quran audio adds no Release 1 table.
 - Prepared, Later, and Future modules add zero Release 1 tables.
 - M2 must activate tables only in its explicitly authorized dependency sequence. It may not infer permission to create all domain tables at once.
@@ -1362,7 +1362,7 @@ Implement the provider-independent Devotional Content and Translation foundation
 - Deterministic search indexing (Phase 8), AI retrieval, embeddings, semantic search, or Knowledge Graph work of any kind. `ALSAMAD_KNOWLEDGE_ENGINE_ARCHITECTURE.md` and any Knowledge Engine implementation are M7.0-track and are explicitly not authorized by this contract.
 - Repetition counters, streaks, or any worship measurement, consistent with the No Worship Scoring Principle; a repetition _display_ sourced from `devotional_collection_items` guidance is permitted, a logged or persisted count is not.
 - Selection, drafting, or seeding of new Editorial General Dua entries, new adhkar collections, or new dua content beyond what is already committed at HEAD in `src/lib/general-duas.ts`. M6 authorizes zero new religious or editorial seed rows.
-- Authentication, bookmarking persistence, or any Prepared five-table identity package.
+- Public Identity/account implementation, authentication, bookmarking persistence, or any synchronized-preference/saved-item package.
 
 ### Dependencies
 
@@ -1994,6 +1994,24 @@ and, only if genuinely necessary, exactly one new, narrowly-scoped canonical/alt
 - Rollback/recovery
 - Release status
 
+## Public ALSAMAD Identity Expanded V1 prerequisite architecture track
+
+**Governance status.** `REG-0028` and accepted `ADR-0011` promote Public ALSAMAD Identity/Account from Prepared/inactive into an Expanded V1 prerequisite architecture track. `PUBLIC ALSAMAD IDENTITY ARCHITECTURE = OPEN / APPROVED`. This is governance design only. `PUBLIC ALSAMAD IDENTITY IMPLEMENTATION = BLOCKED / NOT AUTHORIZED`; implementation is not READY, NOT STARTED, and has no assigned unit, file boundary, migration, provider, or acceptance PASS.
+
+**Architectural outcome.** One opaque, provider-neutral, ALSAMAD-owned durable account subject is the shared platform identity for separately authorized clients and modules. Authentication credentials/provider identities, sessions, recovery methods, Editorial Identity, presentation attributes, and dependent private-module profiles remain separate from that account root. Recovery restores access to the same durable account; sessions are revocable access contexts bounded by account state; separately authorized web/mobile clients reuse the same account rather than create duplicate systems.
+
+**First architecture boundary.** Durable account identity; authentication boundary; session boundary; recovery boundary; essential usable/restricted-or-disabled/deletion-in-progress/terminal-completion lifecycle semantics; Editorial Identity separation; future private-module linkage suitability; multi-client reuse; and deletion coordination that prevents blind cascade, orphaning, or undeclared retention. Exact state names and physical representation remain unresolved.
+
+**Explicit exclusions.** Preferences, saved items, favorites, synchronization, personalization, private routines, notifications, payments, unrelated account features, Talibeen linkage/profile/persistence/discovery/introductions/messaging, real accounts/data, tables/columns/constraints/schema/ORM/migrations, provider/mechanism selection or integration, credentials, session storage, recovery implementation, API contract/endpoint, route, UI, Admin/support tooling, runtime wiring, and deployment remain blocked. The Core Release 1 guest-first experience and 30-table boundary are unchanged.
+
+**Dependent-module boundary.** Future private modules may reference the shared account only after their own governance. Base-account deletion does not imply unconditional physical cascade. Each dependent module must define ownership, deletion, retention, legal/safety evidence, cleanup, and completion behavior before production linkage. This track creates no Talibeen-specific data or retention authority and does not collapse Public Identity into Editorial Identity.
+
+**Dependencies before any implementation authorization.** Accepted architecture alone is insufficient. A later crossing requires an exact Database physical contract; exact API and Security implementation contracts; privacy purpose, minimization, lifecycle, deletion, user-rights, and acceptance criteria; applicable provider/mechanism review; threat/data-flow review; rollback and recovery evidence requirements; and one Owner-reviewed Roadmap unit naming the exact file/migration boundary. Implementation and completion require their own later evidence-backed crossings.
+
+**External research.** None was required to approve this conceptual provider-neutral architecture. Provider selection, credential/session/recovery implementation security, privacy/legal compliance, deletion/user rights/transfers, Talibeen sensitive data, identity/age assurance, jurisdictions, and operational incident/support requirements remain later gates.
+
+**Release status.** Architecture track OPEN / APPROVED under `REG-0028`/`ADR-0011`; implementation `BLOCKED / NOT AUTHORIZED`. No implementation evidence exists. This track authorizes no Talibeen unit and changes no M5, M6, KE, Quran, devotional, or Core Release 1 status.
+
 ## Talibeen Expanded V1 governance-design track
 
 **Governance status.** `REG-0025` promotes Talibeen Al-Halal / طالبين الحلال from Approved Later Module into an **ALSAMAD Expanded V1 separately feature-gated product track**. Talibeen remains outside the frozen Core Release 1 daily companion and changes no Core scope, 30-table count, gate, acceptance, or completion. All Talibeen implementation remains `BLOCKED / NOT AUTHORIZED` except the exact schema-free, runtime-inert Foundation unit separately authorized under `REG-0027`; that narrow exception changes no broader Talibeen status.
@@ -2006,7 +2024,7 @@ and, only if genuinely necessary, exactly one new, narrowly-scoped canonical/alt
 
 **Hard dependencies before any Talibeen implementation involving real identity or persistent state:**
 
-1. public ALSAMAD identity/account activation, including authentication/session/recovery scope, through its own authorized gate;
+1. public ALSAMAD identity/account implementation and activation, including exact authentication/session/recovery scope, through its own later authorized gate; `REG-0028`/`ADR-0011` approve architecture only;
 2. exact Talibeen Product, Privacy, Safety, Legal, and Security contracts, including jurisdictions, `18+` assurance, suspected-minor handling, identity verification, display identity, profile-completion gates, data purposes, consent, and launch approval;
 3. later ADR review for the persistent ALSAMAD-user relationship, candidate eligibility/direction, private-profile/discovery/contact/conversation state, evidence, retention/deletion/legal hold, and multi-client domain boundary;
 4. an exact Database Architecture contract for the isolated Highly Restricted bounded context, followed only later by separately authorized migration work;
@@ -2026,7 +2044,7 @@ and, only if genuinely necessary, exactly one new, narrowly-scoped canonical/alt
 
 **Objective.** Establish isolated, runtime-inert Talibeen domain semantics only: stable vocabulary; an opaque conceptual ALSAMAD identity reference using synthetic/test values; adults-only (`18+`) and missing/invalid-data fail-closed eligibility; man-to-woman and woman-to-man marriage-candidate direction with same-sex, generic, and unknown directions rejected; private Talibeen versus public/base profile separation; verification independence from membership; Free/Plus distinction, with Premium only as V2/deferred vocabulary if needed; default-off/no-production-composition semantics; and client-neutral vocabulary. One ALSAMAD account remains the conceptual person root; no duplicate Talibeen account is permitted.
 
-**Dependencies.** `REG-0025` and `REG-0026` remain DECIDED; `REG-0027` is IMPLEMENTED for this exact completed unit only. Product Architecture and Security Architecture Talibeen invariants remain unchanged; public identity remains Prepared/inactive; no real identity or persistent state may be consumed. External legal/operational research was not required for this synthetic runtime-inert boundary.
+**Dependencies.** `REG-0025` and `REG-0026` remain DECIDED; `REG-0027` is IMPLEMENTED for this exact completed unit only. Product Architecture and Security Architecture Talibeen invariants remain unchanged; Public Identity architecture is OPEN / APPROVED under `REG-0028`/`ADR-0011`, but its implementation and activation remain BLOCKED / NOT AUTHORIZED, so no real identity or persistent state may be consumed. External legal/operational research was not required for this synthetic runtime-inert boundary.
 
 **Exact authorized implementation file boundary:**
 
@@ -2038,7 +2056,7 @@ tests/talibeen-foundation.test.mjs
 
 No other file was created or changed. No directory index/export barrel, fixture, package/config change, or additional test was introduced. The two TypeScript files are pure domain code with no I/O. The Node test follows the repository's existing `node --import tsx --test` convention. The completed implementation is commit `c7ba024d0d19c31c4c46ff027531d504e17bc01f` (`feat: implement Talibeen Foundation contracts`).
 
-**Identity and privacy boundary.** The identity reference is opaque, conceptual, and synthetic-only. It binds to no `users` table, account row, production user ID, provider subject, OAuth/Google/email/magic-link/passkey identity, session, cookie, auth middleware, Editorial Identity, or real verification evidence. Talibeen remains a Highly Restricted private bounded context, but the unit contains no real data, telemetry, persistence, user-like sensitive logs, staff/Admin access, AI access, network/provider call, secret, or production side effect. Persistent identity/private-domain design requires later public-account activation, exact contracts, and ADR review.
+**Identity and privacy boundary.** The identity reference is opaque, conceptual, and synthetic-only. It binds to no `users` table, account row, production user ID, provider subject, OAuth/Google/email/magic-link/passkey identity, session, cookie, auth middleware, Editorial Identity, or real verification evidence. Talibeen remains a Highly Restricted private bounded context, but the unit contains no real data, telemetry, persistence, user-like sensitive logs, staff/Admin access, AI access, network/provider call, secret, or production side effect. Persistent identity/private-domain design requires later Public Identity implementation/activation, exact Talibeen contracts, and separate ADR review; `REG-0028`/`ADR-0011` do not satisfy those later gates.
 
 **Absolute exclusions.** Database/schema/migration/ORM/repository/filesystem persistence; real users/data; authentication/session/account activation; routes/pages/UI/components; API endpoint/contract; discovery/candidate retrieval/location filtering; introductions/requests/messaging/conversations/contact sharing; media/photos; moderation/Admin runtime; notifications/email/push; payments/billing/pricing implementation; analytics/telemetry/Profile Visits; public SEO/metadata/sitemap/structured data; Intentional Discovery Breaks; success-story publication; AI; Social Reach; standalone web/mobile runtime; charitable campaigns; devotional/Quran/Knowledge Engine integration; external calls; secrets; runtime activation; and any production composition-root import.
 
@@ -2058,7 +2076,7 @@ No other file was created or changed. No directory index/export barrel, fixture,
 
 **Rollback/recovery.** The authorized implementation rolls back by reverting/removing only its isolated three-file unit. There is no migration rollback, user-data migration, provider cleanup, runtime-route rollback, API compatibility obligation, external revocation, or data recovery because the unit is schema-free, synthetic-only, runtime-inert, and externally disconnected.
 
-**Deferred beyond Foundation.** Public account activation/authentication; persistent user linkage; profile fields/completion; age/identity-assurance providers; Database/migrations; API; discovery/location; introductions; messaging/contact grants; media/photos; moderation operations; retention/deletion/legal hold; notifications/email; payments/pricing; analytics/Profile Visits; public SEO; Intentional Discovery Breaks; public success stories; standalone clients; AI; and Social Reach remain blocked. Their applicable privacy, safety, legal, security, consumer, provider, and operational research/contracts remain required before those later phases.
+**Deferred beyond Foundation.** Public account implementation/activation/authentication; persistent user linkage; profile fields/completion; age/identity-assurance providers; Database/migrations; API; discovery/location; introductions; messaging/contact grants; media/photos; moderation operations; retention/deletion/legal hold; notifications/email; payments/pricing; analytics/Profile Visits; public SEO; Intentional Discovery Breaks; public success stories; standalone clients; AI; and Social Reach remain blocked. Public Identity architecture approval under `REG-0028`/`ADR-0011` changes none of those implementation gates. Their applicable privacy, safety, legal, security, consumer, provider, and operational research/contracts remain required before those later phases.
 
 **Release status.** `TALIBEEN FOUNDATION = COMPLETE`. `Talibeen Foundation Verified = PASS`. This status applies only to the narrow Foundation unit. Broader Talibeen remains `BLOCKED / NOT AUTHORIZED`; no next implementation unit, persistent identity/profile work, runtime/user-facing capability, V1.1/V2 feature, or charitable campaign is authorized by this completion.
 
@@ -2192,7 +2210,7 @@ M0-->M05["M0.5"]-->M1-->M2-->M3-->M4-->M5-->M6-->M7-->M8-->M9-->M10-->M11-->M12
 - Quran.Foundation production Content access, exact editions, quotas, attribution, retention rights, and independently licensed fallback
 - Translation licenses
 - Devotional datasets
-- Staff authentication provider and operational configuration; staff authentication itself is mandatory, while public authentication remains Prepared
+- Staff authentication provider and operational configuration; staff authentication itself is mandatory, while Public Identity architecture is OPEN / APPROVED under `REG-0028`/`ADR-0011` and its implementation remains BLOCKED / NOT AUTHORIZED
 - PostgreSQL provider
 - Hosting
 - Object storage
@@ -2216,7 +2234,7 @@ M0.5 depends on the completed Quran.Foundation capability discovery and integrat
 
 M1 may begin only after all twelve architecture documents, this roadmap, Release 1, and M0 are consistent. M1 must sequence the `QuranContentProvider` contract and Quran.Foundation adapter before provider use. Content activation depends on approved production credentials, exact resources, commercial/attribution terms, quota limits, retention rights or an independently licensed fallback, validation/checksums, and deletion/exit handling.
 
-Release 1 includes approved text, translations, tafsir, footnotes, structural navigation, and chapter information. Audio is conditionally included only after its written rights and production gate passes; otherwise it is disabled. QF Search remains internal evaluation until its production/search gate passes, while public search stays deterministic and local. Public authentication and `QuranUserInteropProvider` remain Prepared. Streaks and Quran.Foundation social/community capabilities remain excluded.
+Release 1 includes approved text, translations, tafsir, footnotes, structural navigation, and chapter information. Audio is conditionally included only after its written rights and production gate passes; otherwise it is disabled. QF Search remains internal evaluation until its production/search gate passes, while public search stays deterministic and local. Public Identity architecture is OPEN / APPROVED under `REG-0028`/`ADR-0011`, but public-authentication implementation remains BLOCKED / NOT AUTHORIZED; `QuranUserInteropProvider` remains Prepared. Streaks and Quran.Foundation social/community capabilities remain excluded.
 
 The milestone dependency chain is `M0 → M0.5 → M1`. No implementation begins until M0.5 verification passes.
 

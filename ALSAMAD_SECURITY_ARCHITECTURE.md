@@ -140,7 +140,11 @@ Editorial General Dua retains structural classification, language review, religi
 
 # 6. Identity, MFA, Passkeys, Recovery, Sessions
 
-Core Release 1 public reading remains guest-first. Staff identity is separate from optional public accounts. The separately feature-gated Talibeen context is not a public-profile extension.
+Core Release 1 public reading remains guest-first. `REG-0028` and `ADR-0011` open Public ALSAMAD Identity as an Expanded V1 prerequisite architecture track while implementation and real-user activation remain blocked. Staff/Editorial identity is separate from public accounts, and the separately feature-gated Talibeen context is not a public-profile extension.
+
+The durable ALSAMAD account subject is provider-neutral and distinct from credentials, provider subjects, sessions, recovery methods, presentation fields, Editorial Identity, and dependent private-module profiles. Authentication may later prove control of a credential/provider identity and resolve it to the stable account; provider replacement or recovery must not silently create a second account. Sessions represent revocable authorized access in an authenticated account context, may coexist across future authorized clients/devices, and remain bounded by current account state. Exact credential, provider, linking, session storage/transport, timeout, recovery, and account-state implementations require later contracts.
+
+Account lifecycle must distinguish usable access, restricted/disabled access, deletion in progress, and terminal completion at the semantic level without freezing a physical enum here. Deletion completion cannot assume a blind cascade into dependent sensitive/private modules: every such module must govern ownership, disposition, retention, legal/safety evidence, and cleanup before production linkage. No module data, retention period, support bypass, provider, table, API, or implementation is authorized by this architecture boundary.
 
 - Passkeys/WebAuthn are preferred.
 - Staff MFA is mandatory; high-impact roles require phishing-resistant methods where available.
@@ -416,11 +420,13 @@ Threat modeling; guest-core security; staff identity/MFA/session/capabilities/se
 
 ## Expanded V1 — Separately Feature-Gated
 
+Public ALSAMAD Identity architecture under `REG-0028`/`ADR-0011`: shared provider-neutral durable account identity; authentication/session/recovery and essential lifecycle boundaries; Editorial Identity separation; multi-client reuse; and governed future private-module linkage. Architecture is open; implementation, provider selection, tables, APIs, real accounts/data, and dependent-module linkage remain blocked.
+
 Talibeen governance design under `REG-0025`, outside frozen Core Release 1. Public identity activation; isolated Highly Restricted data contracts; Privacy/Safety/Legal/Security approval; exact discovery/contact/messaging/media/notification/payment/SEO/analytics consumer contracts; purpose-bound administration; default-off feature and staged-release gates; and one exact later Roadmap implementation crossing remain required. Classification does not authorize activation.
 
 ## Prepared
 
-Public identity/passkeys/sync/bookmarks if not activated; correction intake; media/audio; notification preferences; event/outbox/webhook foundations after a consumer is approved.
+Public Identity implementation/provider integration; sync/bookmarks/preferences/saved items; correction intake; media/audio; notification preferences; event/outbox/webhook foundations after a consumer is approved.
 
 ## Approved Later Module
 
@@ -443,7 +449,7 @@ Production requires current threat/data-flow model; no unresolved blocking findi
 - RPO/RTO, backup/audit/log/security-evidence retention and restore cadence.
 - Vulnerability SLAs, penetration-test provider, disclosure channel, incident contacts.
 - Exact Quran/translation editions, durable-storage rights, attribution, quotas, and artifact-signing approach; Quran.Foundation is the approved primary Quran provider.
-- Later public-authentication activation requirements; public authentication remains Prepared in Release 1.
+- Exact Public Identity physical/API implementation, provider/mechanism selection, privacy acceptance, account deletion operations, and activation requirements; the Expanded V1 architecture track is open under `REG-0028`/`ADR-0011`, but implementation and real accounts remain blocked.
 - Key hierarchy, rotation, emergency recovery custody.
 - Talibeen initial jurisdictions, age-assurance method/provider for the settled `18+` boundary, identity verification, safety operation, isolation details, staff-access model, retention/legal hold, beta cohort, and staged public-launch approval.
 - AI provider terms, data handling, evaluation thresholds, and red-team governance before approval.

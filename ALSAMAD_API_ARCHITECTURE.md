@@ -92,7 +92,8 @@ gRPC may serve measured internal throughput needs. Protobuf maps to application 
 | Prayer methods and regional defaults                    | Prayer              | Release 1             |
 | Hijri methods, adjustments, Muslim events               | Calendar            | Release 1             |
 | Publication and audit events                            | Audit/Publication   | Release 1             |
-| Accounts, sessions, preferences, saved items            | Identity            | Prepared              |
+| Accounts and sessions                                   | Identity            | Expanded V1 prerequisite architecture open; API implementation blocked |
+| Preferences and saved items                             | Identity            | Prepared/deferred     |
 | Hadith                                                  | Hadith              | Approved Later Module |
 | Talibeen                                                | Talibeen            | Expanded V1 separately feature-gated; implementation blocked |
 | Subscriptions, payments, Balance                        | Commerce/Ledger     | Approved Later Module |
@@ -175,7 +176,7 @@ Errors never reveal SQL, stack traces, secrets, provider payloads, topology, con
 
 Release 1 staff APIs use an approved provider-independent identity adapter and revocable server session. Cookies are Secure, HttpOnly, appropriately SameSite, and CSRF-protected. Staff MFA is mandatory; high-impact roles prefer phishing-resistant passkeys.
 
-Prepared public identity maps verified OAuth/OIDC or passkey credentials to an internal stable subject. Raw provider tokens are not retained unless a named provider call requires them; any retained token is encrypted, scoped, rotated, and minimized.
+Under `REG-0028` and `ADR-0011`, Public ALSAMAD Identity is a provider-neutral Expanded V1 prerequisite architecture track. Authentication may later establish control of a credential or provider identity and resolve it to one stable ALSAMAD account subject; the credential/provider identity, session, and recovery mechanism never become that durable account identity. Recovery restores access to the same account rather than silently creating a duplicate, and account-state changes may require session invalidation. These are conceptual boundaries only: no endpoint, route, version, request/response schema, transport, token format, cookie, provider, account/session store, implementation, or real-user processing is authorized. Preferences and saved items remain Prepared/deferred.
 
 Services use workload identity or short-lived signed credentials. Shared permanent internal API keys are prohibited.
 
@@ -335,7 +336,7 @@ Each endpoint class requires schema/golden contract tests; authorization allow/d
 - Public base URL/gateway topology and whether public reads use a dedicated origin.
 - Staff identity provider and phishing-resistant MFA rollout.
 - Exact Quran.Foundation resources, Quran/translation rights, and devotional, prayer, and Hijri providers/licenses.
-- Endpoint limits, Quran.Foundation quotas, approved retention/cache TTLs, and later public-authentication activation; public authentication is Prepared in Release 1.
+- Endpoint limits, Quran.Foundation quotas, approved retention/cache TTLs, and later Public Identity implementation/activation; its Expanded V1 prerequisite architecture is open under `REG-0028`/`ADR-0011`, but no public-authentication API or runtime is authorized.
 - First proven GraphQL/gRPC consumer.
 - Event broker and webhook signing scheme when approved.
 - Public API documentation and controlled admin schema exposure.

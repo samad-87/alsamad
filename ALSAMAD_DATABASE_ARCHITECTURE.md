@@ -21,7 +21,7 @@ This document defines the smallest durable Release 1 schema and the additive exp
 
 Release 1 serves guests in Arabic and English while remaining unlimited-language by architecture. It includes the Quran reader, authenticated duas and adhkar, visibly separated Editorial General Duas, prayer and Hijri configuration, Muslim events, deterministic search, source provenance, and the minimum editorial and audit integrity needed to publish safely.
 
-Authentication, synchronized preferences, bookmarks, and reading position remain Prepared and are not publicly activated in Release 1. Tasbeeh and ordinary display preferences remain local-first. Hadith, Talibeen Al-Halal, subscriptions, Alsamad Balance, notifications, semantic search, runtime AI, and the Knowledge Graph create no Release 1 tables.
+Public Identity architecture is open under `REG-0028`/`ADR-0011`, but authentication/account implementation remains blocked and is not publicly activated in Release 1. Synchronized preferences, bookmarks, and reading position remain Prepared; tasbeeh and ordinary display preferences remain local-first. Hadith, Talibeen Al-Halal, subscriptions, Alsamad Balance, notifications, semantic search, runtime AI, and the Knowledge Graph create no Release 1 tables.
 
 Documented Prepared, Later, or Future structures must not be migrated merely because they appear here. Each requires separate product, privacy, security, and implementation approval.
 
@@ -870,19 +870,25 @@ A view or materialized view may optimize a read model without changing the physi
 | Correction or withdrawal         | New revision where applicable plus `publication_events` and `audit_events`.                                              |
 | Tasbeeh                          | Local device storage; no PostgreSQL table.                                                                               |
 
-# 9. Prepared Identity and Synchronized Preferences
+# 9. Expanded V1 Public Identity Architecture and Prepared Synchronization
 
-Core Release 1 operates without server-side user accounts. Quran, duas, adhkar, prayer, calendar, search, and tasbeeh are guest-first. If authentication, bookmarks, and synchronization are separately approved for launch, add this five-table package through an additive migration:
+Core Release 1 operates without server-side user accounts. Quran, duas, adhkar, prayer, calendar, search, and tasbeeh remain guest-first. `REG-0028` and `ADR-0011` open an Expanded V1 prerequisite **architecture track only** for one provider-neutral, durable ALSAMAD account root and its future authentication, session, recovery, and essential lifecycle boundaries. They authorize no physical table, column, constraint, migration, ORM schema, provider integration, real account, personal data, API, or runtime.
 
-| Prepared table     | Purpose                                                  | Minimum integrity boundary                                               |
-| ------------------ | -------------------------------------------------------- | ------------------------------------------------------------------------ |
-| `users`            | Private account root.                                    | Stable UUID, checked status, deletion lifecycle.                         |
-| `user_identities`  | External authentication-provider link.                   | Unique provider/external subject; provider metadata minimized.           |
-| `user_sessions`    | Revocable server session when not provider-managed.      | Unique hashed token, expiry, revocation; no raw token storage.           |
-| `user_preferences` | Synchronized locale, theme, reading, and prayer choices. | One row per user; critical typed fields and bounded non-critical JSONB.  |
-| `user_saved_items` | Bookmarks and reading position.                          | Unique user/target/kind; constrained target types and privacy ownership. |
+The prior five-table package remains useful Prepared evidence, but is no longer one indivisible activation package:
 
-This package raises the physical count from 30 to 35 only if the pending product decision is approved. Separate provider, email, device, consent, notification, or preference tables require their own proven workflows; they are not included for symmetry.
+| Conceptual candidate | Current classification | Purpose / boundary |
+| -------------------- | ---------------------- | ------------------ |
+| `users`              | Expanded V1 architecture only; physical contract blocked | Candidate durable shared account root; exact identifier, fields, states, deletion representation, and constraints require a later Database/ADR/Roadmap crossing. |
+| `user_identities`    | Expanded V1 architecture only; physical contract blocked | Candidate provider-neutral authentication link; an external subject is never the durable ALSAMAD account identity. |
+| `user_sessions`      | Expanded V1 architecture only; physical contract blocked | Candidate independently revocable session representation; storage and transport remain unresolved. |
+| `user_preferences`   | Prepared/deferred | Optional synchronized locale, theme, reading, and prayer choices; outside the first Public Identity boundary. |
+| `user_saved_items`   | Prepared/deferred | Optional bookmarks and reading position; outside the first Public Identity boundary. |
+
+Recovery is an architecture boundary, not an approved table: it must restore access to the same durable account without silently creating a duplicate identity, while its mechanism and physical representation remain later decisions. Preferences, saved items, favorites, personalization, private routines, notifications, and unrelated account features are not promoted by `REG-0028`.
+
+Future private modules may reference the shared account only after their own governance. Account deletion must not blindly cascade into, orphan, or silently retain dependent private-module records; each module must first define its ownership, deletion, retention, legal/safety, and cleanup contract. No Talibeen persistence or retention rule is created here.
+
+The Core Release 1 physical count remains exactly 30. A later exact Database contract must determine the smallest physical identity package and its additive migration boundary before implementation; the historical projection from 30 to 35 is not current implementation authority or a frozen activation count.
 
 # 10. Additive Expansion Path
 
@@ -1003,7 +1009,7 @@ These decisions do not prohibit future tables. They require evidence and an addi
 | Bounded recurrence or provider JSONB drifts.            | Validate against explicit application and database checks; version the schema.                                                              |
 | One geographic hierarchy becomes operationally awkward. | Split through additive subtype tables while keeping geographic IDs stable.                                                                  |
 | Editorial General Dua is mislabeled.                    | Enforce checked type, required review gates, source-claim constraints, tests, and public presentation rules in the publication transaction. |
-| Accounts launch later.                                  | Migrate local preferences explicitly into the five-table synchronized package with user consent.                                            |
+| Accounts launch later.                                  | After separate identity implementation authority, migrate any later-approved local preferences explicitly under their own synchronized-data contract and user consent. |
 
 The opposite risk is larger: speculative tables create conflicting truth, broader authorization surfaces, harder imports, status drift, more failure modes, and schema inertia before they support a public journey.
 
@@ -1020,7 +1026,7 @@ The opposite risk is larger: speculative tables create conflicting truth, broade
 - Content type, verification, publication, and review remain independent even when expressed as constrained columns.
 - Search is deterministic, source-aware, and derived from canonical content.
 - Prayer times, Hijri display dates, event occurrences, and tasbeeh state are not unnecessarily persisted.
-- Authentication remains an additive five-table Prepared package and is not active in Release 1.
+- Public Identity architecture is OPEN / APPROVED under `REG-0028`/`ADR-0011`; authentication/account implementation remains additive, physically unresolved, BLOCKED / NOT AUTHORIZED, and inactive in Release 1. Preferences and saved items remain Prepared/deferred.
 - Quran.Foundation integration preserves the approved 30-table boundary; it adds provider mappings and provenance within existing bounded structures, not an optional 31st table.
 - Every table has one owning module and a stable identifier strategy.
 - No giant unconstrained polymorphic table, premature event sourcing, premature partitioning, or speculative integration table is introduced.

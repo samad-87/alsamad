@@ -175,6 +175,7 @@ As of 2026-08-08, the M6 architecture decision analysis covering REG-0001–REG-
 | REG-0025 | Talibeen Al-Halal promotion to Expanded V1 separately feature-gated governance-design track           | Product, Security, Roadmap   | DECIDED     | Registry only; later persistent contracts require separate ADR review     |
 | REG-0026 | Talibeen Foundation narrow runtime-inert domain-contract boundary                                    | Roadmap                      | DECIDED     | Registry only; implementation remains blocked pending a later Roadmap crossing |
 | REG-0027 | Talibeen Foundation owner-reviewed exact-unit implementation authorization                          | Roadmap                      | IMPLEMENTED | Registry only; implemented by the corresponding Roadmap PASS              |
+| REG-0028 | Public ALSAMAD Identity/Account Expanded V1 prerequisite architecture boundary                     | Product, Database, API, Security, Roadmap | DECIDED | Registry + ADR (`ADR-0011`, Accepted); implementation blocked |
 
 ### REG-0001 — Editorial General Dua placement in the devotional physical model
 
@@ -1023,3 +1024,37 @@ Authority is limited to the `REG-0026` semantics: stable Talibeen vocabulary; an
 **Implementation evidence:** `Talibeen Foundation Verified = PASS` in `ALSAMAD_IMPLEMENTATION_ROADMAP.md`, implemented by commit `c7ba024d0d19c31c4c46ff027531d504e17bc01f` (`feat: implement Talibeen Foundation contracts`) in exactly `src/lib/talibeen/contracts.ts`, `src/lib/talibeen/eligibility.ts`, and `tests/talibeen-foundation.test.mjs`. Acceptance evidence: dedicated Foundation tests 11/11 PASS; repository tests 497/497 PASS; TypeScript typecheck PASS; scoped lint PASS; scoped Prettier check PASS; whitespace/diff check PASS; and import/dependency, runtime-isolation, persistence-isolation, external-isolation, and exact-scope reviews PASS. This marks only the schema-free, synthetic-only, runtime-inert Foundation unit COMPLETE. Broader Talibeen remains `BLOCKED / NOT AUTHORIZED` and persistent identity/private-domain work still requires separate ADR/materiality and Roadmap review.
 
 **Supersedes / Superseded by:** Supersedes no decision. Satisfies only the separate implementation-authorization requirement recorded by `REG-0026` and the Roadmap.
+
+### REG-0028 — Public ALSAMAD Identity/Account Expanded V1 prerequisite architecture boundary
+
+**Category:** `Product`, `Database`, `API`, `Security`, `Roadmap`.
+
+**Summary:** Whether Public ALSAMAD Identity/Account is promoted from Prepared/inactive into an Expanded V1 prerequisite architecture track as one durable shared platform identity, while implementation remains blocked and preferences, saved items, personalization, and dependent private-module capabilities remain outside the first boundary.
+
+**Committed evidence:** Product Architecture keeps Core Release 1 guest-first while distinguishing the shared account root from optional synchronized capabilities. Database Architecture §9 preserves the historical five-table package as Prepared evidence but separates the identity/authentication/session candidates from deferred preferences and saved items without approving a physical contract. API and Security Architecture define provider-neutral account, authentication, session, recovery, lifecycle, Editorial-separation, and multi-client boundaries. Owner approval dated 2026-08-30 settles the product direction. `ADR-0011` records the material rationale and rejected alternatives.
+
+**Affected architecture:** `ALSAMAD_PRODUCT_ARCHITECTURE_V1.md` §§3.5 and 4; `ALSAMAD_DATABASE_ARCHITECTURE.md` §9; `ALSAMAD_API_ARCHITECTURE.md` §§5 and 9; `ALSAMAD_SECURITY_ARCHITECTURE.md` §§6, 26, and 28; `ALSAMAD_IMPLEMENTATION_ROADMAP.md` Public ALSAMAD Identity architecture track; `ADR-0011`.
+
+**Affected roadmap gate:** Public ALSAMAD Identity architecture track only. `PUBLIC ALSAMAD IDENTITY ARCHITECTURE = OPEN / APPROVED`; `PUBLIC ALSAMAD IDENTITY IMPLEMENTATION = BLOCKED / NOT AUTHORIZED`.
+
+**Opened:** 2026-08-30.
+
+**Tier rationale:** Registry + ADR. The decision fixes the durable shared account identity that future clients and modules may reference and separates it from replaceable credentials/provider subjects, sessions, recovery methods, Editorial Identity, and private-module data. Reversal after persistent consumers exist would require cross-module data reconstruction and could cause account duplication, takeover, orphaning, or unsafe deletion. It therefore meets both §7 ADR conditions. **ADR reference:** `ADR-0011` (Accepted).
+
+**Status:** `DECIDED` (2026-08-30). Architecture is approved; no implementation evidence exists and no implementation is authorized.
+
+**Decision outcome:** One provider-neutral, ALSAMAD-owned durable account subject is the shared platform identity for separately authorized clients and modules. Authentication establishes control of a credential or provider identity and may later resolve it to the durable account; it does not define or replace that account. Sessions represent revocable authorized access in an authenticated account context. Recovery restores access to the same durable account rather than silently creating another. Public ALSAMAD Account is not Talibeen-only, no client or module creates a duplicate account system, and Editorial Identity remains a separate bounded context.
+
+The first architecture boundary contains only the durable account root, authentication, session, recovery, essential account-lifecycle semantics, Editorial Identity separation, future private-module linkage suitability, and multi-client reuse. Preferences, saved items, favorites, synchronization, personalization, private routines, notifications, payments, and unrelated account capabilities remain Prepared/deferred.
+
+**Dependent-module and deletion boundary:** A future private module may reference the durable account only after its own governance. Base-account deletion must not blindly cascade into, orphan, or silently retain sensitive dependent-module data. Each module must define ownership, deletion, retention, legal/safety constraints, and cleanup before production linkage. This decision creates no Talibeen-specific persistence, retention, legal basis, or deletion policy.
+
+**Absolute non-authorization:** **THIS DECISION DOES NOT AUTHORIZE IMPLEMENTATION.** It authorizes no `users`/account/auth-identity/session/preferences/saved-item table, column, schema, ORM, migration, provider or mechanism selection/integration, credential, session persistence, recovery implementation, API contract/endpoint, route, UI, real account, personal data, Talibeen linkage/profile/persistence, or production activation. Neither this Registry entry nor `ADR-0011` supplies an implementation boundary.
+
+**Roadmap operationalization:** The Roadmap opens only the architecture track. Any implementation requires exact Database/API/Security and privacy acceptance contracts, applicable provider/mechanism review, and a later Owner-reviewed Roadmap crossing naming one exact unit and file/migration boundary, followed by separate acceptance and completion evidence.
+
+**Independence from protected status truths:** Core Release 1 remains guest-first and its table count is unchanged. `M5 Gate 3` remains `PARTIAL`; M5 Gates 4–7 and `M5 Quran Import Activated` remain `NOT PASS`; `M6.1`/`M6.2` remain `BLOCKED`; KE-1 remains COMPLETE/runtime-inert; KE-2A remains COMPLETE; KE-2B remains `NOT STARTED / BLOCKED`; combined KE-2 remains incomplete; and no KE-3 implementation authority exists. `TALIBEEN FOUNDATION = COMPLETE` and `Talibeen Foundation Verified = PASS`; broader Talibeen remains `BLOCKED / NOT AUTHORIZED` with no next unit authorized.
+
+**Implementation evidence:** None.
+
+**Supersedes / Superseded by:** Supersedes no Registry decision. Promotes and narrows previously Prepared architecture material without rewriting its historical status or authorizing its physical candidates.

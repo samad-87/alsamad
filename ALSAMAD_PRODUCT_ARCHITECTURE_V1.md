@@ -98,9 +98,11 @@ The calendar must distinguish calculated dates from local or authority-announced
 
 Release 1 ships deterministic lexical/full-text search with filters and source cards. Runtime generative religious answers are **Future / Research** and gated until they pass retrieval, citation, refusal, evaluation, monitoring, and disclosure requirements.
 
-### 3.5 Accounts are useful, but not first-page value
+### 3.5 Shared identity is a prerequisite, but never first-page value
 
-Authentication should initially support synced preferences, bookmarks, reading position, and private routines. Do not require signup to use Quran, duas, prayer times, calendar, search, or tasbeeh.
+`REG-0028` promotes Public ALSAMAD Identity/Account into an **Expanded V1 prerequisite architecture track**. One durable shared ALSAMAD account is the platform identity for separately authorized clients and modules; it is not a Talibeen-only account and remains distinct from authentication credentials, provider identities, sessions, Editorial Identity, and every dependent private-module profile. This architecture promotion authorizes no account implementation or real-user processing.
+
+Core Release 1 remains guest-first: do not require signup to use Quran, duas, prayer times, calendar, search, or tasbeeh. Synchronized preferences, bookmarks, saved items, reading position, personalization, and private routines remain optional Prepared capabilities outside the first Public Identity architecture boundary.
 
 ### 3.6 Monetization must never influence religious answers
 
@@ -128,7 +130,8 @@ This section is authoritative for the Core Release 1 daily companion. Approved L
 
 ### Prepared
 
-- Authentication and private sync
+- Public Identity implementation and real-account activation (the architecture track is Expanded V1 under `REG-0028`; implementation remains blocked)
+- Private sync and personalization
 - Bookmarks and reading progress
 - Notification preferences
 - Audio manifests and reciter catalog
@@ -2075,7 +2078,7 @@ This appendix preserves the document's original planning history. It is historic
 7. **Approved Decision:** Quran.Foundation is the primary Quran provider through a provider-independent internal adapter. ALSAMAD identifiers, editorial authority, edition approval, license evidence, checksums, publication, correction, and withdrawal remain locally owned. Exact editions and durable-storage rights remain activation gates before import.
 8. **Approved Decision:** Quran.Foundation supplies candidate translation resources through the same adapter. ALSAMAD must approve the exact English edition(s), license, attribution, and footnote handling before activation.
 9. **Pending Decision:** Named scholarly/editorial review structure before verified duas/adhkar publication.
-10. **Approved Decision:** Public authentication and bookmarks remain Prepared and hidden in Release 1. Quran.Foundation OAuth/User APIs are optional Quran-specific interoperability only and must never become canonical ALSAMAD identity.
+10. **Approved Decision:** Public Identity architecture is an Expanded V1 prerequisite track under `REG-0028`/`ADR-0011`, but public-authentication implementation remains blocked and hidden in Release 1; bookmarks remain Prepared. Quran.Foundation OAuth/User APIs are optional Quran-specific interoperability only and must never become canonical ALSAMAD identity.
 
 ## M0.5 — Quran.Foundation architecture alignment
 
