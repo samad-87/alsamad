@@ -176,6 +176,8 @@ As of 2026-08-08, the M6 architecture decision analysis covering REG-0001–REG-
 | REG-0026 | Talibeen Foundation narrow runtime-inert domain-contract boundary                                    | Roadmap                      | DECIDED     | Registry only; implementation remains blocked pending a later Roadmap crossing |
 | REG-0027 | Talibeen Foundation owner-reviewed exact-unit implementation authorization                          | Roadmap                      | IMPLEMENTED | Registry only; implemented by the corresponding Roadmap PASS              |
 | REG-0028 | Public ALSAMAD Identity/Account Expanded V1 prerequisite architecture boundary                     | Product, Database, API, Security, Roadmap | DECIDED | Registry + ADR (`ADR-0011`, Accepted); implementation blocked |
+| REG-0029 | Public ALSAMAD durable account-root minimal physical contract                                      | Database, Security, API, Roadmap | DECIDED | Registry + ADR (`ADR-0012`, Accepted); physical contract only |
+| REG-0030 | Public ALSAMAD runtime-inert durable account-root persistence implementation authorization          | Database, Security, API, Roadmap | DECIDED | Registry only; exact future unit authorized, not implemented |
 
 ### REG-0001 — Editorial General Dua placement in the devotional physical model
 
@@ -1094,3 +1096,58 @@ The root's sole purpose is stable shared ALSAMAD account identity. It is opaque,
 **Implementation evidence:** None.
 
 **Supersedes / Superseded by:** Does not supersede `REG-0028`; it operationalizes only the previously unresolved minimal physical-root contract under `REG-0028`/`ADR-0011`.
+
+### REG-0030 — Public ALSAMAD runtime-inert durable account-root persistence implementation authorization
+
+**Category:** `Database`, `Security`, `API`, `Roadmap`.
+
+**Summary:** Whether to authorize one future, separate implementation of the already-approved provider-neutral, zero-row, runtime-inert Public ALSAMAD durable account root under an exact four-file boundary, without authorizing any broader account, authentication, provider, API, real-data, or Talibeen capability.
+
+**Committed evidence:** `REG-0028` and accepted `ADR-0011` approve the shared Public ALSAMAD Identity architecture boundary. `REG-0029` and accepted `ADR-0012` approve the exact minimal `users` physical contract, Security/privacy acceptance boundary, API no-surface rule, and inert rollback premise while explicitly withholding implementation authority. The first implementation-authorization audit confirmed the repository precedent of one shared Drizzle schema edit, one handwritten forward-only SQL migration, one mechanical journal append, and PostgreSQL verification. It also confirmed that `uuid` v14 and unchanged `src/db/ids.ts` already provide `createId()` through UUIDv7, no snapshot is currently required, and no provider or external research is needed for an empty inert root.
+
+**Affected architecture:** Existing `ALSAMAD_DATABASE_ARCHITECTURE.md` §9.1, `ALSAMAD_SECURITY_ARCHITECTURE.md` §6, `ALSAMAD_API_ARCHITECTURE.md` §9, accepted `ADR-0011`, and accepted `ADR-0012` remain unchanged and controlling.
+
+**Affected roadmap gate:** `PUBLIC ALSAMAD RUNTIME-INERT DURABLE ACCOUNT ROOT PERSISTENCE = AUTHORIZED / NOT STARTED` only. Broader `PUBLIC ALSAMAD IDENTITY IMPLEMENTATION = BLOCKED / NOT AUTHORIZED` except for this explicit unit.
+
+**Opened:** 2026-08-30.
+
+**Tier rationale:** Registry-only implementation-authorization crossing. The material identity and physical decisions are already frozen by `REG-0028`/`ADR-0011` and `REG-0029`/`ADR-0012`; this entry changes no architecture and only authorizes bounded, reversible execution against those decisions. **ADR references:** `ADR-0011` and `ADR-0012` (Accepted dependencies; unchanged).
+
+**Status:** `DECIDED` (2026-08-30). This is implementation authorization, not implementation evidence. It may become `IMPLEMENTED` only after separate implementation, complete acceptance evidence, staged implementation review, a verified implementation commit, and separately reviewed completion governance.
+
+**Decision outcome:** Authorize a future, separate unit named **PUBLIC ALSAMAD RUNTIME-INERT DURABLE ACCOUNT ROOT PERSISTENCE**. The unit may add only the Drizzle representation of the approved `users` root; one isolated additive forward-only migration; required database constraints and lifecycle-integrity function/trigger; one mechanical migration-journal append; and PostgreSQL verification additions required to prove the contract. It must create zero seed, backfill, real, or retained fixture rows and zero runtime consumers.
+
+**Exact future implementation boundary:**
+
+1. modify `src/db/schema.ts`;
+2. create `drizzle/<mechanically-assigned-next-number>_public_identity_account_root.sql`;
+3. modify `drizzle/meta/_journal.json` only for one mechanical registration append;
+4. modify `scripts/db-verify.mjs` only for this unit's verification.
+
+No standalone test file, dependency file, snapshot, runtime file, API file, UI file, provider/auth file, or Talibeen file is authorized. The migration number is recomputed from authoritative repository state at implementation time. The current audit observed `0013` only as the next likely number from the unchanged baseline; this decision does not reserve or permanently pre-claim it. The semantic suffix is exactly `public_identity_account_root`. If tooling requires an additional file, snapshot, dependency, or unrelated generated change, implementation must stop and return to governance.
+
+**Adopted physical contract:** `users` has exactly four columns and no fifth field: application-generated UUIDv7 `id` (`uuid PRIMARY KEY NOT NULL`, no database default, opaque, immutable, ALSAMAD-owned, provider/client/module independent, not derived from contact/provider data, never reused); `status` (`varchar(24) NOT NULL DEFAULT 'active'`); immutable `created_at` (`timestamptz NOT NULL DEFAULT current_timestamp`); and lifecycle-only `updated_at` (`timestamptz NOT NULL DEFAULT current_timestamp`). The closed status values are exactly `active`, `disabled`, `deletion_pending`, and `deleted`. The primary-key index on `users.id` is the only index.
+
+**UUID and lifecycle integrity:** No new UUID dependency and no change to `src/db/ids.ts` are authorized. The migration must retain no database UUID default and may implement the established PostgreSQL UUIDv7/RFC-variant check as `ck_users__id_uuidv7`. `ck_users__status` enforces the four values. The exact governed trigger is `trg_users__lifecycle_integrity`; its supporting function name is a local engineering detail following repository convention. The trigger rejects `id` or `created_at` mutation, timestamp-only and no-op updates, status changes without a strictly increasing explicitly supplied `updated_at`, entry to `deleted` except from `deletion_pending`, and every transition out of `deleted`. `DEFAULT current_timestamp` is insertion-only; no general automatic update-on-write mechanism is authorized.
+
+**Data, runtime, and API boundary:** The root contains no email, phone, username, display/avatar, provider subject, credential, password/passkey, session, recovery, preference, saved-item, profile, marketing, analytics, Editorial, Talibeen, or module-specific data. It has no FK, cascade, dependent table, seed, backfill, real account, or real personal data. It has no reader, writer, repository, service, route/handler, UI, server action, background consumer, auth/provider integration, account-creation flow, composition-root consumer, or Talibeen linkage. It remains absent from REST, GraphQL, RPC, request/response schemas, public identifiers, serialization, account services, and every public/runtime surface.
+
+**Migration and journal contract:** Exactly one isolated additive forward-only migration may contain only `users`, its four approved columns/defaults, the UUIDv7/RFC check, status check, lifecycle function, lifecycle trigger, and mechanically necessary SQL. `drizzle/meta/_journal.json` may receive exactly one append with the next journal index, version `7`, a monotonic `when`, matching migration tag, and `breakpoints: true`; every prior entry and migration remains unchanged. No snapshot is authorized unless implementation-time tooling proves one mechanically required, in which case implementation stops for governance review.
+
+**Verification and acceptance:** `scripts/db-verify.mjs` may add only real-PostgreSQL and repository evidence for the exact table/columns/types/defaults; UUIDv7/variant acceptance and invalid version/variant rejection; absent database UUID default; duplicate-ID rejection; default and invalid status behavior; `ck_users__status`; immutable `id`/`created_at`; timestamp-only/no-op/non-increasing lifecycle rejection; valid explicitly later lifecycle change; `deletion_pending → deleted`; invalid direct entry to and every transition out of `deleted`; primary-key-only indexing; absent prohibited fields/FKs/cascades; zero seed/backfill/retained rows; exact migration/journal boundary; and zero runtime/API/Talibeen integration. Synthetic fixtures must be transaction-scoped and rolled back. Runtime scans must distinguish legitimate schema/verifier references from prohibited consumption across relevant `src/app`, `src/components`, `src/lib`, server-action, non-verifier-script, and composition-root locations.
+
+The implementation must pass `npm run db:check`, `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm test`, `npm run build`, and `git diff --check`, plus exact implementation/staged-file review, prior-migration byte-integrity review, exactly-one-journal-append review, zero-row proof, zero-runtime proof, API no-surface proof, Talibeen non-expansion proof, and rollback evidence. Compilation alone is insufficient.
+
+**Rollback:** Migration execution failure must roll back atomically through the existing transaction. Before database application, rollback is reversion of the exact implementation commit. After application, and only while `users` is verified empty and unconsumed, removal requires a separately reviewed forward cleanup migration. Committed migration or journal history must never be rewritten, and production user data must never be silently dropped. The inert unit requires no provider, session, API, route, Talibeen, module, or user-data cleanup because none is authorized.
+
+**Scoped threat/data-flow assessment:** Data flow is limited to reviewed migration tooling applying structure to PostgreSQL and transaction-scoped synthetic verification that leaves zero rows. There are no credentials, contacts, provider identities, sessions, recovery data, module/Talibeen data, runtime consumers, or public/API surfaces. The controlling risks are schema drift from `ADR-0012`, incorrect UUID semantics, lifecycle-integrity bypass, accidental runtime exposure, migration/journal corruption, and accidental sensitive fields or relationships. The acceptance contract above addresses each risk. This is not approval for real-user processing.
+
+**Research boundary:** No external research is required for this inert implementation. Provider/runtime integration later requires separate authentication-security, provider, session, recovery, and operational-support research/governance. Real-user activation later requires privacy/legal, retention/deletion, backup, access/export, audit, transfers/subprocessors, Security, and jurisdiction research/governance. Talibeen production linkage additionally requires identity/age-assurance, privacy, legal, safety, moderation, retention, and jurisdiction research/governance.
+
+**Explicit exclusions:** This decision authorizes no provider selection/integration; `user_identities`; `user_sessions`; authentication, signup/login, session, or recovery runtime/persistence; account repository/service/API/UI; real account or personal-data processing; preferences/saved items; Editorial linkage; Talibeen linkage/profile/persistence/discovery/introductions/messaging/moderation/API/UI; notifications; payments; SEO; analytics; AI; background jobs; deployment; or broader Public Identity implementation.
+
+**Independence from protected status truths:** `REG-0029` remains `DECIDED`; `ADR-0012` remains Accepted and unchanged. Core Release 1 remains guest-first and exactly 30 tables. `M5 Gate 3` remains `PARTIAL`; M5 Gates 4–7 and Quran Import Activated remain `NOT PASS`; `M6.1`/`M6.2` remain `BLOCKED`; KE-1 remains COMPLETE/runtime-inert; KE-2A remains COMPLETE; KE-2B remains BLOCKED; combined KE-2 remains incomplete; and no KE-3 authority exists. `TALIBEEN FOUNDATION = COMPLETE` and `Talibeen Foundation Verified = PASS`; broader Talibeen remains `BLOCKED / NOT AUTHORIZED`, with no next Talibeen unit.
+
+**Implementation evidence:** None. Implementation is `NOT STARTED`.
+
+**Supersedes / Superseded by:** Supersedes no decision. It operationalizes the exact physical contract in `REG-0029`/`ADR-0012` without changing or repurposing either.
