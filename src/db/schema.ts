@@ -716,6 +716,30 @@ export const editorialUsers = pgTable(
   ],
 );
 
+export const users = pgTable(
+  "users",
+  {
+    id: uuid("id").primaryKey(),
+    status: varchar("status", { length: 24 }).notNull().default("active"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    check(
+      "ck_users__id_uuidv7",
+      sql`(get_byte(uuid_send(${table.id}), 6) >> 4) = 7 and (get_byte(uuid_send(${table.id}), 8) & 192) = 128`,
+    ),
+    check(
+      "ck_users__status",
+      sql`${table.status} in ('active', 'disabled', 'deletion_pending', 'deleted')`,
+    ),
+  ],
+);
+
 export const topics = pgTable(
   "topics",
   {

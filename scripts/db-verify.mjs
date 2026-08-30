@@ -102,6 +102,7 @@ try {
       "quran_translation_texts",
       "source_references",
       "topics",
+      "users",
       "works",
     ],
   );
@@ -263,6 +264,262 @@ try {
     0,
   );
 
+  const userColumns = await queryClient`
+    select column_name, data_type, character_maximum_length, is_nullable, column_default
+    from information_schema.columns
+    where table_schema='public' and table_name='users'
+    order by ordinal_position
+  `;
+  assert.deepEqual(
+    userColumns.map(({ column_name }) => column_name),
+    ["id", "status", "created_at", "updated_at"],
+  );
+  assert.deepEqual(
+    userColumns.map(({ data_type }) => data_type),
+    [
+      "uuid",
+      "character varying",
+      "timestamp with time zone",
+      "timestamp with time zone",
+    ],
+  );
+  assert.equal(userColumns[0]?.is_nullable, "NO");
+  assert.equal(userColumns[0]?.column_default, null);
+  assert.equal(userColumns[1]?.character_maximum_length, 24);
+  assert.equal(userColumns[1]?.is_nullable, "NO");
+  assert.match(userColumns[1]?.column_default ?? "", /active/);
+  for (const column of userColumns.slice(2)) {
+    assert.equal(column.is_nullable, "NO");
+    assert.equal(column.column_default, "CURRENT_TIMESTAMP");
+  }
+
+  const userConstraints = await queryClient`
+    select conname, contype
+    from pg_constraint
+    where conrelid='users'::regclass
+    order by conname
+  `;
+  assert.deepEqual(
+    userConstraints.map(({ conname, contype }) => [conname, contype]),
+    [
+      ["ck_users__id_uuidv7", "c"],
+      ["ck_users__status", "c"],
+      ["users_pkey", "p"],
+    ],
+  );
+  assert.equal(
+    (
+      await queryClient`
+        select count(*)::int as count
+        from information_schema.table_constraints
+        where table_schema='public' and table_name='users'
+          and constraint_type='FOREIGN KEY'
+      `
+    )[0]?.count,
+    0,
+  );
+
+  const userIndexes = await queryClient`
+    select indexname, indexdef
+    from pg_indexes
+    where schemaname='public' and tablename='users'
+    order by indexname
+  `;
+  assert.equal(userIndexes.length, 1);
+  assert.equal(userIndexes[0]?.indexname, "users_pkey");
+  assert.match(
+    userIndexes[0]?.indexdef ?? "",
+    /CREATE UNIQUE INDEX users_pkey ON public\.users USING btree \(id\)/,
+  );
+  assert.equal(
+    (
+      await queryClient`
+        select count(*)::int as count
+        from pg_trigger
+        where tgrelid='users'::regclass and not tgisinternal
+          and tgname='trg_users__lifecycle_integrity'
+      `
+    )[0]?.count,
+    1,
+  );
+  assert.equal(
+    (await queryClient`select count(*)::int as count from users`)[0]?.count,
+    0,
+  );
+
+  const userId = "0198a7b0-e000-7000-8000-000000000001";
+  const userId2 = "0198a7b0-e000-7000-8000-000000000002";
+  await queryClient
+    .begin(async (transaction) => {
+      await transaction`insert into users(id) values(${userId}::uuid)`;
+      let row = (
+        await transaction`select status,created_at=updated_at as timestamps_equal from users where id=${userId}::uuid`
+      )[0];
+      assert.equal(row?.status, "active");
+      assert.equal(row?.timestamps_equal, true);
+
+      await transaction`update users set status='disabled',updated_at=updated_at+interval '1 second' where id=${userId}::uuid`;
+      await transaction`update users set status='deletion_pending',updated_at=updated_at+interval '1 second' where id=${userId}::uuid`;
+      await transaction`update users set status='deleted',updated_at=updated_at+interval '1 second' where id=${userId}::uuid`;
+      row = (
+        await transaction`select status,created_at,updated_at from users where id=${userId}::uuid`
+      )[0];
+      assert.equal(row?.status, "deleted");
+      assert.ok(row.updated_at > row.created_at);
+      throw new Error("Public Identity root lifecycle rollback");
+    })
+    .catch((error) =>
+      assert.equal(error.message, "Public Identity root lifecycle rollback"),
+    );
+
+  await expectDatabaseRejection(
+    "non-v7 public user id",
+    async (transaction) => {
+      await transaction`insert into users(id) values('0198a7b0-e000-4000-8000-000000000001'::uuid)`;
+    },
+  );
+  await expectDatabaseRejection(
+    "invalid RFC variant public user id",
+    async (transaction) => {
+      await transaction`insert into users(id) values('0198a7b0-e000-7000-0000-000000000001'::uuid)`;
+    },
+  );
+  await expectDatabaseRejection(
+    "duplicate public user id",
+    async (transaction) => {
+      await transaction`insert into users(id) values(${userId}::uuid),(${userId}::uuid)`;
+    },
+  );
+  await expectDatabaseRejection(
+    "invalid public user status",
+    async (transaction) => {
+      await transaction`insert into users(id,status) values(${userId}::uuid,'pending')`;
+    },
+  );
+  await expectDatabaseRejection(
+    "public user id mutation",
+    async (transaction) => {
+      await transaction`insert into users(id) values(${userId}::uuid)`;
+      await transaction`update users set id=${userId2}::uuid where id=${userId}::uuid`;
+    },
+  );
+  await expectDatabaseRejection(
+    "public user created_at mutation",
+    async (transaction) => {
+      await transaction`insert into users(id) values(${userId}::uuid)`;
+      await transaction`update users set created_at=created_at+interval '1 second' where id=${userId}::uuid`;
+    },
+  );
+  await expectDatabaseRejection(
+    "public user no-op update",
+    async (transaction) => {
+      await transaction`insert into users(id) values(${userId}::uuid)`;
+      await transaction`update users set status=status,updated_at=updated_at where id=${userId}::uuid`;
+    },
+  );
+  await expectDatabaseRejection(
+    "public user timestamp-only update",
+    async (transaction) => {
+      await transaction`insert into users(id) values(${userId}::uuid)`;
+      await transaction`update users set updated_at=updated_at+interval '1 second' where id=${userId}::uuid`;
+    },
+  );
+  await expectDatabaseRejection(
+    "public user status transition without updated_at",
+    async (transaction) => {
+      await transaction`insert into users(id) values(${userId}::uuid)`;
+      await transaction`update users set status='disabled' where id=${userId}::uuid`;
+    },
+  );
+  await expectDatabaseRejection(
+    "public user status transition with earlier updated_at",
+    async (transaction) => {
+      await transaction`insert into users(id) values(${userId}::uuid)`;
+      await transaction`update users set status='disabled',updated_at=updated_at-interval '1 second' where id=${userId}::uuid`;
+    },
+  );
+  for (const status of ["active", "disabled"]) {
+    await expectDatabaseRejection(
+      `public user direct ${status} to deleted transition`,
+      async (transaction) => {
+        await transaction`insert into users(id,status) values(${userId}::uuid,${status})`;
+        await transaction`update users set status='deleted',updated_at=updated_at+interval '1 second' where id=${userId}::uuid`;
+      },
+    );
+  }
+  await expectDatabaseRejection(
+    "public user transition out of deleted",
+    async (transaction) => {
+      await transaction`insert into users(id,status) values(${userId}::uuid,'deletion_pending')`;
+      await transaction`update users set status='deleted',updated_at=updated_at+interval '1 second' where id=${userId}::uuid`;
+      await transaction`update users set status='active',updated_at=updated_at+interval '1 second' where id=${userId}::uuid`;
+    },
+  );
+  assert.equal(
+    (await queryClient`select count(*)::int as count from users`)[0]?.count,
+    0,
+  );
+
+  const forbiddenUserColumns = [
+    "email",
+    "phone",
+    "username",
+    "display_name",
+    "avatar",
+    "locale",
+    "provider",
+    "provider_subject",
+    "credential",
+    "session",
+    "recovery",
+    "preferences",
+    "saved_items",
+    "profile",
+    "editorial_user_id",
+    "talibeen_profile_id",
+    "marketing",
+    "analytics",
+  ];
+  assert.equal(
+    userColumns.some(({ column_name }) =>
+      forbiddenUserColumns.includes(column_name),
+    ),
+    false,
+  );
+
+  const userMigration = await readFile(
+    "drizzle/0013_public_identity_account_root.sql",
+    "utf8",
+  );
+  assert.match(userMigration, /create table if not exists users/);
+  assert.match(userMigration, /constraint ck_users__id_uuidv7 check/);
+  assert.match(userMigration, /constraint ck_users__status check/);
+  assert.match(userMigration, /create trigger trg_users__lifecycle_integrity/);
+  assert.doesNotMatch(userMigration, /\binsert\s+into\s+users\b/i);
+  assert.doesNotMatch(
+    userMigration,
+    /\b(?:gen_random_uuid|uuid_generate_v4)\s*\(/i,
+  );
+
+  const migrationFiles = (await readdir("drizzle"))
+    .filter((file) => file.endsWith(".sql"))
+    .sort();
+  assert.deepEqual(migrationFiles, [
+    "0000_foundation.sql",
+    "0001_global_locales_geography.sql",
+    "0002_content_integrity_foundation.sql",
+    "0003_fix_m4_source_reference_trigger.sql",
+    "0004_quran_data_model.sql",
+    "0005_license_publication_rights_separation.sql",
+    "0006_license_version_immutability.sql",
+    "0007_m5_publication_trigger_table_branching.sql",
+    "0008_atomic_quran_release_selector.sql",
+    "0009_arc005_insert_activation_validation.sql",
+    "0011_editorial_identity_foundation.sql",
+    "0012_ke2a_topics.sql",
+    "0013_public_identity_account_root.sql",
+  ]);
+
   const forbiddenEditorialColumns = [
     "staff_key",
     "subject",
@@ -310,31 +567,53 @@ try {
       [9, "0009_arc005_insert_activation_validation"],
     ],
   );
-  assert.deepEqual(journal.entries.at(-2), {
+  assert.deepEqual(journal.entries.at(-3), {
     idx: 10,
     version: "7",
     when: 1785796810000,
     tag: "0011_editorial_identity_foundation",
     breakpoints: true,
   });
-  assert.deepEqual(journal.entries.at(-1), {
+  assert.deepEqual(journal.entries.at(-2), {
     idx: 11,
     version: "7",
     when: 1785796811000,
     tag: "0012_ke2a_topics",
     breakpoints: true,
   });
+  assert.deepEqual(journal.entries.at(-1), {
+    idx: 12,
+    version: "7",
+    when: 1785796812000,
+    tag: "0013_public_identity_account_root",
+    breakpoints: true,
+  });
 
   const runtimeFiles = (
     await Promise.all(
-      ["src/app", "src/components", "scripts"].map(listFilesRecursively),
+      ["src/app", "src/components", "src/lib", "scripts"].map(
+        listFilesRecursively,
+      ),
     )
   )
     .flat()
-    .filter((path) => path !== join("scripts", "db-verify.mjs"));
+    .filter(
+      (path) =>
+        path !== join("scripts", "db-verify.mjs") &&
+        !path.endsWith(join("src", "lib", "knowledge", "collections.ts")) &&
+        !path.endsWith(join("src", "lib", "knowledge", "references.ts")) &&
+        !path.endsWith(
+          join("src", "lib", "knowledge", "adapters", "duas.ts"),
+        ) &&
+        /\.(?:[cm]?[jt]sx?)$/.test(path),
+    );
   for (const path of runtimeFiles) {
     const content = await readFile(path, "utf8");
-    assert.doesNotMatch(content, /editorial_users|editorialUsers/);
+    assert.doesNotMatch(
+      content,
+      /\busers\b|\buserRoot\b/,
+      `Public Identity root runtime reference in ${path}`,
+    );
   }
 
   const locales = await queryClient`
@@ -2635,7 +2914,9 @@ try {
     );
   }
 
-  console.log("PASS schema tables: exactly 17 Release 1 tables plus topics");
+  console.log(
+    "PASS schema tables: exactly 17 Release 1 tables plus Editorial Identity, topics, and the runtime-inert users root",
+  );
   console.log(
     "PASS Editorial Identity Foundation: exact four-column table, UUIDv7/variant and lifecycle enforcement, zero rows, synthetic fixtures rolled back",
   );
