@@ -909,6 +909,12 @@ The root's sole purpose is stable shared ALSAMAD account identity. It contains n
 
 A later implementation authorization may name one isolated additive migration for `users` only and the minimum established schema/journal/verification files. No filename is assigned here. The migration must contain no seed, backfill, real row, dependent FK, provider/auth/session/recovery data, or runtime composition. Before any consumer or row exists, rollback is reversion/removal of that isolated unused unit, with no data migration, provider cleanup, session revocation, API compatibility, route cleanup, or module cleanup. Exact schema, constraint, zero-row, scope, and rollback evidence is mandatory at later acceptance.
 
+## 9.2 Provider-neutral authentication identity linkage boundary
+
+`REG-0031` and accepted `ADR-0013` approve architecture only for future authentication identity linkage. One durable ALSAMAD account may eventually link to multiple authentication identities, while one authentication identity may resolve to at most one durable account. Ambiguous, conflicting, duplicate, stale, or cross-account mappings fail closed. Matching email, phone, or another mutable contact attribute never establishes identity equivalence, account ownership, merge, or transfer. Future additional linkage requires proof of control of the existing durable account and proof of control of the new authentication identity.
+
+A future `user_identities`-like persistence model is conceptually expected but not physically approved. This section freezes no table name, column, key, index, foreign key, provider field, contact field, constraint, lifecycle representation, migration, ORM declaration, or verification boundary. Unlink safety, replacement/relink behavior, security/audit lineage, retention, deletion, access/export, and support treatment remain later contracts. `PUBLIC ALSAMAD AUTHENTICATION IDENTITY LINKAGE PHYSICAL CONTRACT = BLOCKED / NOT AUTHORIZED`; implementation, rows, provider integration, API/runtime access, sessions, recovery, and real-user processing remain blocked.
+
 # 10. Additive Expansion Path
 
 Stable UUIDs and canonical keys for works, editions, passages, content items, locales, ayahs, and geographic areas protect later modules from destructive redesign.

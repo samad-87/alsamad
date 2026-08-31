@@ -180,6 +180,10 @@ Under `REG-0028` and `ADR-0011`, Public ALSAMAD Identity is a provider-neutral E
 
 `REG-0029`/`ADR-0012` approve only a negative API contract for the possible future runtime-inert `users` root. The persistence root is internal, unreachable from public or staff APIs and routes, absent from request/response contracts and public identifiers, never serialized to a client, and unavailable through REST, GraphQL, RPC, server actions, account services, repositories, or other runtime consumers. No endpoint, path, version, schema, handler, route, service, repository, import, account operation, or implementation is created or authorized. A later API/privacy/Security/Roadmap crossing is required before any external representation or operation.
 
+`REG-0031`/`ADR-0013` approve only API boundary invariants for future provider-neutral authentication identity linkage. A future separately governed API must never treat mutable email, phone, or other contact data as the durable account identity; must fail closed on ambiguous, conflicting, stale, or cross-account resolution; must not expose provider subjects as public ALSAMAD identifiers; must preserve one durable ALSAMAD account identity across authorized clients and modules; and must not enable unaudited merge, transfer, or takeover semantics. Any future linkage operation requires separately governed authentication and authorization, including proof of control of the existing account and new authentication identity.
+
+No API surface is authorized by this architecture decision. It defines no route, method, endpoint, request or response schema, payload, status code, REST/GraphQL/RPC choice, server action, serialization format, provider integration, login/signup behavior, session behavior, recovery behavior, or runtime implementation.
+
 Services use workload identity or short-lived signed credentials. Shared permanent internal API keys are prohibited.
 
 # 10. Capability-Based Authorization
