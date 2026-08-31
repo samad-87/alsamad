@@ -177,7 +177,7 @@ As of 2026-08-08, the M6 architecture decision analysis covering REG-0001–REG-
 | REG-0027 | Talibeen Foundation owner-reviewed exact-unit implementation authorization                          | Roadmap                      | IMPLEMENTED | Registry only; implemented by the corresponding Roadmap PASS              |
 | REG-0028 | Public ALSAMAD Identity/Account Expanded V1 prerequisite architecture boundary                     | Product, Database, API, Security, Roadmap | DECIDED | Registry + ADR (`ADR-0011`, Accepted); implementation blocked |
 | REG-0029 | Public ALSAMAD durable account-root minimal physical contract                                      | Database, Security, API, Roadmap | DECIDED | Registry + ADR (`ADR-0012`, Accepted); physical contract only |
-| REG-0030 | Public ALSAMAD runtime-inert durable account-root persistence implementation authorization          | Database, Security, API, Roadmap | DECIDED | Registry only; exact future unit authorized, not implemented |
+| REG-0030 | Public ALSAMAD runtime-inert durable account-root persistence implementation authorization          | Database, Security, API, Roadmap | IMPLEMENTED | Registry only; exact inert unit complete; no broader authority |
 
 ### REG-0001 — Editorial General Dua placement in the devotional physical model
 
@@ -1107,13 +1107,13 @@ The root's sole purpose is stable shared ALSAMAD account identity. It is opaque,
 
 **Affected architecture:** Existing `ALSAMAD_DATABASE_ARCHITECTURE.md` §9.1, `ALSAMAD_SECURITY_ARCHITECTURE.md` §6, `ALSAMAD_API_ARCHITECTURE.md` §9, accepted `ADR-0011`, and accepted `ADR-0012` remain unchanged and controlling.
 
-**Affected roadmap gate:** `PUBLIC ALSAMAD RUNTIME-INERT DURABLE ACCOUNT ROOT PERSISTENCE = AUTHORIZED / NOT STARTED` only. Broader `PUBLIC ALSAMAD IDENTITY IMPLEMENTATION = BLOCKED / NOT AUTHORIZED` except for this explicit unit.
+**Affected roadmap gate:** `PUBLIC ALSAMAD RUNTIME-INERT DURABLE ACCOUNT ROOT PERSISTENCE = COMPLETE` only. Broader `PUBLIC ALSAMAD IDENTITY IMPLEMENTATION = BLOCKED / NOT AUTHORIZED` except for this completed explicit unit.
 
 **Opened:** 2026-08-30.
 
 **Tier rationale:** Registry-only implementation-authorization crossing. The material identity and physical decisions are already frozen by `REG-0028`/`ADR-0011` and `REG-0029`/`ADR-0012`; this entry changes no architecture and only authorizes bounded, reversible execution against those decisions. **ADR references:** `ADR-0011` and `ADR-0012` (Accepted dependencies; unchanged).
 
-**Status:** `DECIDED` (2026-08-30). This is implementation authorization, not implementation evidence. It may become `IMPLEMENTED` only after separate implementation, complete acceptance evidence, staged implementation review, a verified implementation commit, and separately reviewed completion governance.
+**Status:** `IMPLEMENTED` (2026-08-31; decision recorded 2026-08-30). The exact authorized runtime-inert durable account-root persistence unit is COMPLETE under the corresponding Roadmap PASS. This lifecycle transition records accepted implementation evidence only and changes none of the original decision semantics or broader Public Identity authority.
 
 **Decision outcome:** Authorize a future, separate unit named **PUBLIC ALSAMAD RUNTIME-INERT DURABLE ACCOUNT ROOT PERSISTENCE**. The unit may add only the Drizzle representation of the approved `users` root; one isolated additive forward-only migration; required database constraints and lifecycle-integrity function/trigger; one mechanical migration-journal append; and PostgreSQL verification additions required to prove the contract. It must create zero seed, backfill, real, or retained fixture rows and zero runtime consumers.
 
@@ -1148,6 +1148,6 @@ The implementation must pass `npm run db:check`, `npm run typecheck`, `npm run l
 
 **Independence from protected status truths:** `REG-0029` remains `DECIDED`; `ADR-0012` remains Accepted and unchanged. Core Release 1 remains guest-first and exactly 30 tables. `M5 Gate 3` remains `PARTIAL`; M5 Gates 4–7 and Quran Import Activated remain `NOT PASS`; `M6.1`/`M6.2` remain `BLOCKED`; KE-1 remains COMPLETE/runtime-inert; KE-2A remains COMPLETE; KE-2B remains BLOCKED; combined KE-2 remains incomplete; and no KE-3 authority exists. `TALIBEEN FOUNDATION = COMPLETE` and `Talibeen Foundation Verified = PASS`; broader Talibeen remains `BLOCKED / NOT AUTHORIZED`, with no next Talibeen unit.
 
-**Implementation evidence:** None. Implementation is `NOT STARTED`.
+**Implementation evidence:** `Public ALSAMAD Durable Account Root Persistence Verified = PASS` in `ALSAMAD_IMPLEMENTATION_ROADMAP.md`, implemented by commit `62e6df28c2f66f93b6a2633a9d23de026c4d4085` (`feat: implement inert durable account root persistence`) with parent `64eb686974f310c8fed01bf2c9c9cbce99964eeb` in exactly `drizzle/0013_public_identity_account_root.sql`, `drizzle/meta/_journal.json`, `scripts/db-verify.mjs`, and `src/db/schema.ts`. Migration `0013_public_identity_account_root.sql` completes the exact four-column `users` physical contract, UUIDv7/RFC-variant checks, lifecycle-integrity function and trigger, primary-key-only/zero-FK boundary, zero retained rows, and isolated additive migration with exactly one journal append. Acceptance evidence: `db:check` PASS; typecheck PASS; lint PASS; targeted implementation formatting PASS; repository tests 497/497 PASS; production build PASS with 265 static pages; Git diff checks PASS; migration/journal integrity PASS; zero runtime consumers; API no-surface PASS; and Talibeen isolation PASS. Repository-wide `format:check` remains pre-existing unrelated debt at 41 failures; none of the Prettier-supported implementation files is implicated. Remote proof: `HEAD == origin/main == live remote main == 62e6df28c2f66f93b6a2633a9d23de026c4d4085` with divergence `0 / 0`. This completes only the exact inert persistence unit and grants no authority for a next Public Identity unit, provider or identity linking, sessions, recovery, preferences/saved items, APIs, runtime readers/writers, real-user activation, deletion/retention implementation, profile linkage, or Talibeen linkage. Broader `PUBLIC ALSAMAD IDENTITY IMPLEMENTATION = BLOCKED / NOT AUTHORIZED`.
 
 **Supersedes / Superseded by:** Supersedes no decision. It operationalizes the exact physical contract in `REG-0029`/`ADR-0012` without changing or repurposing either.
