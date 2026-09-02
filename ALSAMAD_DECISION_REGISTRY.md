@@ -180,6 +180,7 @@ As of 2026-08-08, the M6 architecture decision analysis covering REG-0001–REG-
 | REG-0030 | Public ALSAMAD runtime-inert durable account-root persistence implementation authorization          | Database, Security, API, Roadmap | IMPLEMENTED | Registry only; exact inert unit complete; no broader authority |
 | REG-0031 | Public ALSAMAD provider-neutral authentication identity linkage governance boundary                | Database, Security, API, Roadmap | DECIDED | Registry + ADR (`ADR-0013`, Accepted); architecture only, implementation blocked |
 | REG-0032 | Public ALSAMAD provider-neutral authentication identity linkage physical contract                  | Database, Security, API, Roadmap | DECIDED | Registry + ADR (`ADR-0014`, Accepted); physical contract only, implementation blocked |
+| REG-0033 | Public ALSAMAD authentication identity linkage runtime-inert persistence implementation authorization | Database, Security, API, Roadmap | DECIDED | Registry only; exact inert unit governance-authorized, implementation requires separate Owner approval |
 
 ### REG-0001 — Editorial General Dua placement in the devotional physical model
 
@@ -1231,3 +1232,58 @@ The only indexes are the `id` primary-key index, the canonical unique-constraint
 **Implementation evidence:** None. The physical contract is APPROVED; implementation and real-data processing are `BLOCKED / NOT AUTHORIZED`.
 
 **Supersedes / Superseded by:** Supersedes no decision. It operationalizes only the physical questions deliberately deferred by `REG-0031`/`ADR-0013` and does not change the durable-root contract or completed implementation.
+
+### REG-0033 — Public ALSAMAD authentication identity linkage runtime-inert persistence implementation authorization
+
+**Category:** `Database`, `Security`, `API`, `Roadmap`.
+
+**Summary:** Whether to authorize, subject to a separate explicit Owner implementation approval, one exact zero-row, provider-neutral, runtime-inert persistence implementation of the `user_identities` physical contract already approved by `REG-0032`/`ADR-0014`.
+
+**Committed evidence:** `REG-0028`/`ADR-0011` establish the durable account boundary; `REG-0029`/`ADR-0012` freeze the `users` root; implemented `REG-0030` provides the repository precedent for an isolated four-file inert persistence unit; `REG-0031`/`ADR-0013` approve linkage architecture; and `REG-0032`/accepted `ADR-0014` freeze the complete provider-neutral linkage physical contract. The readiness audit at remote baseline `8c93af4a355e4dbfe2c8c152e8cc8fd64edcc8e5` found no material ambiguity, provider/session/recovery prerequisite, or external-research dependency for an empty implementation. Owner authorization dated 2026-09-02 opens this governance-design write only. Writing or later accepting this decision does not itself grant permission to edit implementation files; a separate explicit Owner implementation approval remains mandatory.
+
+**Affected architecture:** No architecture document changes. `ALSAMAD_DATABASE_ARCHITECTURE.md` §9.3, `ALSAMAD_SECURITY_ARCHITECTURE.md` §6, `ALSAMAD_API_ARCHITECTURE.md` §9, `REG-0032`, and accepted `ADR-0014` remain controlling and unchanged. Product Architecture is unchanged.
+
+**Affected roadmap gate:** `PUBLIC ALSAMAD AUTHENTICATION IDENTITY LINKAGE RUNTIME-INERT PERSISTENCE IMPLEMENTATION = GOVERNANCE-AUTHORIZED / NOT YET IMPLEMENTED / OWNER IMPLEMENTATION APPROVAL REQUIRED`. Linkage runtime, provider integration, sessions, recovery, APIs, real identity data, personal-data processing, and broader Public Identity implementation remain `BLOCKED / NOT AUTHORIZED`.
+
+**Opened:** 2026-09-02.
+
+**Tier rationale:** Registry-only implementation-authorization crossing. All material architecture and physical decisions are already frozen by `REG-0031`/`ADR-0013` and `REG-0032`/`ADR-0014`; this decision changes neither and defines only a bounded, reversible future execution and acceptance contract. **ADR references:** `ADR-0013` and `ADR-0014` (Accepted dependencies; unchanged). No `ADR-0015` is required.
+
+**Status:** `DECIDED` (2026-09-02). The exact inert unit is governance-authorized but has not been implemented. Implementation may begin only after independent review and commit/push of this governance unit and a separate explicit Owner implementation approval. `IMPLEMENTED` may be recorded only after the exact unit passes its acceptance contract and completion evidence is separately reviewed.
+
+**Decision outcome:** Authorize a possible future unit named **PUBLIC ALSAMAD AUTHENTICATION IDENTITY LINKAGE RUNTIME-INERT PERSISTENCE IMPLEMENTATION**, subject to the approval sequence above. It may represent only the already-approved `user_identities` contract through the exact four-file boundary below. It must remain zero-row, provider-neutral, API-inert, runtime-inert, session-independent, recovery-independent, and personal-data-processing-inactive.
+
+**Exact future implementation boundary:**
+
+1. create `drizzle/0014_public_identity_authentication_linkage.sql`;
+2. modify `drizzle/meta/_journal.json` only for one mechanical registration append for that migration;
+3. modify `src/db/schema.ts` only for the exact `user_identities` ORM declaration;
+4. modify `scripts/db-verify.mjs` only for this unit's PostgreSQL and repository verification.
+
+No standalone test, snapshot, dependency, runtime, API, provider, session, recovery, UI, service, repository, or unrelated file is authorized. If the implementation requires any fifth file or a physical decision outside `ADR-0014`, it must stop and return to governance. The migration sequence is frozen from the reviewed repository state: `0013_public_identity_account_root.sql` is current, so the exact next migration is `0014_public_identity_authentication_linkage.sql`. No existing migration or journal entry may be renamed or rewritten.
+
+**Exact adopted physical contract:** Implement `user_identities` with exactly seven columns and no eighth field: application-generated immutable UUIDv7 `id uuid PRIMARY KEY NOT NULL` with no database default; immutable `user_id uuid NOT NULL` with no default; immutable `authenticator_namespace varchar(128) COLLATE "C" NOT NULL` with no default; immutable, non-empty, opaque `subject text COLLATE "C" NOT NULL` with no default; explicit `status varchar(16) NOT NULL` with no default and exactly `active` or `retired`; immutable `created_at timestamptz NOT NULL DEFAULT current_timestamp`; and `updated_at timestamptz NOT NULL DEFAULT current_timestamp`, representing only the latest governed current-state transition. Types, nullability, defaults, collations, comparison semantics, and purposes are exactly those in `ADR-0014`.
+
+**Constraints, lifecycle, and indexes:** `ck_user_identities__id_uuidv7` enforces UUIDv7 and the RFC variant. `fk_user_identities__user` references `users(id)`, is `NOT DEFERRABLE`, and uses `ON UPDATE RESTRICT` and `ON DELETE RESTRICT`; `user_id` cannot change. `ck_user_identities__authenticator_namespace` enforces `[a-z0-9][a-z0-9._-]{0,127}` for ALSAMAD's canonical namespace vocabulary. `ck_user_identities__subject_nonempty` rejects the empty subject. The status check closes the vocabulary to `active` and `retired` with no default. `trg_user_identities__integrity` rejects changes to `id`, `user_id`, `authenticator_namespace`, `subject`, or `created_at`; rejects no-op and timestamp-only updates; and requires an explicitly supplied strictly later `updated_at` for a real status transition. Its supporting function name is a local implementation detail following repository convention. Database lifecycle capability authorizes no caller or runtime link, unlink, replacement, or relink operation.
+
+The exact three indexes are the `id` primary-key index, the unconditional unique-constraint index for (`authenticator_namespace`, `subject`) across every retained active and retired row, and one non-unique `ix_user_identities__user_id` index. No convenience index is authorized. Canonical uniqueness prevents reassignment only while the row and its evidence remain; it is not a permanent post-erasure reservation.
+
+**Zero-row, data, runtime, and provider boundary:** Immediately after migration and verification, `SELECT count(*) FROM user_identities` must equal `0`. No seed, backfill, imported identity, retained fixture, synthetic retained identity, production identity, or other row is permitted. Synthetic verifier rows must be transaction-scoped, rollback-safe, and leave zero rows. The unit has zero consumers across application routes, components, server actions, API handlers, services, repositories, authentication flows, provider integrations, sessions, recovery, Talibeen, Editorial Identity, and every other module. It creates no endpoint, serialization, public/staff API, signup/login behavior, identity resolution, deployment, or production activation.
+
+The implementation contains no Google/Apple/provider-specific assumption, OAuth/OIDC logic, passkey/password/email/phone/SMS mechanism, provider normalization, subject recycling or reassignment behavior, provider payload, assurance field, contact/profile data, credential, token, secret, session/recovery data, or audit actor/reason/proof field. Namespace and subject remain generic empty storage capability only. No real authentication identity or personal data may be stored or processed.
+
+**Audit, retention, and erasure boundary:** `created_at` is row-creation evidence and `updated_at` is only the latest current-state transition; neither is complete immutable security/audit lineage. No real lifecycle mutation is authorized until a separate immutable audit-event/Security/runtime contract exists. The empty table decides no lawful basis, production retention duration, erasure completion, legal hold, backup, user-rights mechanism, provider-specific retention, or post-erasure reassignment. No permanent denylist, retained hash, tombstone identifier, or indefinite identifier retention is authorized. Lawful deletion later removes this table's evidence and protection; deletion itself grants no reassignment authority.
+
+**Migration, rollback, and verification:** Migration failure must roll back atomically. Verification failure prevents acceptance and must leave no retained row. Before application, rollback is reversion of the exact unaccepted implementation change. After application, migration history must not be rewritten; while the table remains proven empty and unconsumed, any later removal requires separately reviewed authority and a forward cleanup migration. No destructive production-data rollback is authorized.
+
+Acceptance must prove the exact table and seven columns, types, nullability, defaults, collations, PK, UUIDv7/version/variant behavior, FK target/actions/non-deferrability, namespace grammar, subject non-empty rule, closed explicit status, immutable fields, permitted active/retired transitions, rejection of illegal/no-op/timestamp-only/non-increasing changes, latest-state-only `updated_at`, unconditional retained-row uniqueness including collision/concurrency behavior where practical, exact three indexes, and zero rows. Negative evidence must prove absence of prohibited/provider/contact/credential/token/session/recovery/audit fields. Repository evidence must prove exact migration and one-entry journal integrity, prior-migration byte integrity, exact four-file boundary, zero consumers, API no-surface, provider/session/recovery absence, Talibeen and Editorial isolation, and rollback readiness.
+
+Required quality gates are `npm run db:check`, `npm run typecheck`, `npm run lint`, targeted formatting of the implementation files, repository tests, `npm run build`, and `git diff --check`, plus exact implementation/staged-file review. Repository-wide formatting debt, if still pre-existing and unrelated, must be reported accurately and must not authorize scope expansion. Compilation alone cannot pass the unit.
+
+**Absolute exclusions:** This decision authorizes no implementation during the governance write and no later implementation without separate Owner approval. It authorizes no actual identity row, provider selection/integration, credential, login/signup, link/unlink/relink/replacement operation, immutable audit subsystem, session, recovery, API/route/server action, repository/service/runtime reader or writer, support/admin mutation, real personal-data processing, production activation/deployment, Talibeen or Editorial linkage, preference/saved item, or broader Public Identity implementation. Completion of the future inert unit grants no automatic authority for any next Public Identity unit.
+
+**Independence from protected status truths:** `REG-0030` remains IMPLEMENTED; `REG-0031`/`ADR-0013` and `REG-0032`/`ADR-0014` remain unchanged. Durable Account Root remains COMPLETE/PASS. Product Architecture, Core Release 1, M5/M6/KE/Quran/SEO status, Talibeen Foundation COMPLETE/PASS, and broader Talibeen BLOCKED / NOT AUTHORIZED status are unchanged.
+
+**Implementation evidence:** None. The unit is `NOT YET IMPLEMENTED`; no implementation file has been authorized for editing by this governance-design write.
+
+**Supersedes / Superseded by:** Supersedes no decision. It operationalizes `REG-0032`/`ADR-0014` only and does not reopen or amend their physical contract.
