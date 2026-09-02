@@ -179,6 +179,7 @@ As of 2026-08-08, the M6 architecture decision analysis covering REG-0001–REG-
 | REG-0029 | Public ALSAMAD durable account-root minimal physical contract                                      | Database, Security, API, Roadmap | DECIDED | Registry + ADR (`ADR-0012`, Accepted); physical contract only |
 | REG-0030 | Public ALSAMAD runtime-inert durable account-root persistence implementation authorization          | Database, Security, API, Roadmap | IMPLEMENTED | Registry only; exact inert unit complete; no broader authority |
 | REG-0031 | Public ALSAMAD provider-neutral authentication identity linkage governance boundary                | Database, Security, API, Roadmap | DECIDED | Registry + ADR (`ADR-0013`, Accepted); architecture only, implementation blocked |
+| REG-0032 | Public ALSAMAD provider-neutral authentication identity linkage physical contract                  | Database, Security, API, Roadmap | DECIDED | Registry + ADR (`ADR-0014`, Accepted); physical contract only, implementation blocked |
 
 ### REG-0001 — Editorial General Dua placement in the devotional physical model
 
@@ -1163,7 +1164,7 @@ The implementation must pass `npm run db:check`, `npm run typecheck`, `npm run l
 
 **Affected architecture:** `ALSAMAD_DATABASE_ARCHITECTURE.md` §9, `ALSAMAD_SECURITY_ARCHITECTURE.md` §6, `ALSAMAD_API_ARCHITECTURE.md` §9, and accepted `ADR-0011`/`ADR-0012` remain controlling and are extended only by accepted `ADR-0013`. Product Architecture is unchanged.
 
-**Affected roadmap gate:** `PUBLIC ALSAMAD AUTHENTICATION IDENTITY LINKAGE ARCHITECTURE = OPEN / APPROVED` only. `PUBLIC ALSAMAD AUTHENTICATION IDENTITY LINKAGE PHYSICAL CONTRACT = BLOCKED / NOT AUTHORIZED`; `PUBLIC ALSAMAD AUTHENTICATION IDENTITY LINKAGE IMPLEMENTATION = BLOCKED / NOT AUTHORIZED`; and broader `PUBLIC ALSAMAD IDENTITY IMPLEMENTATION = BLOCKED / NOT AUTHORIZED`.
+**Affected roadmap gate:** This decision opens `PUBLIC ALSAMAD AUTHENTICATION IDENTITY LINKAGE ARCHITECTURE = OPEN / APPROVED` only. At this architecture crossing the physical contract remained `BLOCKED / NOT AUTHORIZED`; it is subsequently decided only by `REG-0032`/`ADR-0014`. `PUBLIC ALSAMAD AUTHENTICATION IDENTITY LINKAGE IMPLEMENTATION = BLOCKED / NOT AUTHORIZED`, and broader `PUBLIC ALSAMAD IDENTITY IMPLEMENTATION = BLOCKED / NOT AUTHORIZED`.
 
 **Opened:** 2026-08-31.
 
@@ -1187,6 +1188,46 @@ Future additional linkage requires proof of control of the existing durable ALSA
 
 **Independence from protected status truths:** `REG-0030` remains `IMPLEMENTED`; the Durable Account Root remains COMPLETE/PASS. Core Release 1 remains guest-first and exactly 30 tables. `M5 Gate 3` remains `PARTIAL`; M5 Gates 4–7 and Quran Import Activated remain `NOT PASS`; `M6.1`/`M6.2` remain `BLOCKED`; KE-1 remains COMPLETE/runtime-inert; KE-2A remains COMPLETE; KE-2B remains BLOCKED; combined KE-2 remains incomplete; and no KE-3 authority exists. `TALIBEEN FOUNDATION = COMPLETE` and `Talibeen Foundation Verified = PASS`; broader Talibeen remains `BLOCKED / NOT AUTHORIZED`.
 
-**Implementation evidence:** None. Architecture is OPEN / APPROVED; physical contract and implementation are `BLOCKED / NOT AUTHORIZED`.
+**Implementation evidence:** None under this architecture decision. At this crossing the physical contract and implementation were `BLOCKED / NOT AUTHORIZED`; the physical contract is subsequently decided only by `REG-0032`/`ADR-0014`, while implementation remains blocked.
 
 **Supersedes / Superseded by:** Supersedes no decision. It extends `REG-0028`/`ADR-0011` without changing `REG-0029`/`ADR-0012` or implemented `REG-0030`.
+
+### REG-0032 — Public ALSAMAD provider-neutral authentication identity linkage physical contract
+
+**Category:** `Database`, `Security`, `API`, `Roadmap`.
+
+**Summary:** Whether ALSAMAD-owned persistence is justified for provider-neutral authentication identity linkage and, if so, what minimum zero-row physical contract can enforce the accepted cardinality, anti-takeover, non-reassignment, contact-independence, and lineage invariants without authorizing implementation or real personal-data processing.
+
+**Committed evidence:** `REG-0028`/`ADR-0011` establish the durable account/authentication separation. `REG-0029`/`ADR-0012` freeze the `users` root, and implemented `REG-0030` records its inert persistence as COMPLETE/PASS. `REG-0031`/`ADR-0013` approve provider-neutral linkage architecture but explicitly leave persistence, keys, constraints, lifecycle, retention, and verification to a separate physical crossing. Owner authorization dated 2026-09-01 opens only this governance-design unit. Explicit Owner correction dated 2026-09-02 rejects permanent-forever reservation and approves fail-closed, retention-bounded ownership continuity without automatic reassignment. `ADR-0014` records the corrected material physical decision and rejected alternatives.
+
+**Affected architecture:** `ALSAMAD_DATABASE_ARCHITECTURE.md` §9.3; `ALSAMAD_SECURITY_ARCHITECTURE.md` §6; `ALSAMAD_API_ARCHITECTURE.md` §9; `ALSAMAD_IMPLEMENTATION_ROADMAP.md` Public ALSAMAD Identity track; accepted `ADR-0013`; and new accepted `ADR-0014`. Product Architecture is unchanged.
+
+**Affected roadmap gate:** `PUBLIC ALSAMAD AUTHENTICATION IDENTITY LINKAGE PHYSICAL CONTRACT = APPROVED` only. Linkage implementation, provider integration, sessions, recovery, APIs/runtime, real authentication identity data, real personal-data processing, and broader Public Identity implementation remain `BLOCKED / NOT AUTHORIZED`.
+
+**Opened:** 2026-09-01.
+
+**Tier rationale:** Registry + ADR. Persistent authentication linkage is security-sensitive and data-shaping; canonical identity, retained-row uniqueness, account assignment, unlink/relink, inactive-record, FK, and retention boundaries become difficult to reverse once access depends on them. Incorrect choices can enable takeover, cross-account reassignment, ambiguity, access loss, unlawful retention, or destruction of security lineage. **ADR references:** `ADR-0013` (Accepted architectural dependency) and `ADR-0014` (Accepted physical contract).
+
+**Status:** `DECIDED` (2026-09-01; retention-bounded policy corrected by Owner decision 2026-09-02). Physical contract approved; not implemented and no implementation or real-data processing is authorized.
+
+**Decision outcome:** ALSAMAD-owned persistence is justified because provider/runtime-only state cannot supply one durable cross-provider mapping to `users.id`, enforce fail-closed ownership continuity while evidence is retained, or preserve stable ownership across provider replacement. The future table is exactly `user_identities` with exactly seven columns: application-generated immutable UUIDv7 `id`; immutable non-null `user_id`; immutable `authenticator_namespace varchar(128)` under `C` collation; immutable opaque `subject text` under `C` collation with no universal provider maximum; explicit checked `status varchar(16)` with no default and limited to `active` or `retired`; immutable `created_at timestamptz`; and latest-current-state-only `updated_at timestamptz`.
+
+`user_id` references `users.id` through a non-null, non-deferrable FK with `ON UPDATE RESTRICT` and `ON DELETE RESTRICT`. The unconditional unique constraint on (`authenticator_namespace`, `subject`) covers every retained active and retired row and provides concurrency-safe one-identity-to-at-most-one-account enforcement while evidence exists. `user_id` is not unique, so one account may have multiple identities. Namespace is an ALSAMAD-controlled lowercase ASCII token checked against `[a-z0-9][a-z0-9._-]{0,127}`; its bound limits only ALSAMAD's canonical namespace vocabulary. Subject is non-empty, opaque, unbounded `text`, stored exactly, and compared case-sensitively under `C` collation; provider-specific limits, normalization, and representation research remains deferred.
+
+The lifecycle is a retention-bounded inactive-record model. Retirement makes the mapping ineligible for future resolution but preserves its immutable account assignment while lawfully retained. Relink may only reactivate the same retained row for the same account/namespace/subject under later proof/runtime/audit governance; replacement creates a distinct canonical row and retires the prior row. The future integrity trigger rejects immutable-field changes, timestamp-only/no-op updates, and non-increasing lifecycle timestamps. `updated_at` records only the latest current-state transition and is not immutable event lineage. The table is not an audit-event store; real mutation remains blocked until separate governance defines necessary actor/reason/proof evidence, access, retention, deletion, and legal-hold treatment.
+
+Unconditional uniqueness governs retained rows only. Later separately governed lawful erasure or retention expiry may remove the canonical row, after which this table cannot enforce post-erasure non-reassignment. Deletion grants no automatic reassignment authority. No permanent denylist/hash/tombstone is approved. Provider-subject recycling and every exceptional reassignment path remain unsupported and require separate provider research, proof requirements, Security/privacy governance, and immutable audit evidence; absent that authority, conflict or insufficient evidence fails closed.
+
+The only indexes are the `id` primary-key index, the canonical unique-constraint index, and one non-unique `user_id` FK/account-disposition index. The contract contains no contact, profile, credential, token, secret, session, recovery, provider payload, assurance, audit-event, Editorial, Talibeen, analytics, marketing, or module data.
+
+**Privacy/research boundary:** Provider-neutral zero-row shape, retained-row ownership/uniqueness, FK, active/retired representation, indexes, inertness, and rollback are decided now. Provider formats/guarantees, subject recycling, exceptional reassignment, validation/normalization, hashing/encryption/tokenization, assurance, operational behavior, subprocessors/transfers, and jurisdiction questions require later research. Lawful basis, notice, purpose confirmation, retention duration, lawful erasure, deletion completion, access/export, correction, backups, audit/support access, and production threat/data-flow approval must pass before any real authentication identity is processed.
+
+**Future inert-unit boundary:** This decision makes an isolated additive zero-row implementation conceptually possible but does not authorize it or name its files/migration. A later Owner-reviewed Roadmap crossing must define the exact schema/migration/journal/verification boundary and prove exact columns and constraints, no subject length bound, explicit status/no default, concurrency-safe retained-row uniqueness, restrictive FK, three-index limit, forbidden-field absence, migration isolation, zero rows, zero consumers, API/runtime/provider/session/recovery inertness, quarantine preservation, and rollback.
+
+**Absolute non-authorization:** This decision authorizes no SQL, table creation, migration, Drizzle/ORM declaration, journal change, verifier/test, seed/backfill/row, provider/mechanism selection or integration, credential/token, signup/login, session, recovery, API/route/server action, repository/service/runtime reader or writer, real identity/contact/personal data, privileged/support access, audit implementation, Editorial/Talibeen linkage, deployment, implementation boundary, staging, commit, push, or next runtime unit.
+
+**Independence from protected status truths:** `REG-0030` remains IMPLEMENTED and Durable Account Root remains COMPLETE/PASS. Core Release 1 remains guest-first and exactly 30 tables. M5/KE/Quran status is unchanged. Talibeen Foundation remains COMPLETE/PASS and broader Talibeen remains BLOCKED / NOT AUTHORIZED. Product Architecture is unchanged.
+
+**Implementation evidence:** None. The physical contract is APPROVED; implementation and real-data processing are `BLOCKED / NOT AUTHORIZED`.
+
+**Supersedes / Superseded by:** Supersedes no decision. It operationalizes only the physical questions deliberately deferred by `REG-0031`/`ADR-0013` and does not change the durable-root contract or completed implementation.

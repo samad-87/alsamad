@@ -184,6 +184,8 @@ Under `REG-0028` and `ADR-0011`, Public ALSAMAD Identity is a provider-neutral E
 
 No API surface is authorized by this architecture decision. It defines no route, method, endpoint, request or response schema, payload, status code, REST/GraphQL/RPC choice, server action, serialization format, provider integration, login/signup behavior, session behavior, recovery behavior, or runtime implementation.
 
+`REG-0032`/`ADR-0014` approve only an internal physical contract for a possible future zero-row `user_identities` mapping. Its UUIDv7 row identifier, `users.id` FK, authenticator namespace, opaque subject, status, and timestamps are persistence details and are absent from request/response contracts, public identifiers, serialization, routes, server actions, repositories/services, and all public or staff API surfaces. Neither provider subjects nor durable account identifiers may be exposed as public identifiers. Physical approval creates no resolution, link, unlink, replacement, relink, collision, login, signup, session, recovery, support, administration, post-erasure reassignment, or provider-subject-recycling operation. Retained-row uniqueness preserves ownership only while evidence exists; lawful deletion grants no API authority and, without a separately governed exceptional path, later conflict fails closed. Any future API requires a separate API/privacy/Security/Roadmap crossing and must preserve fail-closed ambiguity, contact independence, proof-of-control, retained-row non-reassignment, unlink safety, separate immutable audit lineage, account-state, enumeration, and leakage controls.
+
 Services use workload identity or short-lived signed credentials. Shared permanent internal API keys are prohibited.
 
 # 10. Capability-Based Authorization
