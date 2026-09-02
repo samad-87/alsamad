@@ -102,6 +102,7 @@ try {
       "quran_translation_texts",
       "source_references",
       "topics",
+      "user_identities",
       "users",
       "works",
     ],
@@ -460,6 +461,285 @@ try {
     0,
   );
 
+  const userIdentityColumns = await queryClient`
+    select column_name, data_type, character_maximum_length, is_nullable,
+      column_default, collation_name
+    from information_schema.columns
+    where table_schema='public' and table_name='user_identities'
+    order by ordinal_position
+  `;
+  assert.deepEqual(
+    userIdentityColumns.map(({ column_name }) => column_name),
+    [
+      "id",
+      "user_id",
+      "authenticator_namespace",
+      "subject",
+      "status",
+      "created_at",
+      "updated_at",
+    ],
+  );
+  assert.deepEqual(
+    userIdentityColumns.map(({ data_type }) => data_type),
+    [
+      "uuid",
+      "uuid",
+      "character varying",
+      "text",
+      "character varying",
+      "timestamp with time zone",
+      "timestamp with time zone",
+    ],
+  );
+  assert.deepEqual(
+    userIdentityColumns.map(({ is_nullable }) => is_nullable),
+    ["NO", "NO", "NO", "NO", "NO", "NO", "NO"],
+  );
+  assert.deepEqual(
+    userIdentityColumns.map(({ column_default }) => column_default),
+    [null, null, null, null, null, "CURRENT_TIMESTAMP", "CURRENT_TIMESTAMP"],
+  );
+  assert.equal(userIdentityColumns[2]?.character_maximum_length, 128);
+  assert.equal(userIdentityColumns[2]?.collation_name, "C");
+  assert.equal(userIdentityColumns[3]?.character_maximum_length, null);
+  assert.equal(userIdentityColumns[3]?.collation_name, "C");
+  assert.equal(userIdentityColumns[4]?.character_maximum_length, 16);
+
+  const userIdentityConstraints = await queryClient`
+    select conname, contype, condeferrable, confupdtype, confdeltype,
+      pg_get_constraintdef(oid) as definition
+    from pg_constraint
+    where conrelid='user_identities'::regclass
+    order by conname
+  `;
+  assert.deepEqual(
+    userIdentityConstraints.map(({ conname, contype }) => [conname, contype]),
+    [
+      ["ck_user_identities__authenticator_namespace", "c"],
+      ["ck_user_identities__id_uuidv7", "c"],
+      ["ck_user_identities__status", "c"],
+      ["ck_user_identities__subject_nonempty", "c"],
+      ["fk_user_identities__user", "f"],
+      ["uq_user_identities__authenticator_subject", "u"],
+      ["user_identities_pkey", "p"],
+    ],
+  );
+  const identityForeignKey = userIdentityConstraints.find(
+    ({ conname }) => conname === "fk_user_identities__user",
+  );
+  assert.equal(identityForeignKey?.condeferrable, false);
+  assert.equal(identityForeignKey?.confupdtype, "r");
+  assert.equal(identityForeignKey?.confdeltype, "r");
+  assert.match(identityForeignKey?.definition ?? "", /REFERENCES users\(id\)/);
+
+  const userIdentityIndexes = await queryClient`
+    select indexname, indexdef
+    from pg_indexes
+    where schemaname='public' and tablename='user_identities'
+    order by indexname
+  `;
+  assert.deepEqual(
+    userIdentityIndexes.map(({ indexname }) => indexname),
+    [
+      "ix_user_identities__user_id",
+      "uq_user_identities__authenticator_subject",
+      "user_identities_pkey",
+    ],
+  );
+  assert.match(
+    userIdentityIndexes.find(
+      ({ indexname }) =>
+        indexname === "uq_user_identities__authenticator_subject",
+    )?.indexdef ?? "",
+    /UNIQUE INDEX .* \(authenticator_namespace, subject\)/,
+  );
+  assert.match(
+    userIdentityIndexes.find(
+      ({ indexname }) => indexname === "ix_user_identities__user_id",
+    )?.indexdef ?? "",
+    /INDEX .* \(user_id\)/,
+  );
+  assert.equal(
+    (
+      await queryClient`
+        select count(*)::int as count
+        from pg_trigger
+        where tgrelid='user_identities'::regclass and not tgisinternal
+          and tgname='trg_user_identities__integrity'
+      `
+    )[0]?.count,
+    1,
+  );
+
+  const identityUserId = "0198a7b0-e000-7000-8000-000000000011";
+  const identityUserId2 = "0198a7b0-e000-7000-8000-000000000012";
+  const identityId = "0198a7b0-e100-7000-8000-000000000001";
+  const identityId2 = "0198a7b0-e100-7000-8000-000000000002";
+  await queryClient
+    .begin(async (transaction) => {
+      await transaction`insert into users(id) values(${identityUserId}::uuid),(${identityUserId2}::uuid)`;
+      await transaction`insert into user_identities(id,user_id,authenticator_namespace,subject,status)
+        values(${identityId}::uuid,${identityUserId}::uuid,'synthetic','CaseSensitive','active'),
+          (${identityId2}::uuid,${identityUserId}::uuid,'synthetic','casesensitive','retired')`;
+      let row = (
+        await transaction`select status,created_at=updated_at as timestamps_equal from user_identities where id=${identityId}::uuid`
+      )[0];
+      assert.equal(row?.status, "active");
+      assert.equal(row?.timestamps_equal, true);
+      await transaction`update user_identities set status='retired',updated_at=updated_at+interval '1 second' where id=${identityId}::uuid`;
+      await transaction`update user_identities set status='active',updated_at=updated_at+interval '1 second' where id=${identityId}::uuid`;
+      row = (
+        await transaction`select status,updated_at>created_at as timestamp_advanced from user_identities where id=${identityId}::uuid`
+      )[0];
+      assert.equal(row?.status, "active");
+      assert.equal(row?.timestamp_advanced, true);
+      throw new Error("user identity positive verification rollback");
+    })
+    .catch((error) =>
+      assert.equal(
+        error.message,
+        "user identity positive verification rollback",
+      ),
+    );
+
+  const rejectIdentityMutation = async (label, operation) =>
+    expectDatabaseRejection(label, async (transaction) => {
+      await transaction`insert into users(id) values(${identityUserId}::uuid),(${identityUserId2}::uuid)`;
+      await operation(transaction);
+    });
+
+  await rejectIdentityMutation(
+    "non-v7 user identity id",
+    (transaction) =>
+      transaction`insert into user_identities(id,user_id,authenticator_namespace,subject,status)
+      values('0198a7b0-e100-4000-8000-000000000001'::uuid,${identityUserId}::uuid,'synthetic','subject','active')`,
+  );
+  await rejectIdentityMutation(
+    "invalid RFC variant user identity id",
+    (transaction) =>
+      transaction`insert into user_identities(id,user_id,authenticator_namespace,subject,status)
+      values('0198a7b0-e100-7000-0000-000000000001'::uuid,${identityUserId}::uuid,'synthetic','subject','active')`,
+  );
+  await rejectIdentityMutation(
+    "omitted user identity id",
+    (transaction) =>
+      transaction`insert into user_identities(user_id,authenticator_namespace,subject,status)
+      values(${identityUserId}::uuid,'synthetic','subject','active')`,
+  );
+  for (const [label, namespace] of [
+    ["uppercase namespace", "Synthetic"],
+    ["invalid namespace first character", "_synthetic"],
+    ["invalid namespace punctuation", "synthetic:provider"],
+    ["empty namespace", ""],
+    ["overlong namespace", `a${"b".repeat(128)}`],
+  ]) {
+    await rejectIdentityMutation(
+      label,
+      (transaction) =>
+        transaction`insert into user_identities(id,user_id,authenticator_namespace,subject,status)
+        values(${identityId}::uuid,${identityUserId}::uuid,${namespace},'subject','active')`,
+    );
+  }
+  await rejectIdentityMutation(
+    "empty subject",
+    (transaction) =>
+      transaction`insert into user_identities(id,user_id,authenticator_namespace,subject,status)
+      values(${identityId}::uuid,${identityUserId}::uuid,'synthetic','','active')`,
+  );
+  await rejectIdentityMutation(
+    "invalid user identity status",
+    (transaction) =>
+      transaction`insert into user_identities(id,user_id,authenticator_namespace,subject,status)
+      values(${identityId}::uuid,${identityUserId}::uuid,'synthetic','subject','pending')`,
+  );
+  await rejectIdentityMutation(
+    "omitted user identity status",
+    (transaction) =>
+      transaction`insert into user_identities(id,user_id,authenticator_namespace,subject)
+      values(${identityId}::uuid,${identityUserId}::uuid,'synthetic','subject')`,
+  );
+  await expectDatabaseRejection(
+    "missing durable user FK",
+    async (transaction) => {
+      await transaction`insert into user_identities(id,user_id,authenticator_namespace,subject,status)
+      values(${identityId}::uuid,${identityUserId}::uuid,'synthetic','subject','active')`;
+    },
+  );
+
+  for (const [label, mutation] of [
+    ["id", `id='${identityId2}'::uuid`],
+    ["user_id", `user_id='${identityUserId2}'::uuid`],
+    ["authenticator_namespace", "authenticator_namespace='changed'"],
+    ["subject", "subject='changed'"],
+    ["created_at", "created_at=created_at+interval '1 second'"],
+  ]) {
+    await rejectIdentityMutation(
+      `immutable user identity ${label}`,
+      async (transaction) => {
+        await transaction`insert into user_identities(id,user_id,authenticator_namespace,subject,status)
+        values(${identityId}::uuid,${identityUserId}::uuid,'synthetic','subject','active')`;
+        await transaction.unsafe(
+          `update user_identities set ${mutation} where id='${identityId}'::uuid`,
+        );
+      },
+    );
+  }
+  await rejectIdentityMutation(
+    "user identity no-op update",
+    async (transaction) => {
+      await transaction`insert into user_identities(id,user_id,authenticator_namespace,subject,status)
+      values(${identityId}::uuid,${identityUserId}::uuid,'synthetic','subject','active')`;
+      await transaction`update user_identities set status=status,updated_at=updated_at where id=${identityId}::uuid`;
+    },
+  );
+  await rejectIdentityMutation(
+    "user identity timestamp-only update",
+    async (transaction) => {
+      await transaction`insert into user_identities(id,user_id,authenticator_namespace,subject,status)
+      values(${identityId}::uuid,${identityUserId}::uuid,'synthetic','subject','active')`;
+      await transaction`update user_identities set updated_at=updated_at+interval '1 second' where id=${identityId}::uuid`;
+    },
+  );
+  await rejectIdentityMutation(
+    "status transition without updated_at",
+    async (transaction) => {
+      await transaction`insert into user_identities(id,user_id,authenticator_namespace,subject,status)
+      values(${identityId}::uuid,${identityUserId}::uuid,'synthetic','subject','active')`;
+      await transaction`update user_identities set status='retired' where id=${identityId}::uuid`;
+    },
+  );
+  await rejectIdentityMutation(
+    "status transition with earlier updated_at",
+    async (transaction) => {
+      await transaction`insert into user_identities(id,user_id,authenticator_namespace,subject,status)
+      values(${identityId}::uuid,${identityUserId}::uuid,'synthetic','subject','active')`;
+      await transaction`update user_identities set status='retired',updated_at=updated_at-interval '1 second' where id=${identityId}::uuid`;
+    },
+  );
+  await rejectIdentityMutation(
+    "retired identity remains uniquely reserved while retained",
+    async (transaction) => {
+      await transaction`insert into user_identities(id,user_id,authenticator_namespace,subject,status)
+      values(${identityId}::uuid,${identityUserId}::uuid,'synthetic','subject','retired')`;
+      await transaction`insert into user_identities(id,user_id,authenticator_namespace,subject,status)
+      values(${identityId2}::uuid,${identityUserId2}::uuid,'synthetic','subject','active')`;
+    },
+  );
+  await rejectIdentityMutation(
+    "referenced durable user deletion",
+    async (transaction) => {
+      await transaction`insert into user_identities(id,user_id,authenticator_namespace,subject,status)
+      values(${identityId}::uuid,${identityUserId}::uuid,'synthetic','subject','active')`;
+      await transaction`delete from users where id=${identityUserId}::uuid`;
+    },
+  );
+  assert.equal(
+    (await queryClient`select count(*)::int as count from user_identities`)[0]
+      ?.count,
+    0,
+  );
+
   const forbiddenUserColumns = [
     "email",
     "phone",
@@ -518,7 +798,64 @@ try {
     "0011_editorial_identity_foundation.sql",
     "0012_ke2a_topics.sql",
     "0013_public_identity_account_root.sql",
+    "0014_public_identity_authentication_linkage.sql",
   ]);
+
+  const userIdentityMigration = await readFile(
+    "drizzle/0014_public_identity_authentication_linkage.sql",
+    "utf8",
+  );
+  assert.match(
+    userIdentityMigration,
+    /create table if not exists user_identities/,
+  );
+  assert.match(
+    userIdentityMigration,
+    /constraint ck_user_identities__id_uuidv7 check/,
+  );
+  assert.match(
+    userIdentityMigration,
+    /constraint fk_user_identities__user foreign key/,
+  );
+  assert.match(
+    userIdentityMigration,
+    /constraint uq_user_identities__authenticator_subject unique/,
+  );
+  assert.match(
+    userIdentityMigration,
+    /create trigger trg_user_identities__integrity/,
+  );
+  assert.doesNotMatch(
+    userIdentityMigration,
+    /\binsert\s+into\s+user_identities\b/i,
+  );
+  assert.doesNotMatch(
+    userIdentityMigration,
+    /\b(?:gen_random_uuid|uuid_generate_v4)\s*\(/i,
+  );
+
+  const forbiddenUserIdentityColumns = [
+    "provider",
+    "provider_name",
+    "email",
+    "phone",
+    "credential",
+    "token",
+    "secret",
+    "assurance",
+    "metadata",
+    "payload",
+    "audit",
+    "history",
+    "normalized_subject",
+    "reassignment_marker",
+  ];
+  assert.equal(
+    userIdentityColumns.some(({ column_name }) =>
+      forbiddenUserIdentityColumns.includes(column_name),
+    ),
+    false,
+  );
 
   const forbiddenEditorialColumns = [
     "staff_key",
@@ -567,25 +904,32 @@ try {
       [9, "0009_arc005_insert_activation_validation"],
     ],
   );
-  assert.deepEqual(journal.entries.at(-3), {
+  assert.deepEqual(journal.entries.at(-4), {
     idx: 10,
     version: "7",
     when: 1785796810000,
     tag: "0011_editorial_identity_foundation",
     breakpoints: true,
   });
-  assert.deepEqual(journal.entries.at(-2), {
+  assert.deepEqual(journal.entries.at(-3), {
     idx: 11,
     version: "7",
     when: 1785796811000,
     tag: "0012_ke2a_topics",
     breakpoints: true,
   });
-  assert.deepEqual(journal.entries.at(-1), {
+  assert.deepEqual(journal.entries.at(-2), {
     idx: 12,
     version: "7",
     when: 1785796812000,
     tag: "0013_public_identity_account_root",
+    breakpoints: true,
+  });
+  assert.deepEqual(journal.entries.at(-1), {
+    idx: 13,
+    version: "7",
+    when: 1785796813000,
+    tag: "0014_public_identity_authentication_linkage",
     breakpoints: true,
   });
 
@@ -611,7 +955,7 @@ try {
     const content = await readFile(path, "utf8");
     assert.doesNotMatch(
       content,
-      /\busers\b|\buserRoot\b/,
+      /\busers\b|\buserRoot\b|\buserIdentities\b|\buser_identities\b/,
       `Public Identity root runtime reference in ${path}`,
     );
   }
@@ -2915,7 +3259,7 @@ try {
   }
 
   console.log(
-    "PASS schema tables: exactly 17 Release 1 tables plus Editorial Identity, topics, and the runtime-inert users root",
+    "PASS schema tables: exactly 17 Release 1 tables plus Editorial Identity, topics, and the runtime-inert users and user_identities persistence",
   );
   console.log(
     "PASS Editorial Identity Foundation: exact four-column table, UUIDv7/variant and lifecycle enforcement, zero rows, synthetic fixtures rolled back",

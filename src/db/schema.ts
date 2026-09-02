@@ -740,6 +740,52 @@ export const users = pgTable(
   ],
 );
 
+export const userIdentities = pgTable(
+  "user_identities",
+  {
+    id: uuid("id").primaryKey(),
+    userId: uuid("user_id").notNull(),
+    authenticatorNamespace: varchar("authenticator_namespace", {
+      length: 128,
+    }).notNull(),
+    subject: text("subject").notNull(),
+    status: varchar("status", { length: 16 }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    check(
+      "ck_user_identities__id_uuidv7",
+      sql`(get_byte(uuid_send(${table.id}), 6) >> 4) = 7 and (get_byte(uuid_send(${table.id}), 8) & 192) = 128`,
+    ),
+    check(
+      "ck_user_identities__authenticator_namespace",
+      sql`${table.authenticatorNamespace} ~ '^[a-z0-9][a-z0-9._-]{0,127}$'`,
+    ),
+    check("ck_user_identities__subject_nonempty", sql`${table.subject} <> ''`),
+    check(
+      "ck_user_identities__status",
+      sql`${table.status} in ('active', 'retired')`,
+    ),
+    unique("uq_user_identities__authenticator_subject").on(
+      table.authenticatorNamespace,
+      table.subject,
+    ),
+    foreignKey({
+      name: "fk_user_identities__user",
+      columns: [table.userId],
+      foreignColumns: [users.id],
+    })
+      .onUpdate("restrict")
+      .onDelete("restrict"),
+    index("ix_user_identities__user_id").on(table.userId),
+  ],
+);
+
 export const topics = pgTable(
   "topics",
   {

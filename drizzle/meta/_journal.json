@@ -92,6 +92,13 @@
       "when": 1785796812000,
       "tag": "0013_public_identity_account_root",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1785796813000,
+      "tag": "0014_public_identity_authentication_linkage",
+      "breakpoints": true
     }
   ]
 }
