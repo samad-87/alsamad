@@ -180,7 +180,7 @@ As of 2026-08-08, the M6 architecture decision analysis covering REG-0001–REG-
 | REG-0030 | Public ALSAMAD runtime-inert durable account-root persistence implementation authorization          | Database, Security, API, Roadmap | IMPLEMENTED | Registry only; exact inert unit complete; no broader authority |
 | REG-0031 | Public ALSAMAD provider-neutral authentication identity linkage governance boundary                | Database, Security, API, Roadmap | DECIDED | Registry + ADR (`ADR-0013`, Accepted); architecture only, implementation blocked |
 | REG-0032 | Public ALSAMAD provider-neutral authentication identity linkage physical contract                  | Database, Security, API, Roadmap | DECIDED | Registry + ADR (`ADR-0014`, Accepted); physical contract only, implementation blocked |
-| REG-0033 | Public ALSAMAD authentication identity linkage runtime-inert persistence implementation authorization | Database, Security, API, Roadmap | DECIDED | Registry only; exact inert unit governance-authorized, implementation requires separate Owner approval |
+| REG-0033 | Public ALSAMAD authentication identity linkage runtime-inert persistence implementation authorization | Database, Security, API, Roadmap | IMPLEMENTED | Registry only; exact inert unit complete; no broader authority |
 
 ### REG-0001 — Editorial General Dua placement in the devotional physical model
 
@@ -1243,15 +1243,15 @@ The only indexes are the `id` primary-key index, the canonical unique-constraint
 
 **Affected architecture:** No architecture document changes. `ALSAMAD_DATABASE_ARCHITECTURE.md` §9.3, `ALSAMAD_SECURITY_ARCHITECTURE.md` §6, `ALSAMAD_API_ARCHITECTURE.md` §9, `REG-0032`, and accepted `ADR-0014` remain controlling and unchanged. Product Architecture is unchanged.
 
-**Affected roadmap gate:** `PUBLIC ALSAMAD AUTHENTICATION IDENTITY LINKAGE RUNTIME-INERT PERSISTENCE IMPLEMENTATION = GOVERNANCE-AUTHORIZED / NOT YET IMPLEMENTED / OWNER IMPLEMENTATION APPROVAL REQUIRED`. Linkage runtime, provider integration, sessions, recovery, APIs, real identity data, personal-data processing, and broader Public Identity implementation remain `BLOCKED / NOT AUTHORIZED`.
+**Affected roadmap gate:** `Public ALSAMAD Authentication Identity Linkage Runtime-Inert Persistence Verified = PASS`; `PUBLIC ALSAMAD AUTHENTICATION IDENTITY LINKAGE RUNTIME-INERT PERSISTENCE IMPLEMENTATION = COMPLETE`. Linkage runtime, provider integration, sessions, recovery, APIs, real identity data, personal-data processing, and broader Public Identity implementation remain `BLOCKED / NOT AUTHORIZED`.
 
 **Opened:** 2026-09-02.
 
 **Tier rationale:** Registry-only implementation-authorization crossing. All material architecture and physical decisions are already frozen by `REG-0031`/`ADR-0013` and `REG-0032`/`ADR-0014`; this decision changes neither and defines only a bounded, reversible future execution and acceptance contract. **ADR references:** `ADR-0013` and `ADR-0014` (Accepted dependencies; unchanged). No `ADR-0015` is required.
 
-**Status:** `DECIDED` (2026-09-02). The exact inert unit is governance-authorized but has not been implemented. Implementation may begin only after independent review and commit/push of this governance unit and a separate explicit Owner implementation approval. `IMPLEMENTED` may be recorded only after the exact unit passes its acceptance contract and completion evidence is separately reviewed.
+**Status:** `IMPLEMENTED` (2026-09-03). The exact inert unit passed its acceptance contract and completion evidence review at commit `4056876ee738a4a1d58b03ec8081b89393f33051` (`feat: add inert authentication identity persistence`) within the exact four-file boundary: `drizzle/0014_public_identity_authentication_linkage.sql`, `drizzle/meta/_journal.json`, `src/db/schema.ts`, and `scripts/db-verify.mjs`. The implementation remains zero-row, runtime-inert, provider-neutral, and personal-data-processing-inactive; no broader authority is granted.
 
-**Decision outcome:** Authorize a possible future unit named **PUBLIC ALSAMAD AUTHENTICATION IDENTITY LINKAGE RUNTIME-INERT PERSISTENCE IMPLEMENTATION**, subject to the approval sequence above. It may represent only the already-approved `user_identities` contract through the exact four-file boundary below. It must remain zero-row, provider-neutral, API-inert, runtime-inert, session-independent, recovery-independent, and personal-data-processing-inactive.
+**Decision outcome:** The completed unit **PUBLIC ALSAMAD AUTHENTICATION IDENTITY LINKAGE RUNTIME-INERT PERSISTENCE IMPLEMENTATION** represented only the already-approved `user_identities` contract through the exact four-file boundary below. It remains zero-row, provider-neutral, API-inert, runtime-inert, session-independent, recovery-independent, and personal-data-processing-inactive.
 
 **Exact future implementation boundary:**
 
@@ -1284,6 +1284,6 @@ Required quality gates are `npm run db:check`, `npm run typecheck`, `npm run lin
 
 **Independence from protected status truths:** `REG-0030` remains IMPLEMENTED; `REG-0031`/`ADR-0013` and `REG-0032`/`ADR-0014` remain unchanged. Durable Account Root remains COMPLETE/PASS. Product Architecture, Core Release 1, M5/M6/KE/Quran/SEO status, Talibeen Foundation COMPLETE/PASS, and broader Talibeen BLOCKED / NOT AUTHORIZED status are unchanged.
 
-**Implementation evidence:** None. The unit is `NOT YET IMPLEMENTED`; no implementation file has been authorized for editing by this governance-design write.
+**Implementation evidence:** Commit `4056876ee738a4a1d58b03ec8081b89393f33051` (`feat: add inert authentication identity persistence`) touched exactly `drizzle/0014_public_identity_authentication_linkage.sql`, `drizzle/meta/_journal.json`, `src/db/schema.ts`, and `scripts/db-verify.mjs`; the unit passed its reviewed acceptance contract and remote publication verification. It remains zero-row and runtime-inert, and completion grants no broader authority.
 
 **Supersedes / Superseded by:** Supersedes no decision. It operationalizes `REG-0032`/`ADR-0014` only and does not reopen or amend their physical contract.
