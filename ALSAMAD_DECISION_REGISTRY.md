@@ -181,6 +181,7 @@ As of 2026-08-08, the M6 architecture decision analysis covering REG-0001–REG-
 | REG-0031 | Public ALSAMAD provider-neutral authentication identity linkage governance boundary                | Database, Security, API, Roadmap | DECIDED | Registry + ADR (`ADR-0013`, Accepted); architecture only, implementation blocked |
 | REG-0032 | Public ALSAMAD provider-neutral authentication identity linkage physical contract                  | Database, Security, API, Roadmap | DECIDED | Registry + ADR (`ADR-0014`, Accepted); physical contract only, implementation blocked |
 | REG-0033 | Public ALSAMAD authentication identity linkage runtime-inert persistence implementation authorization | Database, Security, API, Roadmap | IMPLEMENTED | Registry only; exact inert unit complete; no broader authority |
+| REG-0034 | Public ALSAMAD authentication session governance boundary | Security, Roadmap | DECIDED | Registry + ADR (`ADR-0015`, Accepted); architecture only, no implementation authority |
 
 ### REG-0001 — Editorial General Dua placement in the devotional physical model
 
@@ -1287,3 +1288,21 @@ Required quality gates are `npm run db:check`, `npm run typecheck`, `npm run lin
 **Implementation evidence:** Commit `4056876ee738a4a1d58b03ec8081b89393f33051` (`feat: add inert authentication identity persistence`) touched exactly `drizzle/0014_public_identity_authentication_linkage.sql`, `drizzle/meta/_journal.json`, `src/db/schema.ts`, and `scripts/db-verify.mjs`; the unit passed its reviewed acceptance contract and remote publication verification. It remains zero-row and runtime-inert, and completion grants no broader authority.
 
 **Supersedes / Superseded by:** Supersedes no decision. It operationalizes `REG-0032`/`ADR-0014` only and does not reopen or amend their physical contract.
+
+### REG-0034 — Public ALSAMAD authentication session governance boundary
+
+**Category:** `Security`, `Roadmap`.
+
+**Summary:** Define the provider-neutral, architecture-only boundary for server-managed, revocable authentication sessions after the completed REG-0033 linkage chain. This decision freezes authority and threat invariants only; it freezes no physical persistence or runtime mechanism.
+
+**Dependencies:** `REG-0033` (`IMPLEMENTED` / `COMPLETE` / `Verified = PASS`) and accepted `ADR-0015`. Session authority is subordinate to one durable ALSAMAD account and the current authentication/security state.
+
+**Decision outcome:** Sessions are conceptual authority contexts with lifecycle vocabulary `ISSUED`, `ACTIVE`, and `EXPIRED` or `REVOKED`; `INVALID` is an evaluation outcome, not a required persisted state. Every session has bounded authority in time, is independently revocable per client/device security context, and supports account-wide invalidation. Logout, revoke-all, account disablement/closure, security-sensitive authentication-state changes, and compromise response must be representable as invalidating events; ordinary profile/content/preferences changes do not automatically invalidate sessions. Ambiguous or invalid authority fails closed. Client/device context conveys no physical-device identity, ownership, trust, assurance, reputation, personhood, household, Talibeen, or Editorial identity.
+
+**Deferred contract:** No table, columns, status enum, indexes, migration, token or cookie representation, transport, TTL values, refresh mechanics, cryptography, storage/cache, API endpoint, provider behavior, or runtime flow is decided. These require later, separately authorized physical/security/runtime governance.
+
+**Boundaries:** This entry authorizes no implementation, session rows, cookies/tokens, login/signup, provider integration, authentication or API runtime, Recovery, support/admin mutation, real identity or personal-data processing, production activation, or successor unit. Recovery remains downstream and separately governed. Immutable audit-event governance and retention/erasure/privacy governance remain separately required before applicable real lifecycle or personal-data operations; no hidden indefinite retention or post-erasure reassignment is authorized.
+
+**Status:** `DECIDED` (2026-09-03). **ADR reference:** `ADR-0015` (Accepted).
+
+**Supersedes / Superseded by:** Supersedes no decision. No successor authority is implied.

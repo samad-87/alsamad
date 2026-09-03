@@ -2726,3 +2726,17 @@ The milestone dependency chain is `M0 → M0.5 → M1`. No implementation begins
 - Roadmap guidance 847.
 - Roadmap guidance 848.
 - Roadmap guidance 849.
+
+## Session Architecture Governance — PUBLIC ALSAMAD AUTHENTICATION SESSION GOVERNANCE BOUNDARY
+
+**Governance status.** `REG-0034` and accepted `ADR-0015` open exactly one provider-neutral, architecture-only governance unit after the completed `REG-0033` linkage persistence chain. The unit has no implementation, physical-contract, runtime, provider, Recovery, real-data, or production authority.
+
+**Architecture boundary.** Authentication sessions are server-managed, revocable authority contexts subordinate to exactly one durable ALSAMAD account and the current authentication/security state. Distinct client/device security contexts may have independently revocable sessions, and account-wide invalidation must be supported. Ambiguous or invalid authority fails closed. Client/device context is not device identity, ownership, trust, assurance, reputation, personhood, household, Talibeen, or Editorial identity.
+
+**Conceptual lifecycle.** `ISSUED`, `ACTIVE`, and `EXPIRED` or `REVOKED` are architecture vocabulary. `INVALID` is an evaluation outcome, not a required persisted state. Every session has bounded authority in time; no permanently valid session is authorized. Required invalidation triggers include current-session logout, account-wide logout/revoke-all, account disablement/closure, security-sensitive authentication-state change, and compromise response. Ordinary profile/content/preferences changes do not automatically invalidate sessions.
+
+**Deferred decisions and exclusions.** Table shape, columns, indexes, migration, persistence, token/cookie/transport representation, headers/endpoints, TTL values, expiry mechanics, refresh, cryptography, storage/cache, provider behavior, login/signup, runtime/API resolution, session rows, cookies/tokens, support/admin operations, Recovery, real data, personal-data processing, and production activation remain separately governed and unauthorized. Transport-specific CSRF requirements are deferred until transport is selected. Immutable audit-event and retention/erasure/privacy contracts remain separately gated. Completion of this architecture unit grants no automatic physical or successor authority.
+
+**Acceptance criteria.** Completion requires an accepted ADR, Registry decision, and Security Architecture text that agree on account ownership/subordination, lifecycle vocabulary, revocation and account-wide invalidation, bounded-time authority, fail-closed evaluation, per-context isolation, fixation/theft-replay/enumeration/privacy/concurrent-session threat boundaries, Recovery separation, audit and retention gates, provider neutrality, zero runtime, and explicit deferral of all physical and runtime mechanisms. `ALSAMAD_API_ARCHITECTURE.md`, `ALSAMAD_DATABASE_ARCHITECTURE.md`, and Product Architecture remain unchanged unless a later decision materially crosses their scope.
+
+**Status.** `PUBLIC ALSAMAD AUTHENTICATION SESSION GOVERNANCE BOUNDARY = OPEN / APPROVED FOR GOVERNANCE DESIGN`; implementation is `NOT AUTHORIZED`.
