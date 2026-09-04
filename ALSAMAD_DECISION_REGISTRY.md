@@ -182,6 +182,7 @@ As of 2026-08-08, the M6 architecture decision analysis covering REG-0001–REG-
 | REG-0032 | Public ALSAMAD provider-neutral authentication identity linkage physical contract                  | Database, Security, API, Roadmap | DECIDED | Registry + ADR (`ADR-0014`, Accepted); physical contract only, implementation blocked |
 | REG-0033 | Public ALSAMAD authentication identity linkage runtime-inert persistence implementation authorization | Database, Security, API, Roadmap | IMPLEMENTED | Registry only; exact inert unit complete; no broader authority |
 | REG-0034 | Public ALSAMAD authentication session governance boundary | Security, Roadmap | DECIDED | Registry + ADR (`ADR-0015`, Accepted); architecture only, no implementation authority |
+| REG-0035 | Public ALSAMAD authentication session physical contract | Database, Security, Roadmap | DECIDED | Registry + ADR (`ADR-0016`, Accepted); physical contract only, implementation blocked |
 
 ### REG-0001 — Editorial General Dua placement in the devotional physical model
 
@@ -1306,3 +1307,41 @@ Required quality gates are `npm run db:check`, `npm run typecheck`, `npm run lin
 **Status:** `DECIDED` (2026-09-03). **ADR reference:** `ADR-0015` (Accepted).
 
 **Supersedes / Superseded by:** Supersedes no decision. No successor authority is implied.
+
+### REG-0035 — Public ALSAMAD authentication session physical contract
+
+**Category:** `Database`, `Security`, `Roadmap`.
+
+**Summary:** Approve the minimum provider-neutral, transport-neutral PostgreSQL physical contract for server-managed ALSAMAD authentication sessions while withholding every implementation, credential, runtime, real-data, and production capability.
+
+**Dependencies:** `REG-0034` and accepted `ADR-0015`; the durable account-root authority under `REG-0028`/`ADR-0011`, `REG-0029`/`ADR-0012`, and implemented `REG-0030`; and existing Security privacy, immutable-audit, retention, erasure, legal-hold, and real-data gates. `ADR-0016` records the material physical decision.
+
+**Affected architecture:** `ALSAMAD_DATABASE_ARCHITECTURE.md` §9.4, `ALSAMAD_SECURITY_ARCHITECTURE.md` Public ALSAMAD Authentication Session Physical Contract Boundary, and `ALSAMAD_IMPLEMENTATION_ROADMAP.md` Public ALSAMAD Authentication Session Physical Contract Governance Boundary. API Architecture and Product Architecture remain unchanged.
+
+**Affected roadmap gate:** `PUBLIC ALSAMAD AUTHENTICATION SESSION PHYSICAL CONTRACT = APPROVED` only. Session persistence implementation, credentials/tokens, providers, login/signup, runtime/API behavior, Recovery, real rows/data, support/admin mutation, production activation, and broader Public Identity implementation remain `BLOCKED / NOT AUTHORIZED`.
+
+**Opened:** 2026-09-04.
+
+**Tier rationale:** Registry + ADR. Persistent session ownership, bounded-time evidence, one-way revocation, derived lifecycle, identifier/credential separation, and deletion behavior are security-sensitive and data-shaping. They become difficult to reverse after account access depends on them. **ADR references:** `ADR-0015` (Accepted architecture dependency) and `ADR-0016` (Accepted physical contract).
+
+**Status:** `DECIDED` (2026-09-04). Physical-contract governance only; no implementation or real-data processing is authorized.
+
+**Decision outcome:** PostgreSQL is the authoritative persistent source of truth for session state. The approved entity is exactly `user_sessions`, with exactly five columns and no sixth field: application-generated UUIDv7 `id uuid PRIMARY KEY NOT NULL` with no database default; immutable `user_id uuid NOT NULL` with no default; immutable `created_at timestamptz NOT NULL` with no default; immutable `expires_at timestamptz NOT NULL` with no default; and nullable `revoked_at timestamptz` initially `NULL` with no default. `id` identifies an ALSAMAD-owned opaque immutable session record, is never reused, and is not a bearer credential or secret.
+
+`user_id` has a non-null, non-deferrable FK to `users(id)` with `ON UPDATE RESTRICT` and `ON DELETE RESTRICT`, is immutable, and is not unique. Multiple concurrent sessions per account remain physically possible. There is no `user_identity_id`; a session authorizes the durable ALSAMAD account, not the authentication identity through which authentication may have originated.
+
+The identifier uses the repository-standard UUIDv7/RFC-variant integrity check. Temporal integrity requires `expires_at > created_at` and `revoked_at IS NULL OR revoked_at >= created_at`. `id`, `user_id`, `created_at`, and `expires_at` are immutable. The only base lifecycle mutation is one-way `revoked_at: NULL → valid timestamp`; it cannot be cleared or rewritten, and no-op lifecycle mutation is rejected. The only index classes are the primary-key index on `id` and non-unique `ix_user_sessions__user_id`. Primary-key uniqueness on `id` is the only uniqueness rule.
+
+**Derived lifecycle:** `ISSUED` is successful row creation. `ACTIVE` requires `revoked_at IS NULL`, current time before `expires_at`, and a current fail-closed account/authentication/security evaluation permitting authority. `EXPIRED` means current time is at or after `expires_at`. `REVOKED` means `revoked_at IS NOT NULL`. `INVALID` remains an evaluation outcome only. No persisted status/lifecycle enum, `SUSPENDED`, generic `updated_at`, or generation/version field exists.
+
+**Credential, provider, context, and data minimization:** Session-record identity is distinct from any future bearer credential. No raw bearer/session secret is stored. Credential/token/hash/encryption/lookup/refresh/rotation/reuse-detection representation remains separately governed. The five-column contract contains no authentication-identity FK, device/client label or assertion, IP, user agent, geolocation, fingerprint, hardware or advertising identifier, provider metadata/payload/token, contact field, assurance/trust/reputation/personhood/household field, Talibeen or Editorial identity, revocation reason, audit-event reference, cleanup metadata, or other speculative column.
+
+**Invalidation capability:** Distinct rows provide independently revocable contexts. The non-unique `user_id` index permits all retained sessions for an account to be located for future separately governed account-wide invalidation. Account disablement/closure and security-sensitive authentication-state invalidation remain fail-closed runtime obligations. Transaction isolation, locking, concurrent issuance serialization, generation/version mechanisms, and revoke-all algorithms are not decided here.
+
+**Audit, privacy, and retention boundary:** Operational state is not immutable audit history. Audit-event governance is not a prerequisite to this physical decision or to a future separately authorized zero-row runtime-inert implementation. Appropriate audit/logging authority is required before real issuance; immutable event governance remains required for real revocation/lifecycle mutation where existing authority requires it; and support/admin mutation requires separately governed immutable, purpose-bound evidence. Numeric retention is not fixed. Before any real issuance or processing, applicable purpose, lawful basis, notice, retention, erasure, deletion completion, backups, access/export, correction, transfers/subprocessors, support access, legal holds, and jurisdiction obligations must be resolved.
+
+**Persistence and non-authority:** A future separately authorized implementation may be considered only as an empty, zero-real-row, runtime-inert, verifier-backed, rollback-safe unit after a new readiness audit, an exact Roadmap implementation crossing, and explicit Owner implementation authorization. PostgreSQL authority does not authorize a cache; any cache or auxiliary store requires separate governance and cannot silently replace PostgreSQL as canonical authority.
+
+This decision grants physical-contract governance authority only. It grants no migration, ORM/schema implementation, persistence implementation, table creation, row, fixture, runtime consumer, token/credential, provider, login/signup, Recovery, API/transport, support/admin mutation, real-data processing, production, deployment, or successor authority. It assigns no migration number or implementation file boundary.
+
+**Supersedes / Superseded by:** Supersedes no decision. It operationalizes only the physical questions deferred by `REG-0034`/`ADR-0015`; no successor authority is implied.
