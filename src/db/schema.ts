@@ -786,6 +786,41 @@ export const userIdentities = pgTable(
   ],
 );
 
+// REG-0036 / ADR-0016: record identity only; no runtime or bearer consumers.
+// SQL migration enforces immutability and one-way revocation with a trigger.
+export const userSessions = pgTable(
+  "user_sessions",
+  {
+    id: uuid("id").primaryKey(),
+    userId: uuid("user_id").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    revokedAt: timestamp("revoked_at", { withTimezone: true }),
+  },
+  (table) => [
+    check(
+      "ck_user_sessions__id_uuidv7",
+      sql`(get_byte(uuid_send(${table.id}), 6) >> 4) = 7 and (get_byte(uuid_send(${table.id}), 8) & 192) = 128`,
+    ),
+    check(
+      "ck_user_sessions__expires_after_creation",
+      sql`${table.expiresAt} > ${table.createdAt}`,
+    ),
+    check(
+      "ck_user_sessions__revoked_not_before_creation",
+      sql`${table.revokedAt} is null or ${table.revokedAt} >= ${table.createdAt}`,
+    ),
+    foreignKey({
+      name: "fk_user_sessions__user",
+      columns: [table.userId],
+      foreignColumns: [users.id],
+    })
+      .onUpdate("restrict")
+      .onDelete("restrict"),
+    index("ix_user_sessions__user_id").on(table.userId),
+  ],
+);
+
 export const topics = pgTable(
   "topics",
   {

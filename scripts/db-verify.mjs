@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import { readFile, readdir } from "node:fs/promises";
 import { join } from "node:path";
 
@@ -103,6 +104,7 @@ try {
       "source_references",
       "topics",
       "user_identities",
+      "user_sessions",
       "users",
       "works",
     ],
@@ -799,6 +801,7 @@ try {
     "0012_ke2a_topics.sql",
     "0013_public_identity_account_root.sql",
     "0014_public_identity_authentication_linkage.sql",
+    "0015_public_identity_authentication_session.sql",
   ]);
 
   const userIdentityMigration = await readFile(
@@ -904,28 +907,28 @@ try {
       [9, "0009_arc005_insert_activation_validation"],
     ],
   );
-  assert.deepEqual(journal.entries.at(-4), {
+  assert.deepEqual(journal.entries[10], {
     idx: 10,
     version: "7",
     when: 1785796810000,
     tag: "0011_editorial_identity_foundation",
     breakpoints: true,
   });
-  assert.deepEqual(journal.entries.at(-3), {
+  assert.deepEqual(journal.entries[11], {
     idx: 11,
     version: "7",
     when: 1785796811000,
     tag: "0012_ke2a_topics",
     breakpoints: true,
   });
-  assert.deepEqual(journal.entries.at(-2), {
+  assert.deepEqual(journal.entries[12], {
     idx: 12,
     version: "7",
     when: 1785796812000,
     tag: "0013_public_identity_account_root",
     breakpoints: true,
   });
-  assert.deepEqual(journal.entries.at(-1), {
+  assert.deepEqual(journal.entries[13], {
     idx: 13,
     version: "7",
     when: 1785796813000,
@@ -955,10 +958,363 @@ try {
     const content = await readFile(path, "utf8");
     assert.doesNotMatch(
       content,
-      /\busers\b|\buserRoot\b|\buserIdentities\b|\buser_identities\b/,
+      /\busers\b|\buserRoot\b|\buserIdentities\b|\buser_identities\b|\buserSessions\b|\buser_sessions\b/,
       `Public Identity root runtime reference in ${path}`,
     );
   }
+
+  // REG-0036: immutable migration history and exactly one journal append.
+  const sessionBaseline = "be115b70b8c21ad201b7bc2b2e3f52e0af9416d8";
+  const gitText = (...args) =>
+    execFileSync("git", args, { encoding: "utf8" }).trim();
+  const baselineJournal = JSON.parse(
+    gitText("show", `${sessionBaseline}:drizzle/meta/_journal.json`),
+  );
+  assert.deepEqual(journal.entries.slice(0, 14), baselineJournal.entries);
+  assert.equal(journal.entries.length, 15);
+  assert.deepEqual(journal.entries[14], {
+    idx: 14,
+    version: "7",
+    when: 1785796814000,
+    tag: "0015_public_identity_authentication_session",
+    breakpoints: true,
+  });
+  for (const migration of migrationFiles.slice(0, -1)) {
+    const path = `drizzle/${migration}`;
+    assert.equal(
+      gitText("hash-object", "--", path),
+      gitText("rev-parse", `${sessionBaseline}:${path}`),
+      `prior migration bytes preserved: ${path}`,
+    );
+  }
+  const sessionMigration = await readFile(
+    "drizzle/0015_public_identity_authentication_session.sql",
+    "utf8",
+  );
+  assert.doesNotMatch(
+    sessionMigration,
+    /\b(?:insert\s+into|copy|merge\s+into|delete\s+from|truncate)\b/i,
+  );
+  // Exercise the actual migration in a transaction-local schema. Reapplying
+  // collides with its table and must roll back every newly created object.
+  assert.equal(
+    (
+      await queryClient`select to_regnamespace('reg0036_rollback_probe') as name`
+    )[0].name,
+    null,
+  );
+  await assert.rejects(
+    queryClient.begin(async (transaction) => {
+      await transaction`create schema reg0036_rollback_probe`;
+      await transaction`set local search_path to reg0036_rollback_probe, public`;
+      await transaction.unsafe(sessionMigration);
+      await transaction.unsafe(sessionMigration);
+    }),
+    (error) => error.code === "42P07",
+    "migration conflict rolls back atomically",
+  );
+  assert.equal(
+    (
+      await queryClient`select to_regnamespace('reg0036_rollback_probe') as name`
+    )[0].name,
+    null,
+    "failed migration leaves no schema, table, indexes, function or trigger",
+  );
+  // Scan all source roots, including db consumers outside the declaration.
+  for (const path of await listFilesRecursively("src")) {
+    if (path === join("src", "db", "schema.ts")) continue;
+    if (!/\.(?:[cm]?[jt]sx?)$/.test(path)) continue;
+    assert.doesNotMatch(
+      await readFile(path, "utf8"),
+      /\buser_sessions\b|\buserSessions\b/,
+      `session runtime consumer in ${path}`,
+    );
+  }
+
+  const sessionColumns = await queryClient`
+    select column_name, data_type, is_nullable, column_default
+    from information_schema.columns
+    where table_schema='public' and table_name='user_sessions'
+    order by ordinal_position
+  `;
+  assert.deepEqual(
+    sessionColumns.map(({ column_name }) => column_name),
+    ["id", "user_id", "created_at", "expires_at", "revoked_at"],
+    "exact catalog excludes every credential, metadata and lifecycle field",
+  );
+  assert.deepEqual(
+    sessionColumns.map(({ data_type }) => data_type),
+    ["uuid", "uuid", ...Array(3).fill("timestamp with time zone")],
+  );
+  assert.deepEqual(
+    sessionColumns.map(({ is_nullable }) => is_nullable),
+    ["NO", "NO", "NO", "NO", "YES"],
+  );
+  assert.deepEqual(
+    sessionColumns.map(({ column_default }) => column_default),
+    Array(5).fill(null),
+  );
+  const sessionConstraints = await queryClient`
+    select conname, contype, condeferrable, condeferred, confupdtype, confdeltype,
+      pg_get_constraintdef(oid) as definition
+    from pg_constraint where conrelid='public.user_sessions'::regclass
+    order by conname
+  `;
+  assert.deepEqual(
+    sessionConstraints.map(({ conname, contype }) => [conname, contype]),
+    [
+      ["ck_user_sessions__expires_after_creation", "c"],
+      ["ck_user_sessions__id_uuidv7", "c"],
+      ["ck_user_sessions__revoked_not_before_creation", "c"],
+      ["fk_user_sessions__user", "f"],
+      ["user_sessions_pkey", "p"],
+    ],
+  );
+  const sessionFk = sessionConstraints.find(({ contype }) => contype === "f");
+  assert.equal(sessionFk.condeferrable, false);
+  assert.equal(sessionFk.condeferred, false);
+  assert.equal(sessionFk.confupdtype, "r");
+  assert.equal(sessionFk.confdeltype, "r");
+  assert.match(
+    sessionFk.definition,
+    /FOREIGN KEY \(user_id\) REFERENCES users\(id\)/,
+  );
+  const sessionIndexes = await queryClient`
+    select c.relname as name, i.indisunique, i.indisprimary,
+      pg_get_indexdef(i.indexrelid) as definition
+    from pg_index i join pg_class c on c.oid=i.indexrelid
+    where i.indrelid='public.user_sessions'::regclass order by c.relname
+  `;
+  assert.deepEqual(
+    sessionIndexes.map(({ name, indisunique, indisprimary }) => [
+      name,
+      indisunique,
+      indisprimary,
+    ]),
+    [
+      ["ix_user_sessions__user_id", false, false],
+      ["user_sessions_pkey", true, true],
+    ],
+  );
+  assert.match(sessionIndexes[0].definition, /USING btree \(user_id\)$/);
+  assert.match(sessionIndexes[1].definition, /USING btree \(id\)$/);
+  const sessionTriggers = await queryClient`
+    select tgname, tgenabled, pg_get_triggerdef(oid) as definition
+    from pg_trigger where tgrelid='public.user_sessions'::regclass and not tgisinternal
+  `;
+  assert.equal(sessionTriggers.length, 1);
+  assert.equal(sessionTriggers[0].tgname, "trg_user_sessions__integrity");
+  assert.equal(sessionTriggers[0].tgenabled, "O");
+  assert.match(sessionTriggers[0].definition, /BEFORE UPDATE/);
+  assert.match(
+    sessionTriggers[0].definition,
+    /FOR EACH ROW EXECUTE FUNCTION enforce_user_sessions_integrity\(\)/,
+  );
+
+  const sessionOwner = createId();
+  const otherSessionOwner = createId();
+  const sessionId = createId();
+  const otherSessionId = createId();
+  const sessionCreated = "2026-09-04T00:00:00Z";
+  const sessionExpires = "2026-09-04T01:00:00Z";
+  const insertSession = (transaction) => transaction`
+    insert into user_sessions(id,user_id,created_at,expires_at)
+    values(${sessionId}::uuid,${sessionOwner}::uuid,${sessionCreated}::timestamptz,${sessionExpires}::timestamptz)
+  `;
+  const sessionRowCount = async () =>
+    (await queryClient`select count(*)::int as count from user_sessions`)[0]
+      .count;
+  assert.equal(await sessionRowCount(), 0, "no pre-existing session rows");
+  const sessionRollback = new Error("session verification rollback");
+  await assert.rejects(
+    queryClient.begin(async (transaction) => {
+      await transaction`insert into users(id) values(${sessionOwner}::uuid)`;
+      await insertSession(transaction);
+      assert.equal(
+        (
+          await transaction`select revoked_at from user_sessions where id=${sessionId}::uuid`
+        )[0].revoked_at,
+        null,
+      );
+      await transaction`insert into user_sessions(id,user_id,created_at,expires_at,revoked_at)
+        values(${otherSessionId}::uuid,${sessionOwner}::uuid,${sessionCreated}::timestamptz,${sessionExpires}::timestamptz,${sessionCreated}::timestamptz)`;
+      assert.equal(
+        (
+          await transaction`select count(*)::int as count from user_sessions where user_id=${sessionOwner}::uuid`
+        )[0].count,
+        2,
+      );
+      await transaction`update user_sessions set revoked_at=created_at where id=${sessionId}::uuid`;
+      assert.equal(
+        (
+          await transaction`select revoked_at=created_at as valid from user_sessions where id=${sessionId}::uuid`
+        )[0].valid,
+        true,
+      );
+      throw sessionRollback;
+    }),
+    (error) => error === sessionRollback,
+  );
+  // Match SQLSTATE so an unrelated error cannot satisfy a negative test.
+  const rejectSession = async (label, code, operation, expectedMessage) => {
+    await assert.rejects(
+      queryClient.begin(async (transaction) => {
+        await transaction`insert into users(id) values(${sessionOwner}::uuid),(${otherSessionOwner}::uuid)`;
+        await operation(transaction);
+        throw new Error(`expected database rejection: ${label}`);
+      }),
+      (error) =>
+        error.code === code &&
+        (expectedMessage === undefined || error.message === expectedMessage),
+      label,
+    );
+    assert.equal(await sessionRowCount(), 0, `rolled back: ${label}`);
+  };
+  for (const badId of [
+    "0198a7b0-e600-4000-8000-000000000001",
+    "0198a7b0-e600-7000-0000-000000000001",
+  ]) {
+    await rejectSession(
+      "UUID version/variant",
+      "23514",
+      (transaction) => transaction`
+      insert into user_sessions(id,user_id,created_at,expires_at)
+      values(${badId}::uuid,${sessionOwner}::uuid,${sessionCreated}::timestamptz,${sessionExpires}::timestamptz)
+    `,
+    );
+  }
+  const sessionValues = {
+    id: `'${sessionId}'::uuid`,
+    user_id: `'${sessionOwner}'::uuid`,
+    created_at: `'${sessionCreated}'::timestamptz`,
+    expires_at: `'${sessionExpires}'::timestamptz`,
+  };
+  for (const omitted of Object.keys(sessionValues)) {
+    const entries = Object.entries(sessionValues).filter(
+      ([name]) => name !== omitted,
+    );
+    await rejectSession(`missing ${omitted}`, "23502", (transaction) =>
+      transaction.unsafe(
+        `insert into user_sessions(${entries.map(([name]) => name).join(",")}) values(${entries.map(([, value]) => value).join(",")})`,
+      ),
+    );
+  }
+  await rejectSession(
+    "nonexistent owner",
+    "23503",
+    (transaction) => transaction`
+    insert into user_sessions(id,user_id,created_at,expires_at)
+    values(${sessionId}::uuid,${createId()}::uuid,${sessionCreated}::timestamptz,${sessionExpires}::timestamptz)
+  `,
+  );
+  await rejectSession("duplicate id", "23505", async (transaction) => {
+    await insertSession(transaction);
+    await insertSession(transaction);
+  });
+  for (const expiry of [sessionCreated, "2026-09-03T23:59:59Z"]) {
+    await rejectSession(
+      "expiry must follow creation",
+      "23514",
+      (transaction) => transaction`
+      insert into user_sessions(id,user_id,created_at,expires_at)
+      values(${sessionId}::uuid,${sessionOwner}::uuid,${sessionCreated}::timestamptz,${expiry}::timestamptz)
+    `,
+    );
+  }
+  await rejectSession(
+    "revocation before creation on insert",
+    "23514",
+    (transaction) => transaction`
+    insert into user_sessions(id,user_id,created_at,expires_at,revoked_at)
+    values(${sessionId}::uuid,${sessionOwner}::uuid,${sessionCreated}::timestamptz,${sessionExpires}::timestamptz,'2026-09-03T23:59:59Z')
+  `,
+  );
+  // Pair each immutable change with valid revocation so the generic no-op
+  // guard cannot satisfy the test. Every replacement also satisfies the FK,
+  // UUID and temporal constraints independently of the immutability trigger.
+  for (const [field, mutation, expectedMessage] of [
+    ["id", `id='${otherSessionId}'::uuid`, "session record id is immutable"],
+    [
+      "user_id",
+      `user_id='${otherSessionOwner}'::uuid`,
+      "session user_id is immutable",
+    ],
+    [
+      "created_at",
+      "created_at=created_at-interval '1 second'",
+      "session created_at is immutable",
+    ],
+    [
+      "expires_at",
+      "expires_at=expires_at+interval '1 second'",
+      "session expires_at is immutable",
+    ],
+  ]) {
+    await rejectSession(
+      `isolated session ${field} immutability`,
+      "23514",
+      async (transaction) => {
+        await insertSession(transaction);
+        await transaction.unsafe(
+          `update user_sessions set ${mutation}, revoked_at=created_at where id='${sessionId}'::uuid`,
+        );
+      },
+      expectedMessage,
+    );
+    console.log(
+      `PASS isolated session ${field} immutability: SQLSTATE and field-specific message`,
+    );
+  }
+  for (const mutation of [
+    "revoked_at=created_at-interval '1 second'",
+    "revoked_at=revoked_at",
+  ]) {
+    await rejectSession(
+      `illegal session mutation: ${mutation}`,
+      "23514",
+      async (transaction) => {
+        await insertSession(transaction);
+        await transaction.unsafe(
+          `update user_sessions set ${mutation} where id='${sessionId}'::uuid`,
+        );
+      },
+    );
+  }
+  for (const mutation of [
+    "NULL",
+    "revoked_at+interval '1 second'",
+    "revoked_at",
+  ]) {
+    await rejectSession(
+      `terminal revocation: ${mutation}`,
+      "23514",
+      async (transaction) => {
+        await insertSession(transaction);
+        await transaction`update user_sessions set revoked_at=created_at where id=${sessionId}::uuid`;
+        await transaction.unsafe(
+          `update user_sessions set revoked_at=${mutation} where id='${sessionId}'::uuid`,
+        );
+      },
+    );
+  }
+  await rejectSession(
+    "restrict owner deletion",
+    "23503",
+    async (transaction) => {
+      await insertSession(transaction);
+      await transaction`delete from users where id=${sessionOwner}::uuid`;
+    },
+  );
+  assert.equal(await sessionRowCount(), 0);
+  assert.equal(
+    (
+      await queryClient`select count(*)::int as count from users where id in (${sessionOwner}::uuid,${otherSessionOwner}::uuid)`
+    )[0].count,
+    0,
+  );
+  console.log(
+    "PASS REG-0036: exact five fields, UUIDv7/RFC, restrictive ownership, temporal integrity, one-way revocation, exact indexes, zero consumers and rolled-back zero-row fixtures",
+  );
 
   const locales = await queryClient`
     select code, id::text, language_tag, direction, native_name, fallback_locale_id
@@ -3259,7 +3615,7 @@ try {
   }
 
   console.log(
-    "PASS schema tables: exactly 17 Release 1 tables plus Editorial Identity, topics, and the runtime-inert users and user_identities persistence",
+    "PASS schema tables: exactly 17 Release 1 tables plus Editorial Identity, topics, and the runtime-inert users, user_identities and user_sessions persistence",
   );
   console.log(
     "PASS Editorial Identity Foundation: exact four-column table, UUIDv7/variant and lifecycle enforcement, zero rows, synthetic fixtures rolled back",
