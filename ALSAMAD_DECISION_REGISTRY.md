@@ -183,7 +183,7 @@ As of 2026-08-08, the M6 architecture decision analysis covering REG-0001–REG-
 | REG-0033 | Public ALSAMAD authentication identity linkage runtime-inert persistence implementation authorization | Database, Security, API, Roadmap | IMPLEMENTED | Registry only; exact inert unit complete; no broader authority |
 | REG-0034 | Public ALSAMAD authentication session governance boundary | Security, Roadmap | DECIDED | Registry + ADR (`ADR-0015`, Accepted); architecture only, no implementation authority |
 | REG-0035 | Public ALSAMAD authentication session physical contract | Database, Security, Roadmap | DECIDED | Registry + ADR (`ADR-0016`, Accepted); physical contract only, implementation blocked |
-| REG-0036 | Public ALSAMAD authentication session runtime-inert persistence implementation authorization | Database, Security, API, Roadmap | DECIDED | Registry only; exact future inert unit authorized, not implemented; separate Owner implementation approval required |
+| REG-0036 | Public ALSAMAD authentication session runtime-inert persistence implementation authorization | Database, Security, API, Roadmap | IMPLEMENTED | Registry only; exact inert unit complete; no broader authority |
 
 ### REG-0001 — Editorial General Dua placement in the devotional physical model
 
@@ -1357,13 +1357,13 @@ This decision grants physical-contract governance authority only. It grants no m
 
 **Affected architecture:** `ALSAMAD_DATABASE_ARCHITECTURE.md` §9.4, the Public ALSAMAD Authentication Session Physical Contract Boundary in `ALSAMAD_SECURITY_ARCHITECTURE.md`, accepted `ADR-0015`, and accepted `ADR-0016` remain unchanged and controlling. The existing API no-surface boundary remains controlling. Product Architecture is unchanged.
 
-**Affected roadmap gate:** `PUBLIC ALSAMAD AUTHENTICATION SESSION RUNTIME-INERT PERSISTENCE IMPLEMENTATION = AUTHORIZED / NOT STARTED` only. Implementation is `NOT YET IMPLEMENTED / OWNER IMPLEMENTATION APPROVAL REQUIRED`. Session runtime, credentials, providers, login/signup, API/transport, Recovery, support/admin mutation, real rows/data, production, broader Public Identity implementation, and successor governance remain `BLOCKED / NOT AUTHORIZED`.
+**Affected roadmap gate:** `PUBLIC ALSAMAD AUTHENTICATION SESSION RUNTIME-INERT PERSISTENCE IMPLEMENTATION = COMPLETE` only. Session runtime, credentials, providers, login/signup, API/transport, Recovery, support/admin mutation, real rows/data, production, broader Public Identity implementation, and successor governance remain `BLOCKED / NOT AUTHORIZED`.
 
 **Opened:** 2026-09-04.
 
 **Tier rationale:** Registry-only implementation-authorization crossing. All material session architecture and physical decisions are already frozen by `REG-0034`/`ADR-0015` and `REG-0035`/`ADR-0016`; this entry defines only bounded, reversible future execution and its acceptance contract. **ADR references:** `ADR-0015` and `ADR-0016` (Accepted dependencies; unchanged). `ADR-0017` is not allocated by this decision.
 
-**Status:** `DECIDED` (2026-09-04). This is governance authorization, not implementation authority or evidence. Before independent governance review, controlled staging, commit authorization, the governance commit, push-authorization review, explicit Owner push authorization, publication to remote `main`, and post-push remote verification have all completed successfully, implementation authority is `NONE` and no implementation file may be touched. Only after that published and remote-verified REG-0036 governance chain is complete may the Owner issue a separate explicit implementation authorization; publication or remote verification does not begin implementation automatically. It may become `IMPLEMENTED` only after that later Owner authorization, exact implementation, complete acceptance evidence, staged implementation review, a verified implementation commit, and separately reviewed completion governance.
+**Status:** `IMPLEMENTED` (2026-09-06; decision recorded 2026-09-04). The exact bounded runtime-inert persistence unit is complete under the separately authorized implementation, verified evidence, implementation commit, remote publication, and completion governance. This status does not authorize session runtime, credentials, providers, login/signup, API/transport, Recovery, support/admin mutation, real rows/data, production, broader Public Identity implementation, or successor governance.
 
 **Decision outcome:** Governance-authorize one future unit named **PUBLIC ALSAMAD AUTHENTICATION SESSION RUNTIME-INERT PERSISTENCE IMPLEMENTATION**. The unit may represent only the approved `user_sessions` contract through the exact four-file boundary below. It must remain empty, zero-real-row, provider-neutral, transport-inert, API-inert, runtime-inert, and production-inert. This governance write does not authorize implementation execution.
 
@@ -1394,6 +1394,6 @@ Required quality evidence is `npm run db:check`, `npm run typecheck`, `npm run l
 
 **Absolute non-authority:** This governance write grants no authority to edit implementation files or execute implementation until separate explicit Owner approval. It grants no real data; session issuance; session validation or revocation runtime; revoke-all or account-wide runtime mutation; bearer credential, JWT, opaque-token, hashing/storage, refresh, rotation, or replay implementation; provider/login/signup; API/transport, cookie, header, endpoint, middleware, or serialization work; Recovery; immutable audit-event implementation; support/admin mutation; production activation or deployment; broader Public Identity implementation; staging, commit, or push; or successor governance.
 
-**Implementation evidence:** None. Implementation is `NOT STARTED`.
+**Implementation evidence:** `Public ALSAMAD Authentication Session Runtime-Inert Persistence Verified = PASS` in `ALSAMAD_IMPLEMENTATION_ROADMAP.md`; implementation commit `466d48ac8f8a2883c8eb459fb7bfa37213d228bf` includes migration `drizzle/0015_public_identity_authentication_session.sql` and is published and remote verified.
 
 **Supersedes / Superseded by:** Supersedes no decision. It operationalizes only the inert persistence possibility in `REG-0035`/`ADR-0016`, changes neither, and grants no automatic successor authority.
