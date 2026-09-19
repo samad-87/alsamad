@@ -821,6 +821,28 @@ export const userSessions = pgTable(
   ],
 );
 
+export const sessionCredentials = pgTable(
+  "session_credentials",
+  {
+    sessionId: uuid("session_id").primaryKey(),
+    credentialHash: varchar("credential_hash", { length: 64 }).notNull(),
+  },
+  (table) => [
+    check(
+      "ck_session_credentials__credential_hash_sha256_hex",
+      sql`${table.credentialHash} ~ '^[0-9a-f]{64}$'`,
+    ),
+    unique("uq_session_credentials__credential_hash").on(table.credentialHash),
+    foreignKey({
+      name: "fk_session_credentials__session",
+      columns: [table.sessionId],
+      foreignColumns: [userSessions.id],
+    })
+      .onUpdate("restrict")
+      .onDelete("restrict"),
+  ],
+);
+
 export const topics = pgTable(
   "topics",
   {
