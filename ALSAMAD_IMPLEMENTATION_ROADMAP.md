@@ -2851,3 +2851,13 @@ No account creation, identity mutation, session establishment, route, UI, real d
 Authorized next unit: compose verified identity resolution with existing account lifecycle resolution and return { userId, status } or null.
 
 Lifecycle status remains descriptive only and MUST NOT yet gate session establishment.
+
+---
+
+### REG-0041 — Account Session Authority Gate
+
+**Status:** APPROVED / OWNER AUTHORIZED.
+
+Authorized next unit: implement one pure account-session authority gate. active is eligible; disabled, deletion_pending, and deleted are ineligible.
+
+No session creation or mutation is part of this unit.

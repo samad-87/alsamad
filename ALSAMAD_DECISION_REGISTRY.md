@@ -1478,3 +1478,15 @@ Exact result: { userId, status } or null.
 This composition is descriptive only. It MUST NOT interpret active, disabled, deletion_pending, or deleted as an authorization decision.
 
 No session establishment, account creation, identity mutation, lifecycle mutation, cookies, routes, UI, real data, or Production activation is authorized.
+
+---
+
+## REG-0041 — Account Session Authority Policy
+
+**Status:** APPROVED / OWNER AUTHORIZED.
+
+Session authority is allowed only for an account whose stored root lifecycle status is exactly active.
+
+disabled, deletion_pending, and deleted fail closed for general session establishment and authenticated session authority.
+
+This decision does not define reactivation, deletion cancellation, recovery, grace-period, or support policy.
