@@ -2871,3 +2871,13 @@ No session creation or mutation is part of this unit.
 Authorized next unit: compose verified account context, account session authority, and existing session establishment.
 
 No session may be created for an ineligible lifecycle status.
+
+---
+
+### REG-0043 — Current Authorized Account Resolution
+
+**Status:** APPROVED / OWNER AUTHORIZED.
+
+Authorized next unit: compose current account resolution with the existing account session authority gate and return the account context only when authority remains valid.
+
+No automatic session revocation or lifecycle mutation is authorized in this unit.

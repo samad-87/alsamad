@@ -1502,3 +1502,15 @@ An already verified account context may establish a session only when hasAccount
 Ineligible account status must fail closed before session creation.
 
 This crossing authorizes composition with the existing establishSession runtime only. It does not authorize login routes, callbacks, account creation, identity mutation, lifecycle mutation, real user data, or Production activation.
+
+---
+
+## REG-0043 — Current Session Account Authority Enforcement
+
+**Status:** APPROVED / OWNER AUTHORIZED.
+
+Existing session-backed account authority must be evaluated against the accounts current stored lifecycle status on use.
+
+Only active retains general authenticated session authority. disabled, deletion_pending, and deleted fail closed.
+
+This unit does not automatically revoke or mutate the underlying session or account.
