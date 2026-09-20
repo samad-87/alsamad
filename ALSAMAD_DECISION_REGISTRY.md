@@ -1514,3 +1514,15 @@ Existing session-backed account authority must be evaluated against the accounts
 Only active retains general authenticated session authority. disabled, deletion_pending, and deleted fail closed.
 
 This unit does not automatically revoke or mutate the underlying session or account.
+
+---
+
+## REG-0044 — Verified Google Session Transaction Composition
+
+**Status:** APPROVED / OWNER AUTHORIZED.
+
+A successfully verified Google OIDC identity may be composed with the existing verified-session establishment runtime.
+
+Failed or missing provider verification must fail closed before session establishment.
+
+This crossing authorizes internal composition only. It does not authorize login or callback routes, authorization-request generation, state/nonce/PKCE storage, account creation, identity mutation, real user data, or Production activation.

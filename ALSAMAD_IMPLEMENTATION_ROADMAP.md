@@ -2881,3 +2881,13 @@ No session may be created for an ineligible lifecycle status.
 Authorized next unit: compose current account resolution with the existing account session authority gate and return the account context only when authority remains valid.
 
 No automatic session revocation or lifecycle mutation is authorized in this unit.
+
+---
+
+### REG-0044 — Google Verified Session Transaction
+
+**Status:** APPROVED / OWNER AUTHORIZED.
+
+Authorized next unit: compose existing Google OIDC verification with existing verified-session establishment and return sessionId or null.
+
+No route, UI, request-state storage, real credentials, real data, or Production processing is authorized.
