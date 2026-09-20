@@ -821,6 +821,53 @@ export const userSessions = pgTable(
   ],
 );
 
+export const googleOidcLoginTransactions = pgTable(
+  "google_oidc_login_transactions",
+  {
+    id: uuid("id").primaryKey(),
+    credentialHash: varchar("credential_hash", { length: 64 }).notNull(),
+    state: varchar("state", { length: 128 }).notNull(),
+    nonce: varchar("nonce", { length: 128 }).notNull(),
+    pkceCodeVerifier: varchar("pkce_code_verifier", { length: 128 }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    consumedAt: timestamp("consumed_at", { withTimezone: true }),
+  },
+  (table) => [
+    check(
+      "ck_google_oidc_login_transactions__id_uuidv7",
+      sql`(get_byte(uuid_send(${table.id}), 6) >> 4) = 7 and (get_byte(uuid_send(${table.id}), 8) & 192) = 128`,
+    ),
+    check(
+      "ck_google_oidc_login_transactions__credential_hash_sha256_hex",
+      sql`${table.credentialHash} ~ '^[0-9a-f]{64}$'`,
+    ),
+    unique("uq_google_oidc_login_transactions__credential_hash").on(
+      table.credentialHash,
+    ),
+    check(
+      "ck_google_oidc_login_transactions__state_not_blank",
+      sql`btrim(${table.state}) <> ''`,
+    ),
+    check(
+      "ck_google_oidc_login_transactions__nonce_not_blank",
+      sql`btrim(${table.nonce}) <> ''`,
+    ),
+    check(
+      "ck_google_oidc_login_transactions__pkce_length",
+      sql`char_length(${table.pkceCodeVerifier}) between 43 and 128`,
+    ),
+    check(
+      "ck_google_oidc_login_transactions__expires_after_creation",
+      sql`${table.expiresAt} > ${table.createdAt}`,
+    ),
+    check(
+      "ck_google_oidc_login_transactions__consumed_not_before_creation",
+      sql`${table.consumedAt} is null or ${table.consumedAt} >= ${table.createdAt}`,
+    ),
+  ],
+);
+
 export const sessionCredentials = pgTable(
   "session_credentials",
   {
