@@ -2901,3 +2901,10 @@ No route, UI, request-state storage, real credentials, real data, or Production 
 Authorized next unit: add migration 0017 and matching Drizzle schema for google_oidc_login_transactions only.
 
 The migration must create zero rows and no runtime consumer.
+
+---
+### REG-0046 — Google OIDC Login Transaction Runtime
+
+**Status:** APPROVED / OWNER AUTHORIZED.
+
+Authorized next unit: implement local issuance and atomic one-time consumption runtime only. No cookies, routes, Google network access, real credentials, real user data, or Production.

@@ -1544,3 +1544,16 @@ The transaction contains no userId, identity mapping, access token, refresh toke
 Expired or consumed transactions are ineligible for authentication. Consumption must be one-way.
 
 This decision authorizes zero-row persistence only. Runtime issuance, consumption, cookies, routes, real credentials, real user data, and Production remain separate units.
+
+---
+## REG-0046 — Google OIDC Login Transaction Runtime
+
+**Status:** APPROVED / OWNER AUTHORIZED.
+
+Authorize local runtime issuance and one-time atomic consumption of Google OIDC login transactions.
+
+Issuance may generate only the opaque transaction credential, persist only its SHA-256 hash, and persist supplied state, nonce, PKCE verifier, timestamps, and expiry.
+
+Consumption must atomically mark consumed_at only when the credential hash matches, consumed_at is null, and expires_at is still in the future. The successful operation may return the stored state, nonce, and PKCE verifier. Missing, expired, or already-consumed transactions return null.
+
+No userId, identity mutation, tokens, routes, cookies, Google network access, real credentials, real user data, or Production processing are authorized by this decision.
