@@ -1557,3 +1557,14 @@ Issuance may generate only the opaque transaction credential, persist only its S
 Consumption must atomically mark consumed_at only when the credential hash matches, consumed_at is null, and expires_at is still in the future. The successful operation may return the stored state, nonce, and PKCE verifier. Missing, expired, or already-consumed transactions return null.
 
 No userId, identity mutation, tokens, routes, cookies, Google network access, real credentials, real user data, or Production processing are authorized by this decision.
+
+---
+## REG-0047 — Google OIDC Login Transaction Cookie
+
+**Status:** APPROVED / OWNER AUTHORIZED.
+
+Authorize browser transport of the raw opaque Google OIDC login transaction credential in one short-lived HttpOnly cookie.
+
+The cookie contains only the opaque credential. It must use SameSite=Lax, path=/, Secure in Production, and bounded expiry. Reading and clearing the cookie are authorized.
+
+No state, nonce, PKCE verifier, tokens, identity data, routes, Google network access, real credentials, real user data, or Production processing are authorized by this decision.

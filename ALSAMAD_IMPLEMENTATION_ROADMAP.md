@@ -2908,3 +2908,10 @@ The migration must create zero rows and no runtime consumer.
 **Status:** APPROVED / OWNER AUTHORIZED.
 
 Authorized next unit: implement local issuance and atomic one-time consumption runtime only. No cookies, routes, Google network access, real credentials, real user data, or Production.
+
+---
+### REG-0047 — Google OIDC Login Transaction Cookie
+
+**Status:** APPROVED / OWNER AUTHORIZED.
+
+Authorized next unit: implement short-lived HttpOnly cookie transport for the opaque Google OIDC login transaction credential only. No routes, Google network access, real credentials, real user data, or Production processing.
