@@ -2841,3 +2841,13 @@ No database mutation, session establishment, route, UI, real credentials, or Pro
 Authorized next unit: compose VerifiedAuthenticationIdentity with the existing read-only identity resolver and return the existing durable userId or null.
 
 No account creation, identity mutation, session establishment, route, UI, real data, or Production processing is authorized.
+
+---
+
+### REG-0040 — Verified Account Context
+
+**Status:** APPROVED / OWNER AUTHORIZED.
+
+Authorized next unit: compose verified identity resolution with existing account lifecycle resolution and return { userId, status } or null.
+
+Lifecycle status remains descriptive only and MUST NOT yet gate session establishment.

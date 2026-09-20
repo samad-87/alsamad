@@ -1464,3 +1464,17 @@ An already verified authentication identity may be passed to the existing read-o
 Exact composition: verified authenticatorNamespace + subject -> resolveAuthenticationIdentity() -> durable userId or null.
 
 This crossing authorizes composition only. It does not authorize raw/unverified identity input, account creation, identity mutation, session establishment, cookies, routes, UI, Recovery, real user data, or Production activation.
+
+---
+
+## REG-0040 — Verified Account Context Composition
+
+**Status:** APPROVED / OWNER AUTHORIZED.
+
+An already verified authentication identity may resolve to an existing durable userId and then to that accounts stored lifecycle status.
+
+Exact result: { userId, status } or null.
+
+This composition is descriptive only. It MUST NOT interpret active, disabled, deletion_pending, or deleted as an authorization decision.
+
+No session establishment, account creation, identity mutation, lifecycle mutation, cookies, routes, UI, real data, or Production activation is authorized.
