@@ -1397,3 +1397,36 @@ Required quality evidence is `npm run db:check`, `npm run typecheck`, `npm run l
 **Implementation evidence:** `Public ALSAMAD Authentication Session Runtime-Inert Persistence Verified = PASS` in `ALSAMAD_IMPLEMENTATION_ROADMAP.md`; implementation commit `466d48ac8f8a2883c8eb459fb7bfa37213d228bf` includes migration `drizzle/0015_public_identity_authentication_session.sql` and is published and remote verified.
 
 **Supersedes / Superseded by:** Supersedes no decision. It operationalizes only the inert persistence possibility in `REG-0035`/`ADR-0016`, changes neither, and grants no automatic successor authority.
+
+---
+
+## REG-0037 — Public ALSAMAD Authentication Identity Runtime Resolution Crossing
+
+**Status:** APPROVED / OWNER AUTHORIZED.
+
+**Decision:** The existing `user_identities` physical contract may now have one narrowly bounded read-only runtime consumer for authentication identity resolution.
+
+The canonical lookup key is exactly:
+
+`(authenticator_namespace, subject)`
+
+Resolution semantics are:
+
+- missing mapping → `null`;
+- `retired` mapping → `null`;
+- `active` mapping → resolve exactly that row's immutable durable `users.id`;
+- ambiguous or invalid authority → fail closed.
+
+`active` means only that the existing mapping is eligible for this resolution path. `retired` remains physically ineligible for resolution.
+
+The runtime must not create, replace, retire, reactivate, merge, transfer, or delete identity mappings. It must not infer identity equivalence from email, phone, username, display name, or any other mutable contact/presentation attribute.
+
+**Exact implementation boundary:** one local read-only identity resolver plus injected-fake tests. The resolver may read the existing `user_identities` table only by canonical namespace + subject and may return only the linked durable ALSAMAD `userId` or `null`.
+
+**Explicit exclusions:** No provider integration; Google/Apple/OIDC; email/password; passkeys; SMS; signup/login route; callback; account creation; identity creation or lifecycle mutation; token storage; provider payload storage; recovery; audit/support/admin mutation; real authentication identity data; real personal-data processing; production activation/deployment; API/UI/middleware; Talibeen integration.
+
+**Data boundary:** tests use synthetic injected fakes only. No local, staging, or production identity rows are required or authorized by this crossing.
+
+**Owner authorization:** The Owner explicitly authorized continued Auth Runtime implementation through the remaining bounded slices on 2026-09-20.
+
+**Supersedes / Superseded by:** Supersedes only the prior runtime-inert restriction for this exact read-only resolution consumer. ADR-0013 and ADR-0014 remain authoritative for identity ownership, lifecycle, uniqueness, privacy, and mutation boundaries.

@@ -2795,3 +2795,25 @@ Required quality evidence is `npm run db:check`, `npm run typecheck`, `npm run l
 **Absolute non-authority and completion boundary.** Completion of this exact unit authorizes no real data; issuance; validation, revocation, revoke-all, or account-wide runtime mutation; bearer credential, JWT, opaque-token, hashing/storage, refresh, rotation, or replay implementation; provider/login/signup; API/transport, cookies, headers, endpoints, middleware, or serialization; Recovery; immutable audit-event implementation; support/admin mutation; production activation/deployment; broader Public Identity implementation; or successor governance. The implementation remains empty, provider-neutral, transport-inert, API-inert, runtime-inert, and production-inert, and completion grants no automatic successor authority.
 
 **Completion evidence.** `Public ALSAMAD Authentication Session Runtime-Inert Persistence Verified = PASS`. The unit is `COMPLETE` at commit `466d48ac8f8a2883c8eb459fb7bfa37213d228bf` (`feat: add inert authentication session persistence`) within the exact four-file boundary above, including migration `drizzle/0015_public_identity_authentication_session.sql` and exactly one matching journal append. PostgreSQL 17.10 verification, `npm run db:check`, repository tests (497/497), typecheck, lint, production build, targeted formatting, Git diff checks, zero-row proof, rollback evidence, independent implementation review, controlled staging, commit review, and remote publication verification passed. The implementation remains zero-row, runtime-inert, provider-neutral, and personal-data-processing-inactive; session runtime, provider/login/signup, API/transport, Recovery, audit-event, retention/privacy, real-data, production, and successor gates remain separately governed.
+
+---
+
+### REG-0037 — Authentication Identity Runtime Resolution
+
+**Status:** APPROVED / OWNER AUTHORIZED.
+
+Authorized next unit: one read-only runtime resolver over the existing `user_identities` table using exactly `(authenticator_namespace, subject)`.
+
+Resolution semantics:
+- missing mapping -> `null`
+- `retired` mapping -> `null`
+- `active` mapping -> exact linked durable `users.id`
+- ambiguous or invalid authority -> fail closed
+
+This unit may read identity linkage only. It may not create, retire, reactivate, replace, merge, transfer, or delete mappings.
+
+Provider integration, Google/Apple/OIDC, email/password, signup/login, callbacks, account creation, recovery, real identity data, production deployment, API/UI/middleware, and Talibeen integration remain outside this unit.
+
+Tests must use injected synthetic fakes only.
+
+Acceptance requires focused tests, typecheck, lint, full tests, production build, targeted formatting check, and `git diff --check`.
