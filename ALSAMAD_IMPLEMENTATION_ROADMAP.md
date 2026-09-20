@@ -2915,3 +2915,10 @@ Authorized next unit: implement local issuance and atomic one-time consumption r
 **Status:** APPROVED / OWNER AUTHORIZED.
 
 Authorized next unit: implement short-lived HttpOnly cookie transport for the opaque Google OIDC login transaction credential only. No routes, Google network access, real credentials, real user data, or Production processing.
+
+---
+### REG-0048 — Google OIDC Authorization Request Preparation
+
+**Status:** APPROVED / OWNER AUTHORIZED.
+
+Authorized next unit: generate state, nonce, PKCE verifier/challenge, issue the short-lived login transaction, set its opaque HttpOnly cookie, and build the Google authorization URL from supplied configuration and redirect URI. No route or redirect yet.

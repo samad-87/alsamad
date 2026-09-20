@@ -1568,3 +1568,16 @@ Authorize browser transport of the raw opaque Google OIDC login transaction cred
 The cookie contains only the opaque credential. It must use SameSite=Lax, path=/, Secure in Production, and bounded expiry. Reading and clearing the cookie are authorized.
 
 No state, nonce, PKCE verifier, tokens, identity data, routes, Google network access, real credentials, real user data, or Production processing are authorized by this decision.
+
+---
+## REG-0048 — Google OIDC Authorization Request Preparation
+
+**Status:** APPROVED / OWNER AUTHORIZED.
+
+Authorize local preparation of a Google OIDC authorization request.
+
+The runtime may generate fresh state, nonce, and PKCE code verifier; calculate an S256 PKCE challenge; issue a short-lived Google OIDC login transaction; place only its opaque credential in the authorized HttpOnly transaction cookie; and build the authorization URL from a supplied OIDC Configuration and redirect URI.
+
+The authorization request scope is openid only. State and nonce must be included. Login transaction lifetime is bounded to 10 minutes.
+
+No routes, redirects, Google network calls, token exchange, account creation, identity mutation, real credentials, real user data, or Production processing are authorized by this decision.
