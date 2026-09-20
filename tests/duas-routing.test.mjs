@@ -396,6 +396,7 @@ test("no new dependency was added for the duas foundation", () => {
   const known = new Set([
     "drizzle-orm",
     "next",
+    "openid-client",
     "postgres",
     "react",
     "react-dom",

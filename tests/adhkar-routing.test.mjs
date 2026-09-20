@@ -314,6 +314,8 @@ test("no new dependency was added for the adhkar foundation", () => {
   const known = new Set([
     "drizzle-orm",
     "next",
+    "openid-client",
+    "openid-client",
     "postgres",
     "react",
     "react-dom",
