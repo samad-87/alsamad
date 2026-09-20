@@ -124,3 +124,20 @@ export async function revokeAllSessions(
   const revokedAt = dependencies.now();
   await dependencies.persistence.revokeAllSessionsByUserId(userId, revokedAt);
 }
+
+export async function resolveSessionUserId(
+  sessionId: string,
+  dependencies: SessionRuntimeDependencies = defaultDependencies,
+): Promise<string | null> {
+  const session = await dependencies.persistence.findSessionById(sessionId);
+
+  if (!session || session.revokedAt !== null) {
+    return null;
+  }
+
+  if (session.expiresAt.getTime() <= dependencies.now().getTime()) {
+    return null;
+  }
+
+  return session.userId;
+}

@@ -260,3 +260,61 @@ test("revokeAllSessions preserves existing revokedAt timestamps", async () => {
     session.revokedAt.getTime(),
   );
 });
+
+// SLICE 7: resolveSessionUserId
+const { resolveSessionUserId } =
+  await import("../src/lib/auth/session-runtime.ts");
+
+test("resolveSessionUserId returns exact userId for active session", async () => {
+  const session = {
+    id: "018f2f2a-0000-7000-8000-000000000021",
+    userId: USER_ID,
+    createdAt: new Date("2026-09-19T15:00:00.000Z"),
+    expiresAt: new Date("2026-09-19T17:00:00.000Z"),
+    revokedAt: null,
+  };
+
+  const { dependencies } = createFakeRuntime([session]);
+
+  assert.equal(await resolveSessionUserId(session.id, dependencies), USER_ID);
+});
+
+test("resolveSessionUserId returns null for missing session", async () => {
+  const { dependencies } = createFakeRuntime();
+
+  assert.equal(
+    await resolveSessionUserId(
+      "018f2f2a-0000-7000-8000-000000000022",
+      dependencies,
+    ),
+    null,
+  );
+});
+
+test("resolveSessionUserId returns null for expired session", async () => {
+  const session = {
+    id: "018f2f2a-0000-7000-8000-000000000023",
+    userId: USER_ID,
+    createdAt: new Date("2026-09-19T14:00:00.000Z"),
+    expiresAt: new Date("2026-09-19T15:59:59.000Z"),
+    revokedAt: null,
+  };
+
+  const { dependencies } = createFakeRuntime([session]);
+
+  assert.equal(await resolveSessionUserId(session.id, dependencies), null);
+});
+
+test("resolveSessionUserId returns null for revoked session", async () => {
+  const session = {
+    id: "018f2f2a-0000-7000-8000-000000000024",
+    userId: USER_ID,
+    createdAt: new Date("2026-09-19T15:00:00.000Z"),
+    expiresAt: new Date("2026-09-19T17:00:00.000Z"),
+    revokedAt: new Date("2026-09-19T15:30:00.000Z"),
+  };
+
+  const { dependencies } = createFakeRuntime([session]);
+
+  assert.equal(await resolveSessionUserId(session.id, dependencies), null);
+});
