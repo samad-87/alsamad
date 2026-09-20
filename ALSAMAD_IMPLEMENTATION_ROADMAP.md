@@ -2891,3 +2891,13 @@ No automatic session revocation or lifecycle mutation is authorized in this unit
 Authorized next unit: compose existing Google OIDC verification with existing verified-session establishment and return sessionId or null.
 
 No route, UI, request-state storage, real credentials, real data, or Production processing is authorized.
+
+---
+
+### REG-0045 — Google OIDC Login Transaction Persistence
+
+**Status:** APPROVED / OWNER AUTHORIZED.
+
+Authorized next unit: add migration 0017 and matching Drizzle schema for google_oidc_login_transactions only.
+
+The migration must create zero rows and no runtime consumer.

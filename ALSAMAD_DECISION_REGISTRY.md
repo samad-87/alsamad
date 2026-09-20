@@ -1526,3 +1526,21 @@ A successfully verified Google OIDC identity may be composed with the existing v
 Failed or missing provider verification must fail closed before session establishment.
 
 This crossing authorizes internal composition only. It does not authorize login or callback routes, authorization-request generation, state/nonce/PKCE storage, account creation, identity mutation, real user data, or Production activation.
+
+---
+
+## REG-0045 — Google OIDC Login Transaction Persistence
+
+**Status:** APPROVED / OWNER AUTHORIZED.
+
+Google OIDC authorization state may use one short-lived server-side transaction record.
+
+The record contains only: UUIDv7 id, SHA-256 credential hash, state, nonce, PKCE code verifier, created_at, expires_at, and nullable consumed_at.
+
+The browser receives only the raw opaque transaction credential in an HttpOnly cookie. The raw credential MUST NOT be persisted.
+
+The transaction contains no userId, identity mapping, access token, refresh token, ID token, email, profile data, or provider payload.
+
+Expired or consumed transactions are ineligible for authentication. Consumption must be one-way.
+
+This decision authorizes zero-row persistence only. Runtime issuance, consumption, cookies, routes, real credentials, real user data, and Production remain separate units.
