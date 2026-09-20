@@ -1452,3 +1452,15 @@ Authorization uses the server-side Authorization Code flow with request/response
 The approved OIDC client dependency is `openid-client`.
 
 This decision authorizes provider verification plumbing only. It does not yet authorize account creation, identity-row creation, login routes, callback routes, session establishment, real credentials, real user data, or Production activation.
+
+---
+
+## REG-0039 — Verified Authentication Identity Resolution Composition
+
+**Status:** APPROVED / OWNER AUTHORIZED.
+
+An already verified authentication identity may be passed to the existing read-only authentication identity resolver.
+
+Exact composition: verified authenticatorNamespace + subject -> resolveAuthenticationIdentity() -> durable userId or null.
+
+This crossing authorizes composition only. It does not authorize raw/unverified identity input, account creation, identity mutation, session establishment, cookies, routes, UI, Recovery, real user data, or Production activation.

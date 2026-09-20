@@ -2831,3 +2831,13 @@ Authorized next unit:
   `{ authenticatorNamespace: "google", subject: verifiedSub }`.
 
 No database mutation, session establishment, route, UI, real credentials, or Production processing is authorized in this unit.
+
+---
+
+### REG-0039 — Verified Identity to Existing Account Resolution
+
+**Status:** APPROVED / OWNER AUTHORIZED.
+
+Authorized next unit: compose VerifiedAuthenticationIdentity with the existing read-only identity resolver and return the existing durable userId or null.
+
+No account creation, identity mutation, session establishment, route, UI, real data, or Production processing is authorized.
