@@ -1490,3 +1490,15 @@ Session authority is allowed only for an account whose stored root lifecycle sta
 disabled, deletion_pending, and deleted fail closed for general session establishment and authenticated session authority.
 
 This decision does not define reactivation, deletion cancellation, recovery, grace-period, or support policy.
+
+---
+
+## REG-0042 — Authorized Verified Session Establishment
+
+**Status:** APPROVED / OWNER AUTHORIZED.
+
+An already verified account context may establish a session only when hasAccountSessionAuthority(status) returns true.
+
+Ineligible account status must fail closed before session creation.
+
+This crossing authorizes composition with the existing establishSession runtime only. It does not authorize login routes, callbacks, account creation, identity mutation, lifecycle mutation, real user data, or Production activation.

@@ -2861,3 +2861,13 @@ Lifecycle status remains descriptive only and MUST NOT yet gate session establis
 Authorized next unit: implement one pure account-session authority gate. active is eligible; disabled, deletion_pending, and deleted are ineligible.
 
 No session creation or mutation is part of this unit.
+
+---
+
+### REG-0042 — Verified Session Establishment Gate
+
+**Status:** APPROVED / OWNER AUTHORIZED.
+
+Authorized next unit: compose verified account context, account session authority, and existing session establishment.
+
+No session may be created for an ineligible lifecycle status.
