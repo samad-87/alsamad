@@ -2817,3 +2817,17 @@ Provider integration, Google/Apple/OIDC, email/password, signup/login, callbacks
 Tests must use injected synthetic fakes only.
 
 Acceptance requires focused tests, typecheck, lint, full tests, production build, targeted formatting check, and `git diff --check`.
+
+---
+
+### REG-0038 — Google OIDC Provider Verification
+
+**Status:** APPROVED / OWNER AUTHORIZED.
+
+Authorized next unit:
+- add `openid-client`;
+- implement a provider-neutral verified-authentication-identity result;
+- implement Google OIDC verification that emits only:
+  `{ authenticatorNamespace: "google", subject: verifiedSub }`.
+
+No database mutation, session establishment, route, UI, real credentials, or Production processing is authorized in this unit.

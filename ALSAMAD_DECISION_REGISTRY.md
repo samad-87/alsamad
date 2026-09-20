@@ -1430,3 +1430,25 @@ The runtime must not create, replace, retire, reactivate, merge, transfer, or de
 **Owner authorization:** The Owner explicitly authorized continued Auth Runtime implementation through the remaining bounded slices on 2026-09-20.
 
 **Supersedes / Superseded by:** Supersedes only the prior runtime-inert restriction for this exact read-only resolution consumer. ADR-0013 and ADR-0014 remain authoritative for identity ownership, lifecycle, uniqueness, privacy, and mutation boundaries.
+
+---
+
+## REG-0038 — Google OIDC Authentication Provider Contract
+
+**Status:** APPROVED / OWNER AUTHORIZED.
+
+**Provider:** Google OpenID Connect.
+
+Canonical ALSAMAD identity mapping:
+- `authenticator_namespace = "google"`
+- `subject =` the exact verified Google OIDC `sub` claim
+
+Email, display name, profile name, or other mutable claims MUST NOT be used as the durable authentication identity key.
+
+Provider verification must validate the Google-issued authentication response before producing any ALSAMAD authentication identity. The implementation must validate issuer, client audience, cryptographic signature, and expiration through a standards-compliant OIDC implementation.
+
+Authorization uses the server-side Authorization Code flow with request/response state validation for CSRF protection.
+
+The approved OIDC client dependency is `openid-client`.
+
+This decision authorizes provider verification plumbing only. It does not yet authorize account creation, identity-row creation, login routes, callback routes, session establishment, real credentials, real user data, or Production activation.
